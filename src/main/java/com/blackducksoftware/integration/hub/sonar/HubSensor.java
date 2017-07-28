@@ -23,20 +23,83 @@
  */
 package com.blackducksoftware.integration.hub.sonar;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+
+import org.sonar.api.batch.fs.FilePredicate;
+import org.sonar.api.batch.fs.FilePredicates;
+import org.sonar.api.batch.fs.FileSystem;
+import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.utils.log.Loggers;
+
+import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.model.view.VulnerableComponentView;
+import com.blackducksoftware.integration.hub.sonar.data.HubVulnerableComponentData;
 
 public class HubSensor implements Sensor {
 
+    final String[] inclusionPatterns = { "**/*.jar", "**/*.war", "**/*.zip", "**/*.tar*" };
+    final String[] exclusionPatterns = { "**/WEB-INF/**/*.jar", "**/test-workspace/**/*.jar" };
+
     @Override
     public void describe(final SensorDescriptor descriptor) {
-        // TODO Auto-generated method stub
+        descriptor.name(HubPlugin.PLUGIN_NAME);
+        descriptor.onlyOnFileType(InputFile.Type.MAIN);
     }
 
     @Override
     public void execute(final SensorContext context) {
-        // TODO Auto-generated method stub
+        final HubSonarLogger logger = new HubSonarLogger(Loggers.get(context.getClass()));
+        final FileSystem fileSystem = context.fileSystem();
+        final FilePredicates filePredicates = fileSystem.predicates();
+        final FilePredicate includeExcludePredicate = filePredicates.and(filePredicates.matchesPathPatterns(inclusionPatterns), filePredicates.doesNotMatchPathPatterns(exclusionPatterns));
+
+        logger.info("=============================");
+        logger.info("|| Black Duck Hub Analysis ||");
+        logger.info("=============================");
+        // logger.info(String.format("PROP: %s", HubSonarUtils.getAndTrimProp(context.settings(), HubPropertyConstants.PROP)));
+
+        // TODO Locate jar files
+        int localComponentCount = 0;
+
+        logger.info(String.format("Found Base Directory: %s", fileSystem.baseDir().toString()));
+
+        final Iterator<File> fileIterator = fileSystem.files(includeExcludePredicate).iterator();
+        while (fileIterator.hasNext()) {
+            localComponentCount++;
+            final File file = fileIterator.next();
+            try {
+                logger.info(String.format("Found File: %s", file.getCanonicalPath()));
+            } catch (final IOException e) {
+                logger.warn(String.format("Problem getting canonical path for: %s", file.getName()));
+            }
+        }
+
+        logger.info(String.format("--> Number of Local Components: %d", localComponentCount));
+
+        // TODO Store metadata
+
+        // TODO Get Hub Project/Version Components and Matched Files
+        final HubVulnerableComponentData hubData = new HubVulnerableComponentData(logger, context.settings());
+        List<VulnerableComponentView> components = null;
+        try {
+            components = hubData.gatherVulnerableComponents();
+        } catch (final IntegrationException e) {
+            // TODO handle
+        }
+
+        if (components != null) {
+            logger.info(String.format("--> Number of Vulnerable Hub Components: %d", components.size()));
+        } else {
+            logger.info("--> No Vulnerable Hub components found.");
+        }
+
+        // TODO Compare with Hub Project/Version Components
     }
 
 }

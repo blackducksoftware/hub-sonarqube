@@ -21,28 +21,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.sonar.widget;
+package com.blackducksoftware.integration.hub.sonar.data;
 
-import org.sonar.api.web.AbstractRubyTemplate;
-import org.sonar.api.web.Description;
-import org.sonar.api.web.RubyRailsWidget;
-import org.sonar.api.web.UserRole;
+import java.util.Arrays;
+import java.util.List;
 
-@UserRole(UserRole.USER)
-@Description("Shows a tree-view of the vulnerable components identified by the Hub.")
-public class HubVulnerabilityWidget extends AbstractRubyTemplate implements RubyRailsWidget {
-    @Override
-    public String getId() {
-        return "hubVulnerabilityWidget";
-    }
+import org.sonar.api.measures.Metric;
+import org.sonar.api.measures.Metric.ValueType;
+import org.sonar.api.measures.Metrics;
+
+public class SonarProjectComponentMetrics implements Metrics {
+
+    public static final Metric NUM_COMPONENTS = buildMetric("num_components", "Number of components", ValueType.INT);
 
     @Override
-    public String getTitle() {
-        return "Hub Vulnerability Report";
+    public List<Metric> getMetrics() {
+        return Arrays.asList(NUM_COMPONENTS);
     }
 
-    @Override
-    protected String getTemplatePath() {
-        return "src/main/resources/com/blackducksoftware/integration/hub/sonar/hub_vulnerability_widget.erb";
+    public static Metric buildMetric(final String key, final String name, final ValueType type) {
+        final Metric.Builder builder = new Metric.Builder(key, name, type);
+        return builder.create();
     }
+
 }

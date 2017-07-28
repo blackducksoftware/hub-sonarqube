@@ -27,15 +27,29 @@
     </license>
   </licenses>
 
-  <!--
   <scm>
-    <connection>scm:git:git://github.com/blackducksoftware/hub-sonarqube.git/</connection>
+    <connection>scm:git:git@github.com:blackducksoftware/hub-sonarqube.git</connection>
     <developerConnection>scm:git:git@github.com:blackducksoftware/hub-sonarqube.git</developerConnection>
     <url>https://www.github.com/blackducksoftware/hub-sonarqube</url>
   </scm>
-  -->
-  
+
+  <properties>
+    <hub.common.version>13.1.2</hub.common.version>
+  </properties>
+
   <dependencies>
+    <dependency>
+      <groupId>com.blackducksoftware.integration</groupId>
+      <artifactId>hub-common</artifactId>
+      <version>${hub.common.version}</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.thoughtworks.xstream</groupId>
+          <artifactId>xstream</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
     <dependency>
       <groupId>org.sonarsource.sonarqube</groupId>
       <artifactId>sonar-plugin-api</artifactId>
@@ -54,7 +68,6 @@
         <configuration>
           <!-- the entry-point class that extends org.sonar.api.SonarPlugin -->
           <pluginClass>com.blackducksoftware.integration.hub.sonar.HubPlugin</pluginClass>
-
           <!-- advanced properties can be set here. See paragraph "Advanced Build Properties". -->
         </configuration>
       </plugin>

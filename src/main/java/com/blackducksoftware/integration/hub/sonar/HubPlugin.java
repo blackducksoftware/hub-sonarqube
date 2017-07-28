@@ -23,29 +23,27 @@
  */
 package com.blackducksoftware.integration.hub.sonar;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.sonar.api.Plugin;
+import org.sonar.api.config.PropertyDefinition;
+
+import com.blackducksoftware.integration.hub.sonar.web.HubVulnerabilityWidget;
 
 public class HubPlugin implements Plugin {
+
+    public static final String PLUGIN_NAME = "Black Duck Hub Plugin for SonarQube";
+
     @Override
     public void define(final Context context) {
-        context.addExtensions(getExtensions());
+        context.addExtensions(getGlobalPropertyExtensions());
+        context.addExtensions(HubSensor.class, HubVulnerabilityWidget.class);
     }
 
-    public List<Object> getExtensions() {
-        final List<Object> extensions = new ArrayList<>();
-        extensions.add(HubPropertyConstants.Definitions.HUB_URL);
-        extensions.add(HubPropertyConstants.Definitions.HUB_USERNAME);
-        extensions.add(HubPropertyConstants.Definitions.HUB_PASSWORD);
-        extensions.add(HubPropertyConstants.Definitions.HUB_TIMEOUT);
-        extensions.add(HubPropertyConstants.Definitions.HUB_IMPORT_SSL_CERT);
-        extensions.add(HubPropertyConstants.Definitions.HUB_PROXY_HOST);
-        extensions.add(HubPropertyConstants.Definitions.HUB_PROXY_PORT);
-        extensions.add(HubPropertyConstants.Definitions.HUB_NO_PROXY_HOSTS);
-        extensions.add(HubPropertyConstants.Definitions.HUB_PROXY_USERNAME);
-        extensions.add(HubPropertyConstants.Definitions.HUB_PROXY_PASSWORD);
-        return extensions;
+    public List<PropertyDefinition> getGlobalPropertyExtensions() {
+        return Arrays.asList(HubPropertyConstants.Definitions.HUB_URL, HubPropertyConstants.Definitions.HUB_USERNAME, HubPropertyConstants.Definitions.HUB_PASSWORD, HubPropertyConstants.Definitions.HUB_TIMEOUT,
+                HubPropertyConstants.Definitions.HUB_IMPORT_SSL_CERT, HubPropertyConstants.Definitions.HUB_PROXY_HOST, HubPropertyConstants.Definitions.HUB_PROXY_PORT, HubPropertyConstants.Definitions.HUB_NO_PROXY_HOSTS,
+                HubPropertyConstants.Definitions.HUB_PROXY_USERNAME, HubPropertyConstants.Definitions.HUB_PROXY_PASSWORD);
     }
 }
