@@ -23,14 +23,8 @@
  */
 package com.blackducksoftware.integration.hub.sonar;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
-import org.sonar.api.batch.fs.FilePredicate;
-import org.sonar.api.batch.fs.FilePredicates;
-import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -38,13 +32,11 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.utils.log.Loggers;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.model.view.VulnerableComponentView;
-import com.blackducksoftware.integration.hub.sonar.data.HubVulnerableComponentData;
+import com.blackducksoftware.integration.hub.sonar.component.ComponentComparer;
+import com.blackducksoftware.integration.hub.sonar.component.HubVulnerableComponentGatherer;
+import com.blackducksoftware.integration.hub.sonar.component.LocalComponentGatherer;
 
 public class HubSensor implements Sensor {
-
-    final String[] inclusionPatterns = { "**/*.jar", "**/*.war", "**/*.zip", "**/*.tar*" };
-    final String[] exclusionPatterns = { "**/WEB-INF/**/*.jar", "**/test-workspace/**/*.jar" };
 
     @Override
     public void describe(final SensorDescriptor descriptor) {
@@ -55,51 +47,39 @@ public class HubSensor implements Sensor {
     @Override
     public void execute(final SensorContext context) {
         final HubSonarLogger logger = new HubSonarLogger(Loggers.get(context.getClass()));
-        final FileSystem fileSystem = context.fileSystem();
-        final FilePredicates filePredicates = fileSystem.predicates();
-        final FilePredicate includeExcludePredicate = filePredicates.and(filePredicates.matchesPathPatterns(inclusionPatterns), filePredicates.doesNotMatchPathPatterns(exclusionPatterns));
-
         logger.info("=============================");
         logger.info("|| Black Duck Hub Analysis ||");
         logger.info("=============================");
-        // logger.info(String.format("PROP: %s", HubSonarUtils.getAndTrimProp(context.settings(), HubPropertyConstants.PROP)));
 
-        // TODO Locate jar files
-        int localComponentCount = 0;
+        final LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, context);
+        final List<String> localComponents = localComponentGatherer.gatherComponents();
+        logger.info(String.format("--> Number of local components found: %d", localComponents.size()));
 
-        logger.info(String.format("Found Base Directory: %s", fileSystem.baseDir().toString()));
+        // TODO Get Hub Project-Version binary paths
+        final HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, context.settings());
+        final List<String> hubComponents = hubComponentGatherer.gatherComponents();
 
-        final Iterator<File> fileIterator = fileSystem.files(includeExcludePredicate).iterator();
-        while (fileIterator.hasNext()) {
-            localComponentCount++;
-            final File file = fileIterator.next();
+        if (hubComponents != null && !hubComponents.isEmpty()) {
+            logger.info(String.format("--> Number of vulnerable Hub components found: %d", hubComponents.size()));
+        } else {
+            logger.info("--> No vulnerable Hub components found.");
+        }
+
+        ComponentComparer componentComparer = null;
+        List<String> sharedComponents = null;
+        if (localComponents.isEmpty() || hubComponents.isEmpty()) {
+            logger.info("--> No comparison will be performed because at least one of the lists of components had zero entries.");
+        } else {
+            componentComparer = new ComponentComparer(logger, localComponents, hubComponents);
             try {
-                logger.info(String.format("Found File: %s", file.getCanonicalPath()));
-            } catch (final IOException e) {
-                logger.warn(String.format("Problem getting canonical path for: %s", file.getName()));
+                sharedComponents = componentComparer.getSharedComponents();
+                logger.info(String.format("--> Number of shared components: %d", componentComparer.getSharedComponentCount()));
+            } catch (final IntegrationException e) {
+                logger.error("Could not get shared components.", e);
             }
         }
 
-        logger.info(String.format("--> Number of Local Components: %d", localComponentCount));
-
-        // TODO Store metadata
-
-        // TODO Get Hub Project/Version Components and Matched Files
-        final HubVulnerableComponentData hubData = new HubVulnerableComponentData(logger, context.settings());
-        List<VulnerableComponentView> components = null;
-        try {
-            components = hubData.gatherVulnerableComponents();
-        } catch (final IntegrationException e) {
-            // TODO handle
-        }
-
-        if (components != null) {
-            logger.info(String.format("--> Number of Vulnerable Hub Components: %d", components.size()));
-        } else {
-            logger.info("--> No Vulnerable Hub components found.");
-        }
-
-        // TODO Compare with Hub Project/Version Components
+        // TODO store shared component data
     }
 
 }
