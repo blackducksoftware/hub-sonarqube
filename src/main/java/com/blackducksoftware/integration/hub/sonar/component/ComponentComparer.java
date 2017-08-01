@@ -66,8 +66,8 @@ public class ComponentComparer {
         final List<String> sharedComponents = new ArrayList<>();
 
         // TODO find a better way to do this
-        for (final String second : secondComponentList) {
-            for (final String first : firstComponentList) {
+        for (final String first : firstComponentList) {
+            for (final String second : secondComponentList) {
                 if (first.contains(second)) {
                     sharedComponents.add(first);
                     break;

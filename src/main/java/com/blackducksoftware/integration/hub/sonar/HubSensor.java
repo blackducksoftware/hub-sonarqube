@@ -51,29 +51,35 @@ public class HubSensor implements Sensor {
         logger.info("|| Black Duck Hub Analysis ||");
         logger.info("=============================");
 
+        logger.info("Gathering local component files...");
         final LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, context);
         final List<String> localComponents = localComponentGatherer.gatherComponents();
-        logger.info(String.format("--> Number of local components found: %d", localComponents.size()));
 
+        logger.info("Gathering Hub component files...");
         final HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, context.settings());
         final List<String> hubComponents = hubComponentGatherer.gatherComponents();
 
-        if (hubComponents != null && !hubComponents.isEmpty()) {
-            logger.info(String.format("--> Number of vulnerable Hub components found: %d", hubComponents.size()));
-        } else {
+        if (hubComponents == null || hubComponents.isEmpty()) {
             logger.info("--> No vulnerable Hub components found.");
         }
 
         ComponentComparer componentComparer = null;
         List<String> sharedComponents = null;
-        if (localComponents.isEmpty() || hubComponents.isEmpty()) {
+        if (localComponents.isEmpty() || hubComponents == null || hubComponents.isEmpty()) {
             logger.info("No comparison will be performed because at least one of the lists of components had zero entries.");
         } else {
             componentComparer = new ComponentComparer(logger, localComponents, hubComponents);
             try {
                 logger.info("Comparing local components to Hub components...");
                 sharedComponents = componentComparer.getSharedComponents();
+                logger.info(String.format("--> Number of local component files matched: %d", localComponents.size()));
+                logger.info(String.format("--> Number of vulnerable Hub component files matched: %d", hubComponents.size()));
                 logger.info(String.format("--> Number of shared components: %d", componentComparer.getSharedComponentCount()));
+
+                for (final String sharedComponent : sharedComponents) {
+                    logger.debug(sharedComponent);
+                }
+
             } catch (final IntegrationException e) {
                 logger.error("Could not get shared components.", e);
             }

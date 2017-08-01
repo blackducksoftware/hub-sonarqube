@@ -68,7 +68,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
     @Override
     public List<String> gatherComponents() {
         final HubServerConfig hubServerConfig = HubSonarUtils.getHubServerConfig(settings);
-        logger.info(hubServerConfig.toString());
+        logger.debug(hubServerConfig.toString());
         RestConnection restConnection = null;
         try {
             restConnection = HubSonarUtils.getRestConnection(logger, hubServerConfig);
@@ -88,7 +88,12 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
             allMatchedFiles = new ArrayList<>();
             final List<VulnerableComponentView> components = getVulnerableComponents(projectVersionWrapper.getProjectVersionView(), services.createVulnerableBomComponentRequestService(), metaService);
             if (components != null) {
+                String prevName = "";
                 for (final VulnerableComponentView component : components) {
+                    if (!prevName.equals(component.componentName)) {
+                        logger.info(String.format("Getting matched files for %s...", component.componentName));
+                        prevName = component.componentName;
+                    }
                     allMatchedFiles.addAll(getMatchedFiles(component, hubRequestFactory, hubResponseService, metaService));
                 }
             } else {
@@ -107,7 +112,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         try {
             logger.info("Attempting to get vulnerable components from the Hub Project-Version...");
             components = vulnerableBomComponentRequestService.getVulnerableComponentsMatchingComponentName(vulnerableBomComponentsLink);
-            logger.info("Success!");
+            logger.info(String.format("Success! Found %d vulnerable components.", components.size()));
         } catch (final IntegrationException e) {
             logger.error(e);
         }
@@ -129,7 +134,8 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         if (allMatchedFiles != null) {
             for (final MatchedFilesView matchedFile : allMatchedFiles) {
                 final String filePath = getFilePath(matchedFile.filePath);
-                if (StringUtils.isNotEmpty(filePath)) {
+                // TODO find a better way to avoid duplicates
+                if (StringUtils.isNotEmpty(filePath) && !matchedFiles.contains(filePath)) {
                     matchedFiles.add(filePath);
                 }
             }

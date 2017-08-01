@@ -58,7 +58,7 @@ public class LocalComponentGatherer implements ComponentGatherer {
 
         logger.debug(String.format("Inclusion Patterns: %s", Arrays.toString(INCLUSION_PATTERNS)));
         logger.debug(String.format("Exclusion Patterns: %s", Arrays.toString(EXCLUSION_PATTERNS)));
-        logger.debug(String.format("Found Base Directory: %s", fileSystem.baseDir().toString()));
+        logger.debug(String.format("Base Directory: %s", fileSystem.baseDir().toString()));
 
         final Iterator<File> fileIterator = fileSystem.files(includeExcludePredicate).iterator();
 
@@ -66,7 +66,6 @@ public class LocalComponentGatherer implements ComponentGatherer {
         while (fileIterator.hasNext()) {
             final File file = fileIterator.next();
             try {
-                logger.trace(String.format("Found File: %s", file.getCanonicalPath()));
                 localBinaries.add(file.getCanonicalPath());
             } catch (final IOException e) {
                 logger.warn(String.format("Problem getting canonical path for: %s", file));
