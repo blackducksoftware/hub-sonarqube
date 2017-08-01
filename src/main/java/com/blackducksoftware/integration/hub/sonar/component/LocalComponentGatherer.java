@@ -39,7 +39,7 @@ import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 
 public class LocalComponentGatherer implements ComponentGatherer {
 
-    public static final String[] INCLUSION_PATTERNS = { "**/*.jar", "**/*.war", "**/*.zip", "**/*.tar*" };
+    public static final String[] INCLUSION_PATTERNS = { "**/*.jar", "**/*.war", "**/*.zip", "**/*.tar*", "**/*.hpi" };
     public static final String[] EXCLUSION_PATTERNS = { "**/WEB-INF/**/*.jar", "**/test-workspace/**/*.jar" };
 
     private final HubSonarLogger logger;
