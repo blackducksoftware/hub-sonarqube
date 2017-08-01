@@ -64,7 +64,16 @@ public class ComponentComparer {
             validateListData(secondComponentList);
         }
         final List<String> sharedComponents = new ArrayList<>();
-        // TODO compare components
+
+        // TODO find a better way to do this
+        for (final String second : secondComponentList) {
+            for (final String first : firstComponentList) {
+                if (first.contains(second)) {
+                    sharedComponents.add(first);
+                    break;
+                }
+            }
+        }
 
         return sharedComponents;
     }

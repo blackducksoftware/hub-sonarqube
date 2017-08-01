@@ -105,9 +105,9 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         final String vulnerableBomComponentsLink = metaService.getFirstLinkSafely(version, MetaService.VULNERABLE_COMPONENTS_LINK);
         List<VulnerableComponentView> components = null;
         try {
-            logger.debug("Attempting to get vulnerable components from the Hub Project-Version...");
+            logger.info("Attempting to get vulnerable components from the Hub Project-Version...");
             components = vulnerableBomComponentRequestService.getVulnerableComponentsMatchingComponentName(vulnerableBomComponentsLink);
-            logger.debug("Success!");
+            logger.info("Success!");
         } catch (final IntegrationException e) {
             logger.error(e);
         }
@@ -129,7 +129,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         if (allMatchedFiles != null) {
             for (final MatchedFilesView matchedFile : allMatchedFiles) {
                 final String filePath = getFilePath(matchedFile.filePath);
-                if (filePath != null) {
+                if (StringUtils.isNotEmpty(filePath)) {
                     matchedFiles.add(filePath);
                 }
             }

@@ -55,7 +55,6 @@ public class HubSensor implements Sensor {
         final List<String> localComponents = localComponentGatherer.gatherComponents();
         logger.info(String.format("--> Number of local components found: %d", localComponents.size()));
 
-        // TODO Get Hub Project-Version binary paths
         final HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, context.settings());
         final List<String> hubComponents = hubComponentGatherer.gatherComponents();
 
@@ -68,10 +67,11 @@ public class HubSensor implements Sensor {
         ComponentComparer componentComparer = null;
         List<String> sharedComponents = null;
         if (localComponents.isEmpty() || hubComponents.isEmpty()) {
-            logger.info("--> No comparison will be performed because at least one of the lists of components had zero entries.");
+            logger.info("No comparison will be performed because at least one of the lists of components had zero entries.");
         } else {
             componentComparer = new ComponentComparer(logger, localComponents, hubComponents);
             try {
+                logger.info("Comparing local components to Hub components...");
                 sharedComponents = componentComparer.getSharedComponents();
                 logger.info(String.format("--> Number of shared components: %d", componentComparer.getSharedComponentCount()));
             } catch (final IntegrationException e) {
