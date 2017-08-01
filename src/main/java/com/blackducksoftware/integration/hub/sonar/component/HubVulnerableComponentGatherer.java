@@ -32,10 +32,11 @@ import org.sonar.api.config.Settings;
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.vulnerablebomcomponent.VulnerableBomComponentRequestService;
+import com.blackducksoftware.integration.hub.dataservice.project.ProjectDataService;
+import com.blackducksoftware.integration.hub.dataservice.project.ProjectVersionWrapper;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.model.view.MatchedFilesView;
 import com.blackducksoftware.integration.hub.model.view.ProjectVersionView;
-import com.blackducksoftware.integration.hub.model.view.ProjectView;
 import com.blackducksoftware.integration.hub.model.view.VulnerableComponentView;
 import com.blackducksoftware.integration.hub.model.view.components.FilePathView;
 import com.blackducksoftware.integration.hub.request.HubPagedRequest;
@@ -80,25 +81,21 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         final HubRequestFactory hubRequestFactory = new HubRequestFactory(restConnection);
         final HubResponseService hubResponseService = services.createHubResponseService();
         final MetaService metaService = services.createMetaService(logger);
+        final ProjectVersionWrapper projectVersionWrapper = getProjectVersionWrapper(services.createProjectDataService(logger));
 
-        ProjectVersionView version = null;
-        try {
-            final ProjectView project = services.createProjectRequestService(logger).getProjectByName(hubProjectName);
-            logger.debug(String.format("Hub Project: %s", project == null ? null : project.name));
-            version = services.createProjectVersionRequestService(logger).getProjectVersion(project, hubProjectVersionName);
-            logger.debug(String.format("Hub Version: %s", version == null ? null : version.versionName));
-        } catch (final IntegrationException e) {
-            logger.error(e);
-        }
-
-        final List<String> allMatchedFiles = new ArrayList<>();
-        final List<VulnerableComponentView> components = getVulnerableComponents(version, services.createVulnerableBomComponentRequestService(), metaService);
-        if (components != null) {
-            for (final VulnerableComponentView component : components) {
-                allMatchedFiles.addAll(getMatchedFiles(component, hubRequestFactory, hubResponseService, metaService));
+        List<String> allMatchedFiles = null;
+        if (projectVersionWrapper != null) {
+            allMatchedFiles = new ArrayList<>();
+            final List<VulnerableComponentView> components = getVulnerableComponents(projectVersionWrapper.getProjectVersionView(), services.createVulnerableBomComponentRequestService(), metaService);
+            if (components != null) {
+                for (final VulnerableComponentView component : components) {
+                    allMatchedFiles.addAll(getMatchedFiles(component, hubRequestFactory, hubResponseService, metaService));
+                }
+            } else {
+                logger.warn("List of vulnerable Hub components was null. No files will be matched.");
             }
         } else {
-            logger.warn("List of vulnerable Hub components was null. No files will be matched.");
+            logger.warn("Hub project and version not found.");
         }
 
         return allMatchedFiles;
@@ -146,14 +143,36 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         final int lastIndex = composite.length() - 1;
         final int archiveMarkIndex = composite.indexOf("!");
         final int otherMarkIndex = composite.indexOf("#");
-        final int startIndex = (otherMarkIndex >= 0 && otherMarkIndex < lastIndex) ? otherMarkIndex + 1 : 0;
-        final int endIndex = (archiveMarkIndex > startIndex) ? archiveMarkIndex : lastIndex;
+
+        final int startIndex;
+        if (otherMarkIndex >= 0 && otherMarkIndex < lastIndex) {
+            startIndex = otherMarkIndex + 1;
+        } else {
+            startIndex = 0;
+        }
+
+        final int endIndex;
+        if (archiveMarkIndex > startIndex) {
+            endIndex = archiveMarkIndex;
+        } else {
+            endIndex = lastIndex;
+        }
 
         final String candidateFilePath = composite.substring(startIndex, endIndex);
 
         // TODO may want to validate OR compare against exclusion patterns
 
         return candidateFilePath;
+    }
+
+    private ProjectVersionWrapper getProjectVersionWrapper(final ProjectDataService projectDataService) {
+        ProjectVersionWrapper wrapper = null;
+        try {
+            wrapper = projectDataService.getProjectVersion(hubProjectName, hubProjectVersionName);
+        } catch (final IntegrationException e) {
+            logger.error(e);
+        }
+        return wrapper;
     }
 
     private void setProjectAndVersion(final Settings settings) {
