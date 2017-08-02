@@ -76,16 +76,17 @@ public class HubSensor implements Sensor {
                 logger.info(String.format("--> Number of vulnerable Hub component files matched: %d", hubComponents.size()));
                 logger.info(String.format("--> Number of shared components: %d", componentComparer.getSharedComponentCount()));
 
+                logger.debug("Shared Components:");
                 for (final String sharedComponent : sharedComponents) {
                     logger.debug(sharedComponent);
                 }
+
+                // TODO store shared component data
 
             } catch (final IntegrationException e) {
                 logger.error("Could not get shared components.", e);
             }
         }
-
-        // TODO store shared component data
     }
 
 }
