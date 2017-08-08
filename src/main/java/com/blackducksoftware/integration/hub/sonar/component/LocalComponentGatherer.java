@@ -39,9 +39,6 @@ import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 
 public class LocalComponentGatherer implements ComponentGatherer {
 
-    public static final String[] INCLUSION_PATTERNS = { "**/*.jar", "**/*.war", "**/*.zip", "**/*.tar*", "**/*.hpi" };
-    public static final String[] EXCLUSION_PATTERNS = { "**/WEB-INF/**/*.jar", "**/test-workspace/**/*.jar" };
-
     private final HubSonarLogger logger;
     private final SensorContext context;
 
@@ -54,10 +51,10 @@ public class LocalComponentGatherer implements ComponentGatherer {
     public List<String> gatherComponents() {
         final FileSystem fileSystem = context.fileSystem();
         final FilePredicates filePredicates = fileSystem.predicates();
-        final FilePredicate includeExcludePredicate = filePredicates.and(filePredicates.matchesPathPatterns(INCLUSION_PATTERNS), filePredicates.doesNotMatchPathPatterns(EXCLUSION_PATTERNS));
+        final FilePredicate includeExcludePredicate = filePredicates.and(filePredicates.matchesPathPatterns(ComponentUtils.INCLUSION_PATTERNS), filePredicates.doesNotMatchPathPatterns(ComponentUtils.EXCLUSION_PATTERNS));
 
-        logger.debug(String.format("Inclusion Patterns: %s", Arrays.toString(INCLUSION_PATTERNS)));
-        logger.debug(String.format("Exclusion Patterns: %s", Arrays.toString(EXCLUSION_PATTERNS)));
+        logger.debug(String.format("Inclusion Patterns: %s", Arrays.toString(ComponentUtils.INCLUSION_PATTERNS)));
+        logger.debug(String.format("Exclusion Patterns: %s", Arrays.toString(ComponentUtils.EXCLUSION_PATTERNS)));
         logger.debug(String.format("Base Directory: %s", fileSystem.baseDir().toString()));
 
         final Iterator<File> fileIterator = fileSystem.files(includeExcludePredicate).iterator();

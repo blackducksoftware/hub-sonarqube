@@ -38,7 +38,6 @@ import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.model.view.MatchedFilesView;
 import com.blackducksoftware.integration.hub.model.view.ProjectVersionView;
 import com.blackducksoftware.integration.hub.model.view.VulnerableComponentView;
-import com.blackducksoftware.integration.hub.model.view.components.FilePathView;
 import com.blackducksoftware.integration.hub.request.HubPagedRequest;
 import com.blackducksoftware.integration.hub.request.HubRequestFactory;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
@@ -46,7 +45,7 @@ import com.blackducksoftware.integration.hub.service.HubResponseService;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
-import com.blackducksoftware.integration.hub.sonar.utils.HubSonarUtils;
+import com.blackducksoftware.integration.hub.sonar.HubSonarUtils;
 
 public class HubVulnerableComponentGatherer implements ComponentGatherer {
 
@@ -133,7 +132,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
 
         if (allMatchedFiles != null) {
             for (final MatchedFilesView matchedFile : allMatchedFiles) {
-                final String filePath = getFilePath(matchedFile.filePath);
+                final String filePath = ComponentUtils.getFilePath(matchedFile.filePath.compositePathContext);
                 // TODO find a better way to avoid duplicates
                 if (StringUtils.isNotEmpty(filePath) && !matchedFiles.contains(filePath)) {
                     matchedFiles.add(filePath);
@@ -142,33 +141,6 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         }
 
         return matchedFiles;
-    }
-
-    private String getFilePath(final FilePathView filePath) {
-        final String composite = filePath.compositePathContext;
-        final int lastIndex = composite.length() - 1;
-        final int archiveMarkIndex = composite.indexOf("!");
-        final int otherMarkIndex = composite.indexOf("#");
-
-        final int startIndex;
-        if (otherMarkIndex >= 0 && otherMarkIndex < lastIndex) {
-            startIndex = otherMarkIndex + 1;
-        } else {
-            startIndex = 0;
-        }
-
-        final int endIndex;
-        if (archiveMarkIndex > startIndex) {
-            endIndex = archiveMarkIndex;
-        } else {
-            endIndex = lastIndex;
-        }
-
-        final String candidateFilePath = composite.substring(startIndex, endIndex);
-
-        // TODO may want to validate OR compare against exclusion patterns
-
-        return candidateFilePath;
     }
 
     private ProjectVersionWrapper getProjectVersionWrapper(final ProjectDataService projectDataService) {

@@ -25,15 +25,11 @@ package com.blackducksoftware.integration.hub.sonar.component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 
 public class ComponentComparer {
-
-    // TODO verify this regex matches file paths and names
-    public static final String COMPONENT_FORMAT_REGEX = "^(/)?([^/\0]+(/)?)+$";
 
     private final List<String> firstComponentList;
     private final List<String> secondComponentList;
@@ -60,8 +56,8 @@ public class ComponentComparer {
 
     public List<String> getSharedComponents() throws IntegrationException {
         if (needsValidation) {
-            validateListData(firstComponentList);
-            validateListData(secondComponentList);
+            preProcessListData(firstComponentList);
+            preProcessListData(secondComponentList);
         }
         final List<String> sharedComponents = new ArrayList<>();
 
@@ -82,10 +78,11 @@ public class ComponentComparer {
         return sharedComponentCount < 0 ? getSharedComponents().size() : sharedComponentCount;
     }
 
-    private void validateListData(final List<String> list) throws IntegrationException {
-        for (final String item : list) {
-            if (!Pattern.matches(COMPONENT_FORMAT_REGEX, item)) {
-                logger.warn(String.format("The format of \'%s\' is invalid.", item));
+    private void preProcessListData(final List<String> list) throws IntegrationException {
+        for (final String str : list) {
+            if (!ComponentUtils.componentMatchesInclusionPatterns(str)) {
+                logger.debug(String.format("Removing '%s', as it does not match any inclusion patterns.", str));
+                list.remove(str);
             }
         }
     }
