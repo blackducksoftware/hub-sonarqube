@@ -26,9 +26,11 @@ package com.blackducksoftware.integration.hub.sonar;
 import org.sonar.api.PropertyType;
 import org.sonar.api.config.PropertyDefinition;
 
+import com.blackducksoftware.integration.hub.sonar.component.ComponentUtils;
+
 public class HubPropertyConstants {
     public static final String HUB_SONAR_PREFIX = "sonar.hub.";
-    public static final String HUB_SONAR_POSTFIX = ".override";
+    public static final String HUB_SONAR_SUFFIX = ".override";
     public static final String HUB_URL = HUB_SONAR_PREFIX + "url";
     public static final String HUB_USERNAME = HUB_SONAR_PREFIX + "username";
     public static final String HUB_PASSWORD = HUB_SONAR_PREFIX + "password";
@@ -42,8 +44,10 @@ public class HubPropertyConstants {
     public static final String HUB_PROXY_USERNAME = HUB_SONAR_PROXY_PREFIX + "username";
     public static final String HUB_PROXY_PASSWORD = HUB_SONAR_PROXY_PREFIX + "password";
 
-    public static final String HUB_PROJECT_OVERRIDE = HUB_SONAR_PREFIX + "project" + HUB_SONAR_POSTFIX;
-    public static final String HUB_PROJECT_VERSION_OVERRIED = HUB_SONAR_PREFIX + "project.version" + HUB_SONAR_POSTFIX;
+    public static final String HUB_PROJECT_OVERRIDE = HUB_SONAR_PREFIX + "project" + HUB_SONAR_SUFFIX;
+    public static final String HUB_PROJECT_VERSION_OVERRIED = HUB_SONAR_PREFIX + "project.version" + HUB_SONAR_SUFFIX;
+    public static final String HUB_BINARY_INCLUSION_PATTERN_OVERRIDE = HUB_SONAR_PREFIX + "binary.inclusion.pattern" + HUB_SONAR_SUFFIX;
+    public static final String HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE = HUB_SONAR_PREFIX + "binary.exclusion.pattern" + HUB_SONAR_SUFFIX;
 
     public static class Definitions {
         public static final PropertyDefinition HUB_URL = buildDef(HubPropertyConstants.HUB_URL, PropertyType.STRING, "Hub URL: ", "Specify the URL of your Hub installation, for example: http://hub.blackducksoftware", "");
@@ -61,6 +65,10 @@ public class HubPropertyConstants {
                 "The username to use in the Proxy authentication. We currently only support proxies with Basic authenticaiton or no authentication.", "");
         public static final PropertyDefinition HUB_PROXY_PASSWORD = buildDef(HubPropertyConstants.HUB_PROXY_PASSWORD, PropertyType.PASSWORD, "Proxy Password: ",
                 "The password to use in the Proxy authentication. We currently only support proxies with Basic authenticaiton or no authentication.", "");
+        public static final PropertyDefinition HUB_BINARY_INLUCSION_PATTERN_OVERRIDE = buildDef(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, PropertyType.STRING, "Binary Inclusion Patterns: ",
+                "File patterns used for gathering local components.", ComponentUtils.DEFAULT_INCLUSION_PATTERNS);
+        public static final PropertyDefinition HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE = buildDef(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, PropertyType.STRING, "Binary Exclusion Patterns: ",
+                "File patterns used for gathering local components.", ComponentUtils.DEFAULT_EXCLUSION_PATTERNS);
 
         private static PropertyDefinition buildDef(final String prop, final PropertyType type, final String name, final String desc, final String defaultVal) {
             return PropertyDefinition.builder(prop).type(type).name(name).description(desc).defaultValue(defaultVal).build();

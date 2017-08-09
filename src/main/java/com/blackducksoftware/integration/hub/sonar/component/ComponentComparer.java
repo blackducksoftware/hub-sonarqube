@@ -28,62 +28,69 @@ import java.util.List;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
+import com.blackducksoftware.integration.hub.sonar.HubSonarUtils;
 
 public class ComponentComparer {
 
-    private final List<String> firstComponentList;
-    private final List<String> secondComponentList;
+    private final List<String> localComponentList;
+    private final List<String> remoteComponentList;
 
-    private final int sharedComponentCount;
+    private int sharedComponentCount;
     private final boolean needsValidation;
     private final HubSonarLogger logger;
 
-    public ComponentComparer(final HubSonarLogger logger, final ComponentGatherer firstGatherer, final ComponentGatherer secondGatherer) {
+    public ComponentComparer(final HubSonarLogger logger, final ComponentGatherer localComponentGatherer, final ComponentGatherer remoteComponentGatherer) {
         this.logger = logger;
-        this.firstComponentList = firstGatherer.gatherComponents();
-        this.secondComponentList = secondGatherer.gatherComponents();
+        this.localComponentList = localComponentGatherer.gatherComponents();
+        this.remoteComponentList = remoteComponentGatherer.gatherComponents();
         this.sharedComponentCount = -1;
         this.needsValidation = false;
     }
 
-    public ComponentComparer(final HubSonarLogger logger, final List<String> firstComponentList, final List<String> secondComponentList) {
+    public ComponentComparer(final HubSonarLogger logger, final List<String> localComponentList, final List<String> remoteComponentList) {
         this.logger = logger;
-        this.firstComponentList = firstComponentList;
-        this.secondComponentList = secondComponentList;
+        this.localComponentList = localComponentList;
+        this.remoteComponentList = remoteComponentList;
         this.sharedComponentCount = -1;
         this.needsValidation = true;
     }
 
     public List<String> getSharedComponents() throws IntegrationException {
         if (needsValidation) {
-            preProcessListData(firstComponentList);
-            preProcessListData(secondComponentList);
+            preProcessListData(localComponentList);
+            preProcessListData(remoteComponentList);
         }
         final List<String> sharedComponents = new ArrayList<>();
 
         // TODO find a better way to do this
-        for (final String first : firstComponentList) {
-            for (final String second : secondComponentList) {
-                if (first.contains(second)) {
-                    sharedComponents.add(first);
+        for (final String local : localComponentList) {
+            for (final String remote : remoteComponentList) {
+                if (local.contains(remote)) {
+                    sharedComponents.add(local);
                     break;
                 }
             }
         }
+        sharedComponentCount = sharedComponents.size();
 
         return sharedComponents;
     }
 
     public int getSharedComponentCount() throws IntegrationException {
-        return sharedComponentCount < 0 ? getSharedComponents().size() : sharedComponentCount;
+        sharedComponentCount = sharedComponentCount < 0 ? getSharedComponents().size() : sharedComponentCount;
+        return sharedComponentCount;
     }
 
     private void preProcessListData(final List<String> list) throws IntegrationException {
-        for (final String str : list) {
-            if (!ComponentUtils.componentMatchesInclusionPatterns(str)) {
-                logger.debug(String.format("Removing '%s', as it does not match any inclusion patterns.", str));
-                list.remove(str);
+        if (HubSonarUtils.getSettings() != null) {
+            final List<String> removalCandidates = new ArrayList<>();
+            for (final String str : list) {
+                if (!ComponentUtils.componentMatchesInclusionPatterns(HubSonarUtils.getSettings(), str)) {
+                    logger.debug(String.format("Removing '%s', as it does not match any inclusion patterns.", str));
+                    removalCandidates.add(str);
+                }
             }
+            list.removeAll(removalCandidates);
         }
     }
 

@@ -47,6 +47,7 @@ public class HubSensor implements Sensor {
     @Override
     public void execute(final SensorContext context) {
         final HubSonarLogger logger = new HubSonarLogger(Loggers.get(context.getClass()));
+        HubSonarUtils.setSettings(context.settings());
         logger.info("=============================");
         logger.info("|| Black Duck Hub Analysis ||");
         logger.info("=============================");
@@ -59,21 +60,18 @@ public class HubSensor implements Sensor {
         final HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, context.settings());
         final List<String> hubComponents = hubComponentGatherer.gatherComponents();
 
-        if (hubComponents == null || hubComponents.isEmpty()) {
-            logger.info("--> No vulnerable Hub components found.");
-        }
+        logger.info(String.format("--> Number of local component files matched: %d", localComponents.size()));
+        logger.info(String.format("--> Number of vulnerable Hub component files matched: %d", hubComponents.size()));
 
         ComponentComparer componentComparer = null;
         List<String> sharedComponents = null;
-        if (localComponents.isEmpty() || hubComponents == null || hubComponents.isEmpty()) {
+        if (localComponents.isEmpty() || hubComponents.isEmpty()) {
             logger.info("No comparison will be performed because at least one of the lists of components had zero entries.");
         } else {
             componentComparer = new ComponentComparer(logger, localComponents, hubComponents);
             try {
                 logger.info("Comparing local components to Hub components...");
                 sharedComponents = componentComparer.getSharedComponents();
-                logger.info(String.format("--> Number of local component files matched: %d", localComponents.size()));
-                logger.info(String.format("--> Number of vulnerable Hub component files matched: %d", hubComponents.size()));
                 logger.info(String.format("--> Number of shared components: %d", componentComparer.getSharedComponentCount()));
 
                 logger.debug("Shared Components:");

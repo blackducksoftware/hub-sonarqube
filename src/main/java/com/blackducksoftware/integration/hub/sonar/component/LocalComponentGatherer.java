@@ -34,6 +34,7 @@ import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.sensor.SensorContext;
+import org.sonar.api.config.Settings;
 
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 
@@ -49,12 +50,14 @@ public class LocalComponentGatherer implements ComponentGatherer {
 
     @Override
     public List<String> gatherComponents() {
+        final Settings settings = context.settings();
         final FileSystem fileSystem = context.fileSystem();
         final FilePredicates filePredicates = fileSystem.predicates();
-        final FilePredicate includeExcludePredicate = filePredicates.and(filePredicates.matchesPathPatterns(ComponentUtils.INCLUSION_PATTERNS), filePredicates.doesNotMatchPathPatterns(ComponentUtils.EXCLUSION_PATTERNS));
+        final FilePredicate includeExcludePredicate = filePredicates.and(filePredicates.matchesPathPatterns(ComponentUtils.getGlobalInclusionPatterns(settings)),
+                filePredicates.doesNotMatchPathPatterns(ComponentUtils.getGlobalExclusionPatterns(settings)));
 
-        logger.debug(String.format("Inclusion Patterns: %s", Arrays.toString(ComponentUtils.INCLUSION_PATTERNS)));
-        logger.debug(String.format("Exclusion Patterns: %s", Arrays.toString(ComponentUtils.EXCLUSION_PATTERNS)));
+        logger.debug(String.format("Inclusion Patterns: %s", Arrays.toString(ComponentUtils.getGlobalInclusionPatterns(settings))));
+        logger.debug(String.format("Exclusion Patterns: %s", Arrays.toString(ComponentUtils.getGlobalExclusionPatterns(settings))));
         logger.debug(String.format("Base Directory: %s", fileSystem.baseDir().toString()));
 
         final Iterator<File> fileIterator = fileSystem.files(includeExcludePredicate).iterator();

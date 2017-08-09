@@ -26,7 +26,5 @@ package com.blackducksoftware.integration.hub.sonar.component;
 import java.util.List;
 
 public interface ComponentGatherer {
-
     public List<String> gatherComponents();
-
 }

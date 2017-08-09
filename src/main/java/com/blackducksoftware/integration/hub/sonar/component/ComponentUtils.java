@@ -23,10 +23,15 @@
  */
 package com.blackducksoftware.integration.hub.sonar.component;
 
+import org.sonar.api.config.Settings;
+
+import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
+import com.blackducksoftware.integration.hub.sonar.HubSonarUtils;
+
 public class ComponentUtils {
 
-    public static final String[] INCLUSION_PATTERNS = { "**/*.jar", "**/*.war", "**/*.zip", "**/*.tar*", "**/*.hpi" };
-    public static final String[] EXCLUSION_PATTERNS = { "**/WEB-INF/**/*.jar", "**/test-workspace/**/*.jar" };
+    public static final String DEFAULT_INCLUSION_PATTERNS = "**/*.jar, **/*.war, **/*.zip, **/*.tar*, ";
+    public static final String DEFAULT_EXCLUSION_PATTERNS = "";
 
     public static String getFilePath(final String composite) {
         final int lastIndex = composite.length() - 1;
@@ -52,8 +57,16 @@ public class ComponentUtils {
         return candidateFilePath;
     }
 
-    public static boolean componentMatchesInclusionPatterns(final String str) {
-        for (final String include : ComponentUtils.INCLUSION_PATTERNS) {
+    public static String[] getGlobalInclusionPatterns(final Settings settings) {
+        return HubSonarUtils.getAndTrimValues(settings, HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE);
+    }
+
+    public static String[] getGlobalExclusionPatterns(final Settings settings) {
+        return HubSonarUtils.getAndTrimValues(settings, HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE);
+    }
+
+    public static boolean componentMatchesInclusionPatterns(final Settings settings, final String str) {
+        for (final String include : HubSonarUtils.getAndTrimValues(settings, HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE)) {
             if (componentMatchesInclusionPattern(str, include)) {
                 return true;
             }
@@ -72,7 +85,7 @@ public class ComponentUtils {
     private static String trimToSuffix(String pattern) {
         if (pattern.contains("*")) {
             final int lastIndex = pattern.lastIndexOf("*");
-            pattern = pattern.substring(lastIndex + 1, pattern.length());
+            pattern = pattern.substring(lastIndex + 1, pattern.length()).trim();
         }
         return pattern;
     }

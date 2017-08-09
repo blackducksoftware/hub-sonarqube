@@ -37,30 +37,50 @@ public class HubSonarUtils {
     public static final String SONAR_PROJECT_NAME_KEY = "sonar.projectName";
     public static final String SONAR_PROJECT_VERSION_KEY = "sonar.projectVersion";
 
+    public static final String[] EMPTY_ARRAY = new String[0];
+
+    private static RestConnection _connection;
+    private static Settings _settings;
+
     public static RestConnection getRestConnection(final IntLogger logger, final HubServerConfig hubServerConfig) throws EncryptionException {
-        return hubServerConfig.createCredentialsRestConnection(logger);
+        if (_connection == null) {
+            _connection = hubServerConfig.createCredentialsRestConnection(logger);
+        }
+        return _connection;
     }
 
     public static HubServerConfig getHubServerConfig(final Settings settings) {
         final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
         if (settings != null) {
-            configBuilder.setHubUrl(getAndTrimProp(settings, HubPropertyConstants.HUB_URL));
-            configBuilder.setUsername(getAndTrimProp(settings, HubPropertyConstants.HUB_USERNAME));
-            configBuilder.setPassword(getAndTrimProp(settings, HubPropertyConstants.HUB_PASSWORD));
-            configBuilder.setTimeout(getAndTrimProp(settings, HubPropertyConstants.HUB_TIMEOUT));
-            configBuilder.setAutoImportHttpsCertificates(Boolean.parseBoolean(getAndTrimProp(settings, HubPropertyConstants.HUB_IMPORT_SSL_CERT)));
+            configBuilder.setHubUrl(getAndTrimValue(settings, HubPropertyConstants.HUB_URL));
+            configBuilder.setUsername(getAndTrimValue(settings, HubPropertyConstants.HUB_USERNAME));
+            configBuilder.setPassword(getAndTrimValue(settings, HubPropertyConstants.HUB_PASSWORD));
+            configBuilder.setTimeout(getAndTrimValue(settings, HubPropertyConstants.HUB_TIMEOUT));
+            configBuilder.setAutoImportHttpsCertificates(Boolean.parseBoolean(getAndTrimValue(settings, HubPropertyConstants.HUB_IMPORT_SSL_CERT)));
 
-            configBuilder.setProxyHost(getAndTrimProp(settings, HubPropertyConstants.HUB_PROXY_HOST));
-            configBuilder.setProxyPort(getAndTrimProp(settings, HubPropertyConstants.HUB_PROXY_PORT));
-            configBuilder.setProxyUsername(getAndTrimProp(settings, HubPropertyConstants.HUB_PROXY_USERNAME));
-            configBuilder.setProxyPassword(getAndTrimProp(settings, HubPropertyConstants.HUB_PROXY_PASSWORD));
+            configBuilder.setProxyHost(getAndTrimValue(settings, HubPropertyConstants.HUB_PROXY_HOST));
+            configBuilder.setProxyPort(getAndTrimValue(settings, HubPropertyConstants.HUB_PROXY_PORT));
+            configBuilder.setProxyUsername(getAndTrimValue(settings, HubPropertyConstants.HUB_PROXY_USERNAME));
+            configBuilder.setProxyPassword(getAndTrimValue(settings, HubPropertyConstants.HUB_PROXY_PASSWORD));
         }
         return configBuilder.build();
     }
 
-    public static String getAndTrimProp(final Settings settings, final String key) {
+    public static void setSettings(final Settings settings) {
+        _settings = settings;
+    }
+
+    public static Settings getSettings() {
+        return _settings;
+    }
+
+    public static String getAndTrimValue(final Settings settings, final String key) {
         final String value = settings.getString(key);
-        return StringUtils.isEmpty(value) ? null : value.trim();
+        return StringUtils.isEmpty(value) ? "" : value.trim();
+    }
+
+    public static String[] getAndTrimValues(final Settings settings, final String key) {
+        return settings.getStringArray(key);
     }
 
 }
