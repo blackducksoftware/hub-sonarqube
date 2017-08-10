@@ -27,28 +27,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
-import com.blackducksoftware.integration.hub.sonar.HubSonarUtils;
 
 public class ComponentComparer {
 
     private final List<String> localComponentList;
     private final List<String> remoteComponentList;
-
+    private final ComponentHelper componentHelper;
     private int sharedComponentCount;
     private final boolean needsValidation;
-    private final HubSonarLogger logger;
 
-    public ComponentComparer(final HubSonarLogger logger, final ComponentGatherer localComponentGatherer, final ComponentGatherer remoteComponentGatherer) {
-        this.logger = logger;
+    public ComponentComparer(final ComponentHelper componentHelper, final ComponentGatherer localComponentGatherer, final ComponentGatherer remoteComponentGatherer) {
+        this.componentHelper = componentHelper;
         this.localComponentList = localComponentGatherer.gatherComponents();
         this.remoteComponentList = remoteComponentGatherer.gatherComponents();
         this.sharedComponentCount = -1;
         this.needsValidation = false;
     }
 
-    public ComponentComparer(final HubSonarLogger logger, final List<String> localComponentList, final List<String> remoteComponentList) {
-        this.logger = logger;
+    public ComponentComparer(final ComponentHelper componentHelper, final List<String> localComponentList, final List<String> remoteComponentList) {
+        this.componentHelper = componentHelper;
         this.localComponentList = localComponentList;
         this.remoteComponentList = remoteComponentList;
         this.sharedComponentCount = -1;
@@ -57,10 +54,11 @@ public class ComponentComparer {
 
     public List<String> getSharedComponents() throws IntegrationException {
         if (needsValidation) {
-            preProcessListData(localComponentList);
-            preProcessListData(remoteComponentList);
+            componentHelper.preProcessComponentListData(localComponentList);
+            componentHelper.preProcessComponentListData(remoteComponentList);
         }
         final List<String> sharedComponents = new ArrayList<>();
+        // sharedComponents.addAll(secondComponentList.parallelStream().filter(second -> firstComponentList.parallelStream().anyMatch(item -> item.contains(second))).collect(Collectors.toList()));
 
         // TODO find a better way to do this
         for (final String local : localComponentList) {
@@ -79,19 +77,6 @@ public class ComponentComparer {
     public int getSharedComponentCount() throws IntegrationException {
         sharedComponentCount = sharedComponentCount < 0 ? getSharedComponents().size() : sharedComponentCount;
         return sharedComponentCount;
-    }
-
-    private void preProcessListData(final List<String> list) throws IntegrationException {
-        if (HubSonarUtils.getSettings() != null) {
-            final List<String> removalCandidates = new ArrayList<>();
-            for (final String str : list) {
-                if (!ComponentUtils.componentMatchesInclusionPatterns(HubSonarUtils.getSettings(), str)) {
-                    logger.debug(String.format("Removing '%s', as it does not match any inclusion patterns.", str));
-                    removalCandidates.add(str);
-                }
-            }
-            list.removeAll(removalCandidates);
-        }
     }
 
 }

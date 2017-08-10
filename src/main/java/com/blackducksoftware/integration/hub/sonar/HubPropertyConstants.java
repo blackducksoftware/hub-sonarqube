@@ -26,9 +26,12 @@ package com.blackducksoftware.integration.hub.sonar;
 import org.sonar.api.PropertyType;
 import org.sonar.api.config.PropertyDefinition;
 
-import com.blackducksoftware.integration.hub.sonar.component.ComponentUtils;
+import com.blackducksoftware.integration.hub.sonar.component.ComponentHelper;
 
 public class HubPropertyConstants {
+    public static final String SONAR_PROJECT_NAME_KEY = "sonar.projectName";
+    public static final String SONAR_PROJECT_VERSION_KEY = "sonar.projectVersion";
+
     public static final String HUB_SONAR_PREFIX = "sonar.hub.";
     public static final String HUB_SONAR_SUFFIX = ".override";
     public static final String HUB_URL = HUB_SONAR_PREFIX + "url";
@@ -65,10 +68,10 @@ public class HubPropertyConstants {
                 "The username to use in the Proxy authentication. We currently only support proxies with Basic authenticaiton or no authentication.", "");
         public static final PropertyDefinition HUB_PROXY_PASSWORD = buildDef(HubPropertyConstants.HUB_PROXY_PASSWORD, PropertyType.PASSWORD, "Proxy Password: ",
                 "The password to use in the Proxy authentication. We currently only support proxies with Basic authenticaiton or no authentication.", "");
-        public static final PropertyDefinition HUB_BINARY_INLUCSION_PATTERN_OVERRIDE = buildDef(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, PropertyType.STRING, "Binary Inclusion Patterns: ",
-                "File patterns used for gathering local components.", ComponentUtils.DEFAULT_INCLUSION_PATTERNS);
+        public static final PropertyDefinition HUB_BINARY_INCLUSION_PATTERN_OVERRIDE = buildDef(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, PropertyType.STRING, "Binary Inclusion Patterns: ",
+                "File patterns used for gathering local components.", ComponentHelper.DEFAULT_INCLUSION_PATTERNS);
         public static final PropertyDefinition HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE = buildDef(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, PropertyType.STRING, "Binary Exclusion Patterns: ",
-                "File patterns used for gathering local components.", ComponentUtils.DEFAULT_EXCLUSION_PATTERNS);
+                "File patterns used for gathering local components.", ComponentHelper.DEFAULT_EXCLUSION_PATTERNS);
 
         private static PropertyDefinition buildDef(final String prop, final PropertyType type, final String name, final String desc, final String defaultVal) {
             return PropertyDefinition.builder(prop).type(type).name(name).description(desc).defaultValue(defaultVal).build();

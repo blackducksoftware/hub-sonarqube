@@ -23,17 +23,25 @@
  */
 package com.blackducksoftware.integration.hub.sonar.component;
 
-import org.sonar.api.config.Settings;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
-import com.blackducksoftware.integration.hub.sonar.HubSonarUtils;
+import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 
-public class ComponentUtils {
+public class ComponentHelper {
+
+    private final SonarManager sonarManager;
+
+    public ComponentHelper(final SonarManager sonarManager) {
+        this.sonarManager = sonarManager;
+    }
 
     public static final String DEFAULT_INCLUSION_PATTERNS = "**/*.jar, **/*.war, **/*.zip, **/*.tar*, ";
     public static final String DEFAULT_EXCLUSION_PATTERNS = "";
 
-    public static String getFilePath(final String composite) {
+    public String getFilePath(final String composite) {
         final int lastIndex = composite.length() - 1;
         final int archiveMarkIndex = composite.indexOf("!");
         final int otherMarkIndex = composite.indexOf("#");
@@ -57,16 +65,20 @@ public class ComponentUtils {
         return candidateFilePath;
     }
 
-    public static String[] getGlobalInclusionPatterns(final Settings settings) {
-        return HubSonarUtils.getAndTrimValues(settings, HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE);
+    public void preProcessComponentListData(final List<String> list) throws IntegrationException {
+        if (sonarManager != null) {
+            final List<String> removalCandidates = new ArrayList<>();
+            for (final String str : list) {
+                if (!componentMatchesInclusionPatterns(str)) {
+                    removalCandidates.add(str);
+                }
+            }
+            list.removeAll(removalCandidates);
+        }
     }
 
-    public static String[] getGlobalExclusionPatterns(final Settings settings) {
-        return HubSonarUtils.getAndTrimValues(settings, HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE);
-    }
-
-    public static boolean componentMatchesInclusionPatterns(final Settings settings, final String str) {
-        for (final String include : HubSonarUtils.getAndTrimValues(settings, HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE)) {
+    public boolean componentMatchesInclusionPatterns(final String str) {
+        for (final String include : sonarManager.getValues(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE)) {
             if (componentMatchesInclusionPattern(str, include)) {
                 return true;
             }
@@ -74,7 +86,7 @@ public class ComponentUtils {
         return false;
     }
 
-    public static boolean componentMatchesInclusionPattern(final String str, final String pattern) {
+    public boolean componentMatchesInclusionPattern(final String str, final String pattern) {
         final String suffix = trimToSuffix(pattern);
         if (str.endsWith(suffix)) {
             return true;
@@ -82,7 +94,7 @@ public class ComponentUtils {
         return false;
     }
 
-    private static String trimToSuffix(String pattern) {
+    private String trimToSuffix(String pattern) {
         if (pattern.contains("*")) {
             final int lastIndex = pattern.lastIndexOf("*");
             pattern = pattern.substring(lastIndex + 1, pattern.length()).trim();

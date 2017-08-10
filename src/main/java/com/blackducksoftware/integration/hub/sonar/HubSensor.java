@@ -32,9 +32,14 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.utils.log.Loggers;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.global.HubServerConfig;
+import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.sonar.component.ComponentComparer;
+import com.blackducksoftware.integration.hub.sonar.component.ComponentHelper;
 import com.blackducksoftware.integration.hub.sonar.component.HubVulnerableComponentGatherer;
 import com.blackducksoftware.integration.hub.sonar.component.LocalComponentGatherer;
+import com.blackducksoftware.integration.hub.sonar.manager.HubManager;
+import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 
 public class HubSensor implements Sensor {
 
@@ -47,17 +52,21 @@ public class HubSensor implements Sensor {
     @Override
     public void execute(final SensorContext context) {
         final HubSonarLogger logger = new HubSonarLogger(Loggers.get(context.getClass()));
-        HubSonarUtils.setSettings(context.settings());
+        final SonarManager sonarManager = new SonarManager(context.settings());
+        final ComponentHelper componentHelper = new ComponentHelper(sonarManager);
+        final RestConnection restConnection = createRestConnection(logger, sonarManager.getHubServerConfigFromSettings());
+        final HubManager hubManager = new HubManager(logger, restConnection);
+
         logger.info("=============================");
         logger.info("|| Black Duck Hub Analysis ||");
         logger.info("=============================");
 
         logger.info("Gathering local component files...");
-        final LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, context);
+        final LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, sonarManager, context.fileSystem());
         final List<String> localComponents = localComponentGatherer.gatherComponents();
 
         logger.info("Gathering Hub component files...");
-        final HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, context.settings());
+        final HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, hubManager);
         final List<String> hubComponents = hubComponentGatherer.gatherComponents();
 
         logger.info(String.format("--> Number of local component files matched: %d", localComponents.size()));
@@ -68,7 +77,7 @@ public class HubSensor implements Sensor {
         if (localComponents.isEmpty() || hubComponents.isEmpty()) {
             logger.info("No comparison will be performed because at least one of the lists of components had zero entries.");
         } else {
-            componentComparer = new ComponentComparer(logger, localComponents, hubComponents);
+            componentComparer = new ComponentComparer(componentHelper, localComponents, hubComponents);
             try {
                 logger.info("Comparing local components to Hub components...");
                 sharedComponents = componentComparer.getSharedComponents();
@@ -85,6 +94,18 @@ public class HubSensor implements Sensor {
                 logger.error("Could not get shared components.", e);
             }
         }
+    }
+
+    private RestConnection createRestConnection(final HubSonarLogger logger, final HubServerConfig hubServerConfig) {
+        RestConnection restConnection = null;
+        try {
+            restConnection = hubServerConfig.createCredentialsRestConnection(logger);
+            restConnection.connect();
+            logger.info(String.format("Successfully connected to %s", hubServerConfig.getHubUrl()));
+        } catch (final IntegrationException e) {
+            logger.error(String.format("Error connecting to %s: ", hubServerConfig.getHubUrl(), e));
+        }
+        return restConnection;
     }
 
 }

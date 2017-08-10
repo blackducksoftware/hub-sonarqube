@@ -23,64 +23,6 @@
  */
 package com.blackducksoftware.integration.hub.sonar;
 
-import org.apache.commons.lang3.StringUtils;
-import org.sonar.api.config.Settings;
-
-import com.blackducksoftware.integration.exception.EncryptionException;
-import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
-import com.blackducksoftware.integration.hub.global.HubServerConfig;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
-import com.blackducksoftware.integration.log.IntLogger;
-
 public class HubSonarUtils {
-
-    public static final String SONAR_PROJECT_NAME_KEY = "sonar.projectName";
-    public static final String SONAR_PROJECT_VERSION_KEY = "sonar.projectVersion";
-
     public static final String[] EMPTY_ARRAY = new String[0];
-
-    private static RestConnection _connection;
-    private static Settings _settings;
-
-    public static RestConnection getRestConnection(final IntLogger logger, final HubServerConfig hubServerConfig) throws EncryptionException {
-        if (_connection == null) {
-            _connection = hubServerConfig.createCredentialsRestConnection(logger);
-        }
-        return _connection;
-    }
-
-    public static HubServerConfig getHubServerConfig(final Settings settings) {
-        final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
-        if (settings != null) {
-            configBuilder.setHubUrl(getAndTrimValue(settings, HubPropertyConstants.HUB_URL));
-            configBuilder.setUsername(getAndTrimValue(settings, HubPropertyConstants.HUB_USERNAME));
-            configBuilder.setPassword(getAndTrimValue(settings, HubPropertyConstants.HUB_PASSWORD));
-            configBuilder.setTimeout(getAndTrimValue(settings, HubPropertyConstants.HUB_TIMEOUT));
-            configBuilder.setAutoImportHttpsCertificates(Boolean.parseBoolean(getAndTrimValue(settings, HubPropertyConstants.HUB_IMPORT_SSL_CERT)));
-
-            configBuilder.setProxyHost(getAndTrimValue(settings, HubPropertyConstants.HUB_PROXY_HOST));
-            configBuilder.setProxyPort(getAndTrimValue(settings, HubPropertyConstants.HUB_PROXY_PORT));
-            configBuilder.setProxyUsername(getAndTrimValue(settings, HubPropertyConstants.HUB_PROXY_USERNAME));
-            configBuilder.setProxyPassword(getAndTrimValue(settings, HubPropertyConstants.HUB_PROXY_PASSWORD));
-        }
-        return configBuilder.build();
-    }
-
-    public static void setSettings(final Settings settings) {
-        _settings = settings;
-    }
-
-    public static Settings getSettings() {
-        return _settings;
-    }
-
-    public static String getAndTrimValue(final Settings settings, final String key) {
-        final String value = settings.getString(key);
-        return StringUtils.isEmpty(value) ? "" : value.trim();
-    }
-
-    public static String[] getAndTrimValues(final Settings settings, final String key) {
-        return settings.getStringArray(key);
-    }
-
 }

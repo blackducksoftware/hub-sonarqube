@@ -33,31 +33,29 @@ import java.util.List;
 import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.FileSystem;
-import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.config.Settings;
 
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
+import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 
 public class LocalComponentGatherer implements ComponentGatherer {
 
     private final HubSonarLogger logger;
-    private final SensorContext context;
+    final SonarManager sonarManager;
+    final FileSystem fileSystem;
 
-    public LocalComponentGatherer(final HubSonarLogger logger, final SensorContext context) {
+    public LocalComponentGatherer(final HubSonarLogger logger, final SonarManager sonarManager, final FileSystem fileSystem) {
         this.logger = logger;
-        this.context = context;
+        this.sonarManager = sonarManager;
+        this.fileSystem = fileSystem;
     }
 
     @Override
     public List<String> gatherComponents() {
-        final Settings settings = context.settings();
-        final FileSystem fileSystem = context.fileSystem();
         final FilePredicates filePredicates = fileSystem.predicates();
-        final FilePredicate includeExcludePredicate = filePredicates.and(filePredicates.matchesPathPatterns(ComponentUtils.getGlobalInclusionPatterns(settings)),
-                filePredicates.doesNotMatchPathPatterns(ComponentUtils.getGlobalExclusionPatterns(settings)));
+        final FilePredicate includeExcludePredicate = filePredicates.and(filePredicates.matchesPathPatterns(sonarManager.getGlobalInclusionPatterns()), filePredicates.doesNotMatchPathPatterns(sonarManager.getGlobalExclusionPatterns()));
 
-        logger.debug(String.format("Inclusion Patterns: %s", Arrays.toString(ComponentUtils.getGlobalInclusionPatterns(settings))));
-        logger.debug(String.format("Exclusion Patterns: %s", Arrays.toString(ComponentUtils.getGlobalExclusionPatterns(settings))));
+        logger.debug(String.format("Inclusion Patterns: %s", Arrays.toString(sonarManager.getGlobalInclusionPatterns())));
+        logger.debug(String.format("Exclusion Patterns: %s", Arrays.toString(sonarManager.getGlobalExclusionPatterns())));
         logger.debug(String.format("Base Directory: %s", fileSystem.baseDir().toString()));
 
         final Iterator<File> fileIterator = fileSystem.files(includeExcludePredicate).iterator();
