@@ -42,7 +42,6 @@ import com.blackducksoftware.integration.hub.sonar.manager.HubManager;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 
 public class HubSensor implements Sensor {
-
     @Override
     public void describe(final SensorDescriptor descriptor) {
         descriptor.name(HubPlugin.PLUGIN_NAME);
@@ -107,5 +106,4 @@ public class HubSensor implements Sensor {
         }
         return restConnection;
     }
-
 }

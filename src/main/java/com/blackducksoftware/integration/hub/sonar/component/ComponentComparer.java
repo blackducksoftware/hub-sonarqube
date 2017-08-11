@@ -58,7 +58,6 @@ public class ComponentComparer {
             componentHelper.preProcessComponentListData(remoteComponentList);
         }
         final List<String> sharedComponents = new ArrayList<>();
-        // sharedComponents.addAll(secondComponentList.parallelStream().filter(second -> firstComponentList.parallelStream().anyMatch(item -> item.contains(second))).collect(Collectors.toList()));
 
         // TODO find a better way to do this
         for (final String local : localComponentList) {
@@ -78,5 +77,4 @@ public class ComponentComparer {
         sharedComponentCount = sharedComponentCount < 0 ? getSharedComponents().size() : sharedComponentCount;
         return sharedComponentCount;
     }
-
 }

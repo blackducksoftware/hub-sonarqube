@@ -35,19 +35,13 @@ import com.blackducksoftware.integration.hub.dataservice.project.ProjectVersionW
 import com.blackducksoftware.integration.hub.model.view.MatchedFilesView;
 import com.blackducksoftware.integration.hub.model.view.ProjectVersionView;
 import com.blackducksoftware.integration.hub.model.view.VulnerableComponentView;
-import com.blackducksoftware.integration.hub.request.HubPagedRequest;
-import com.blackducksoftware.integration.hub.request.HubRequestFactory;
-import com.blackducksoftware.integration.hub.service.HubResponseService;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 import com.blackducksoftware.integration.hub.sonar.manager.HubManager;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
+import com.blackducksoftware.integration.hub.sonar.service.MatchedFilesRequestService;
 
 public class HubVulnerableComponentGatherer implements ComponentGatherer {
-
-    // TODO added in hub-common-13.2.3-SNAPSHOT
-    public static final String MATCHED_FILES_LINK = "matched-files";
-
     private final HubSonarLogger logger;
     private final ComponentHelper componentHelper;
     private final SonarManager sonarManager;
@@ -67,10 +61,8 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
     @Override
     public List<String> gatherComponents() {
         final List<String> allMatchedFiles = new ArrayList<>();
-
         if (hubManager.getRestConnection() != null) {
             final ProjectVersionWrapper projectVersionWrapper = hubManager.getProjectVersionWrapper(hubProjectName, hubProjectVersionName);
-
             if (projectVersionWrapper != null) {
                 final List<VulnerableComponentView> components = getVulnerableComponents(projectVersionWrapper.getProjectVersionView(), hubManager.getVulnerableBomComponentRequestService(), hubManager.getMetaService());
                 if (components != null) {
@@ -80,7 +72,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
                             logger.info(String.format("Getting matched files for %s...", component.componentName));
                             prevName = component.componentName;
                         }
-                        allMatchedFiles.addAll(getMatchedFiles(component, hubManager.getRequestFactory(), hubManager.getResponseService(), hubManager.getMetaService()));
+                        allMatchedFiles.addAll(getMatchedFiles(component, hubManager.getMatchedFilesRequestService(), hubManager.getMetaService()));
                     }
                 } else {
                     logger.warn("List of vulnerable Hub components was null. No files will be matched.");
@@ -110,20 +102,19 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         return components;
     }
 
-    private List<String> getMatchedFiles(final VulnerableComponentView component, final HubRequestFactory hubRequestFactory, final HubResponseService hubResponseService, final MetaService metaService) {
+    private List<String> getMatchedFiles(final VulnerableComponentView component, final MatchedFilesRequestService matchedFilesRequestService, final MetaService metaService) {
         final List<String> matchedFiles = new ArrayList<>();
-        final String matchedFilesLink = metaService.getFirstLinkSafely(component, MATCHED_FILES_LINK);
-        final HubPagedRequest hubPagedRequest = hubRequestFactory.createPagedRequest(matchedFilesLink);
+        final String matchedFilesLink = metaService.getFirstLinkSafely(component, MetaService.MATCHED_FILES_LINK);
         List<MatchedFilesView> allMatchedFiles = null;
         try {
-            allMatchedFiles = hubResponseService.getAllItems(hubPagedRequest, MatchedFilesView.class);
+            allMatchedFiles = matchedFilesRequestService.getMatchedFiles(matchedFilesLink);
         } catch (final IntegrationException e) {
             logger.error(e);
         }
 
         if (allMatchedFiles != null) {
             for (final MatchedFilesView matchedFile : allMatchedFiles) {
-                final String filePath = componentHelper.getFilePath(matchedFile.filePath.compositePathContext);
+                final String filePath = componentHelper.getFileNameFromComposite(matchedFile.filePath.compositePathContext);
                 // TODO find a better way to avoid duplicates
                 if (StringUtils.isNotEmpty(filePath) && !matchedFiles.contains(filePath)) {
                     matchedFiles.add(filePath);
@@ -150,5 +141,4 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
             logger.debug(String.format("Overriden Hub Project-Version to look for: %s", hubProjectVersionName));
         }
     }
-
 }

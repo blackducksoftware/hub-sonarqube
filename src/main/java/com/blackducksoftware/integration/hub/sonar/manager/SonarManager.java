@@ -31,7 +31,6 @@ import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 
 public class SonarManager {
-
     private final Settings settings;
 
     public SonarManager(final Settings settings) {
@@ -71,5 +70,4 @@ public class SonarManager {
     public String[] getValues(final String key) {
         return settings.getStringArray(key);
     }
-
 }

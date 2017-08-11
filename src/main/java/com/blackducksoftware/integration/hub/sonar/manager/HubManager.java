@@ -33,6 +33,7 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubResponseService;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
+import com.blackducksoftware.integration.hub.sonar.service.MatchedFilesRequestService;
 
 public class HubManager {
     private final HubSonarLogger logger;
@@ -42,6 +43,7 @@ public class HubManager {
     private HubServicesFactory servicesFactory = null;
     private HubResponseService responseService = null;
     private ProjectDataService projectDataService = null;
+    private MatchedFilesRequestService matchedFilesRequestService = null;
     private VulnerableBomComponentRequestService vulnerableBomComponentRequestService = null;
     private MetaService metaService = null;
 
@@ -90,6 +92,13 @@ public class HubManager {
             vulnerableBomComponentRequestService = getServicesFactory().createVulnerableBomComponentRequestService();
         }
         return vulnerableBomComponentRequestService;
+    }
+
+    public MatchedFilesRequestService getMatchedFilesRequestService() {
+        if (matchedFilesRequestService == null) {
+            matchedFilesRequestService = new MatchedFilesRequestService(restConnection);
+        }
+        return matchedFilesRequestService;
     }
 
     private ProjectDataService getProjectDataService() {

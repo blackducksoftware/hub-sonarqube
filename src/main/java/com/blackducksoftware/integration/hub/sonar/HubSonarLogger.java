@@ -38,8 +38,8 @@ public class HubSonarLogger extends IntLogger {
     }
 
     @Override
+    @Deprecated
     public void alwaysLog(final String txt) {
-        // TODO find a better way to do this
         logger.info(txt);
     }
 

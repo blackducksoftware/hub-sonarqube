@@ -27,11 +27,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 
 public class ComponentHelper {
-
+    public static final String ANY_STRING_PATTERN = "*";
     private final SonarManager sonarManager;
 
     public ComponentHelper(final SonarManager sonarManager) {
@@ -41,7 +40,13 @@ public class ComponentHelper {
     public static final String DEFAULT_INCLUSION_PATTERNS = "**/*.jar, **/*.war, **/*.zip, **/*.tar*, ";
     public static final String DEFAULT_EXCLUSION_PATTERNS = "";
 
-    public String getFilePath(final String composite) {
+    public String getFileNameFromComposite(final String composite) {
+        final String filePath = getFilePathFromComposite(composite);
+        final String[] pathTokens = filePath.split("/");
+        return pathTokens[pathTokens.length - 1];
+    }
+
+    public String getFilePathFromComposite(final String composite) {
         final int lastIndex = composite.length() - 1;
         final int archiveMarkIndex = composite.indexOf("!");
         final int otherMarkIndex = composite.indexOf("#");
@@ -78,7 +83,7 @@ public class ComponentHelper {
     }
 
     public boolean componentMatchesInclusionPatterns(final String str) {
-        for (final String include : sonarManager.getValues(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE)) {
+        for (final String include : sonarManager.getGlobalInclusionPatterns()) {
             if (componentMatchesInclusionPattern(str, include)) {
                 return true;
             }
@@ -87,17 +92,21 @@ public class ComponentHelper {
     }
 
     public boolean componentMatchesInclusionPattern(final String str, final String pattern) {
-        final String suffix = trimToSuffix(pattern);
-        if (str.endsWith(suffix)) {
+        final String suffix = trimPatternToSuffix(pattern);
+        if (str.endsWith(suffix) || (str.contains(suffix) && pattern.endsWith(ANY_STRING_PATTERN))) {
             return true;
         }
         return false;
     }
 
-    private String trimToSuffix(String pattern) {
-        if (pattern.contains("*")) {
-            final int lastIndex = pattern.lastIndexOf("*");
-            pattern = pattern.substring(lastIndex + 1, pattern.length()).trim();
+    private String trimPatternToSuffix(String pattern) {
+        if (pattern.contains(ANY_STRING_PATTERN)) {
+            final int lastIndex = pattern.lastIndexOf(ANY_STRING_PATTERN);
+            if (lastIndex == pattern.length() - 1) {
+                pattern = trimPatternToSuffix(pattern.substring(0, lastIndex));
+            } else {
+                pattern = pattern.substring(lastIndex + 1, pattern.length()).trim();
+            }
         }
         return pattern;
     }
