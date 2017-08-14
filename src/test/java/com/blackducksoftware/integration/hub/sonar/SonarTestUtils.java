@@ -23,6 +23,16 @@
  */
 package com.blackducksoftware.integration.hub.sonar;
 
-public class HubSonarUtils {
-    public static final String[] EMPTY_STRING_ARRAY = new String[0];
+import java.util.Arrays;
+import java.util.List;
+
+public class SonarTestUtils {
+    public static String TEST_DIRECTORY = "src/test/resources/baseDir";
+    public static String[] TEST_FILE_NAMES = { "test.jar", "test.tar", "test.png" };
+
+    public static boolean stringArrayEquals(final String[] firstArray, final String secondArray[]) {
+        final List<String> first = Arrays.asList(firstArray);
+        final List<String> second = Arrays.asList(secondArray);
+        return first.equals(second);
+    }
 }

@@ -27,42 +27,35 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.sonar.api.batch.fs.FilePredicate;
-import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.FileSystem;
 
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 
 public class LocalComponentGatherer implements ComponentGatherer {
-
     private final HubSonarLogger logger;
-    final SonarManager sonarManager;
-    final FileSystem fileSystem;
+    private final SonarManager sonarManager;
+    private final FileSystem fileSystem;
+    private final FilePredicate includeExcludePredicate;
 
-    public LocalComponentGatherer(final HubSonarLogger logger, final SonarManager sonarManager, final FileSystem fileSystem) {
+    public LocalComponentGatherer(final HubSonarLogger logger, final SonarManager sonarManager, final FileSystem fileSystem, final FilePredicate includeExcludePredicate) {
         this.logger = logger;
         this.sonarManager = sonarManager;
         this.fileSystem = fileSystem;
+        this.includeExcludePredicate = includeExcludePredicate;
     }
 
     @Override
     public List<String> gatherComponents() {
-        final FilePredicates filePredicates = fileSystem.predicates();
-        final FilePredicate includeExcludePredicate = filePredicates.and(filePredicates.matchesPathPatterns(sonarManager.getGlobalInclusionPatterns()), filePredicates.doesNotMatchPathPatterns(sonarManager.getGlobalExclusionPatterns()));
-
         logger.debug(String.format("Inclusion Patterns: %s", Arrays.toString(sonarManager.getGlobalInclusionPatterns())));
         logger.debug(String.format("Exclusion Patterns: %s", Arrays.toString(sonarManager.getGlobalExclusionPatterns())));
         logger.debug(String.format("Base Directory: %s", fileSystem.baseDir().toString()));
 
-        final Iterator<File> fileIterator = fileSystem.files(includeExcludePredicate).iterator();
-
         final List<String> localBinaries = new ArrayList<>();
-        while (fileIterator.hasNext()) {
-            final File file = fileIterator.next();
+        for (final File file : fileSystem.files(includeExcludePredicate)) {
             try {
                 localBinaries.add(file.getCanonicalPath());
             } catch (final IOException e) {
@@ -73,5 +66,4 @@ public class LocalComponentGatherer implements ComponentGatherer {
 
         return localBinaries;
     }
-
 }

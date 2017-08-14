@@ -25,6 +25,9 @@ package com.blackducksoftware.integration.hub.sonar;
 
 import java.util.List;
 
+import org.sonar.api.batch.fs.FilePredicate;
+import org.sonar.api.batch.fs.FilePredicates;
+import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -55,13 +58,16 @@ public class HubSensor implements Sensor {
         final ComponentHelper componentHelper = new ComponentHelper(sonarManager);
         final RestConnection restConnection = createRestConnection(logger, sonarManager.getHubServerConfigFromSettings());
         final HubManager hubManager = new HubManager(logger, restConnection);
+        final FileSystem fileSystem = context.fileSystem();
+        final FilePredicates filePredicates = fileSystem.predicates();
+        final FilePredicate filePredicate = filePredicates.and(filePredicates.matchesPathPatterns(sonarManager.getGlobalInclusionPatterns()), filePredicates.doesNotMatchPathPatterns(sonarManager.getGlobalExclusionPatterns()));
 
         logger.info("=============================");
         logger.info("|| Black Duck Hub Analysis ||");
         logger.info("=============================");
 
         logger.info("Gathering local component files...");
-        final LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, sonarManager, context.fileSystem());
+        final LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, sonarManager, fileSystem, filePredicate);
         final List<String> localComponents = localComponentGatherer.gatherComponents();
 
         logger.info("Gathering Hub component files...");

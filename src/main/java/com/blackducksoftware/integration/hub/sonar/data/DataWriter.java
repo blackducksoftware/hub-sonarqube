@@ -21,8 +21,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.sonar;
+package com.blackducksoftware.integration.hub.sonar.data;
 
-public class HubSonarUtils {
-    public static final String[] EMPTY_STRING_ARRAY = new String[0];
+import org.sonar.api.batch.sensor.SensorContext;
+
+public class DataWriter {
+
+    private final SensorContext context;
+
+    public DataWriter(final SensorContext context) {
+        this.context = context;
+    }
 }

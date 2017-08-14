@@ -43,6 +43,7 @@ public class ComponentComparerTest {
         final ComponentComparer comparer = new ComponentComparer(helper, first, second);
 
         assertEquals(comparer.getSharedComponents(), first);
+        assertEquals(comparer.getSharedComponentCount(), first.size());
     }
 
     @Test
@@ -54,6 +55,7 @@ public class ComponentComparerTest {
         final ComponentComparer comparer = new ComponentComparer(helper, first, second);
 
         assertEquals(comparer.getSharedComponents(), Arrays.asList("three"));
+        assertEquals(comparer.getSharedComponentCount(), 1);
     }
 
     @Test
@@ -77,5 +79,6 @@ public class ComponentComparerTest {
         final ComponentComparer comparer = new ComponentComparer(helper, absolutePathList, relativePathList);
 
         assertEquals(comparer.getSharedComponents(), absolutePathList);
+        assertEquals(comparer.getSharedComponentCount(), absolutePathList.size());
     }
 }

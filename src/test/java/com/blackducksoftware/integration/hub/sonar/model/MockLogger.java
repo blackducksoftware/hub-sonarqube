@@ -21,10 +21,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.sonar;
+package com.blackducksoftware.integration.hub.sonar.model;
 
 import org.sonar.api.utils.log.Logger;
 
+import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 import com.blackducksoftware.integration.log.LogLevel;
 
 public class MockLogger extends HubSonarLogger {
