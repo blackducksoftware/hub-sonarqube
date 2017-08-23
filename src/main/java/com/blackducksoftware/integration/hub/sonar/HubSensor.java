@@ -43,6 +43,8 @@ import com.blackducksoftware.integration.hub.sonar.component.HubVulnerableCompon
 import com.blackducksoftware.integration.hub.sonar.component.LocalComponentGatherer;
 import com.blackducksoftware.integration.hub.sonar.manager.HubManager;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
+import com.blackducksoftware.integration.hub.sonar.metrics.HubSonarMetrics;
+import com.blackducksoftware.integration.hub.sonar.metrics.MetricsHelper;
 
 public class HubSensor implements Sensor {
     @Override
@@ -98,6 +100,13 @@ public class HubSensor implements Sensor {
             } catch (final IntegrationException e) {
                 logger.error("Could not get shared components.", e);
             }
+        }
+
+        // TODO move it to the else statement (above) when complete
+        final MetricsHelper metricsHelper = new MetricsHelper(context);
+        for (final InputFile file : fileSystem.inputFiles(filePredicate)) {
+            final int numComponents = 5; // TODO get this number from the hub
+            metricsHelper.createMeasure(HubSonarMetrics.NUM_COMPONENTS, file, numComponents);
         }
     }
 

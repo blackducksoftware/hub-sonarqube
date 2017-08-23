@@ -30,7 +30,6 @@ import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.log.LogLevel;
 
 public class HubSonarLogger extends IntLogger {
-
     private final Logger logger;
 
     public HubSonarLogger(final Logger logger) {
@@ -140,5 +139,4 @@ public class HubSonarLogger extends IntLogger {
             return LogLevel.INFO;
         }
     }
-
 }

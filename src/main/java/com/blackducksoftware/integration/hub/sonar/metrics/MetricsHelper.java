@@ -21,27 +21,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.sonar.component;
+package com.blackducksoftware.integration.hub.sonar.metrics;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.Serializable;
 
+import org.sonar.api.batch.fs.InputComponent;
+import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.measures.Metric;
-import org.sonar.api.measures.Metric.ValueType;
-import org.sonar.api.measures.Metrics;
 
-public class SonarProjectComponentMetrics implements Metrics {
+public class MetricsHelper {
+    private final SensorContext context;
 
-    public static final Metric NUM_COMPONENTS = buildMetric("num_components", "Number of components", ValueType.INT);
-
-    @Override
-    public List<Metric> getMetrics() {
-        return Arrays.asList(NUM_COMPONENTS);
+    public MetricsHelper(final SensorContext context) {
+        this.context = context;
     }
 
-    public static Metric buildMetric(final String key, final String name, final ValueType type) {
-        final Metric.Builder builder = new Metric.Builder(key, name, type);
-        return builder.create();
+    public void createMeasure(final Metric metric, final InputComponent inputComponent, final Serializable value) {
+        context.newMeasure().forMetric(metric).on(inputComponent).withValue(value).save();
     }
-
 }

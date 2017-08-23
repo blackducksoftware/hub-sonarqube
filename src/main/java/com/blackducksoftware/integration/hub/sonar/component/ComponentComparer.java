@@ -29,7 +29,6 @@ import java.util.List;
 import com.blackducksoftware.integration.exception.IntegrationException;
 
 public class ComponentComparer {
-
     private final List<String> localComponentList;
     private final List<String> remoteComponentList;
     private final ComponentHelper componentHelper;

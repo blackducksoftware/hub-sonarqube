@@ -21,15 +21,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.sonar.data;
+package com.blackducksoftware.integration.hub.sonar.metrics;
 
-import org.sonar.api.batch.sensor.SensorContext;
+import java.util.Arrays;
+import java.util.List;
 
-public class DataWriter {
+import org.sonar.api.measures.Metric;
+import org.sonar.api.measures.Metric.ValueType;
+import org.sonar.api.measures.Metrics;
 
-    private final SensorContext context;
+public class HubSonarMetrics implements Metrics {
+    public static final String DOMAIN_HUB = "Hub Security";
 
-    public DataWriter(final SensorContext context) {
-        this.context = context;
+    public static final Metric<Integer> NUM_COMPONENTS = new Metric.Builder("num_components", "Number of Vulnerable Components", ValueType.INT).setDescription("Description Test").setQualitative(false).setDomain(DOMAIN_HUB).create();
+    public static final Metric<Integer> NUM_COMPONENTS_RATING = new Metric.Builder("num_components_rating", "Component Ratings", ValueType.RATING).setDescription("Description Test").setQualitative(true).setDomain(DOMAIN_HUB).create();
+
+    @Override
+    public List<Metric> getMetrics() {
+        return Arrays.asList(NUM_COMPONENTS, NUM_COMPONENTS_RATING);
     }
 }

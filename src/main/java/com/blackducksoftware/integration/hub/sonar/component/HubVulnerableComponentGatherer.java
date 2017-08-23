@@ -30,7 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
-import com.blackducksoftware.integration.hub.api.vulnerablebomcomponent.VulnerableBomComponentRequestService;
 import com.blackducksoftware.integration.hub.dataservice.project.ProjectVersionWrapper;
 import com.blackducksoftware.integration.hub.model.view.MatchedFilesView;
 import com.blackducksoftware.integration.hub.model.view.ProjectVersionView;
@@ -40,6 +39,7 @@ import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 import com.blackducksoftware.integration.hub.sonar.manager.HubManager;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.hub.sonar.service.MatchedFilesRequestService;
+import com.blackducksoftware.integration.hub.sonar.service.VulnerableBomComponentRequestService;
 
 public class HubVulnerableComponentGatherer implements ComponentGatherer {
     private final HubSonarLogger logger;
@@ -64,7 +64,8 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         if (hubManager.getRestConnection() != null) {
             final ProjectVersionWrapper projectVersionWrapper = hubManager.getProjectVersionWrapper(hubProjectName, hubProjectVersionName);
             if (projectVersionWrapper != null) {
-                final List<VulnerableComponentView> components = getVulnerableComponents(projectVersionWrapper.getProjectVersionView(), hubManager.getVulnerableBomComponentRequestService(), hubManager.getMetaService());
+                // TODO remove: final List<VulnerableComponentView> components = getVulnerableComponents(projectVersionWrapper.getProjectVersionView(), hubManager.getVulnerableBomComponentRequestService(), hubManager.getMetaService());
+                final List<VulnerableComponentView> components = getVulnerableComponents(projectVersionWrapper.getProjectVersionView(), new VulnerableBomComponentRequestService(hubManager.getRestConnection()), hubManager.getMetaService());
                 if (components != null) {
                     String prevName = "";
                     for (final VulnerableComponentView component : components) {
@@ -90,10 +91,11 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
             return null;
         }
 
+        final int requestLimit = 15;
         List<VulnerableComponentView> components = null;
         try {
             logger.info(String.format("Attempting to get vulnerable components from '%s > %s'...", hubProjectName, hubProjectVersionName));
-            components = vulnerableBomComponentRequestService.getVulnerableComponentsMatchingComponentName(vulnerableBomComponentsLink);
+            components = vulnerableBomComponentRequestService.getVulnerableComponentsMatchingComponentName(vulnerableBomComponentsLink, requestLimit);
             logger.info(String.format("Success! Found %d vulnerable components.", components.size()));
         } catch (final IntegrationException e) {
             logger.error(e);

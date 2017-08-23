@@ -63,7 +63,6 @@ public class LocalComponentGatherer implements ComponentGatherer {
                 localBinaries.add(file.getAbsolutePath());
             }
         }
-
         return localBinaries;
     }
 }

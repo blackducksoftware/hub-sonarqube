@@ -110,5 +110,4 @@ public class ComponentHelper {
         }
         return pattern;
     }
-
 }
