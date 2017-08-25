@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SonarTestUtils {
+    public static String MY_PROJECT_KEY = "myProjectKey";
     public static String TEST_DIRECTORY = "src/test/resources/baseDir";
     public static String[] TEST_FILE_NAMES = { "test.jar", "test.tar", "test.png" };
 

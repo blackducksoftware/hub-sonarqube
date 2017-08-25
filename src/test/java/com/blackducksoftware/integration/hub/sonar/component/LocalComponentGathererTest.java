@@ -34,6 +34,7 @@ import org.junit.Test;
 import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.internal.DefaultFileSystem;
+import org.sonar.api.config.MapSettings;
 import org.sonar.api.config.Settings;
 
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
@@ -48,7 +49,7 @@ public class LocalComponentGathererTest {
     @Test
     public void gatherComponentsTest() throws IOException {
         final HubSonarLogger logger = new MockLogger();
-        final Settings settings = new Settings();
+        final Settings settings = new MapSettings();
         final String include = ".jar,.tar";
         final String exclude = ".png";
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, include);

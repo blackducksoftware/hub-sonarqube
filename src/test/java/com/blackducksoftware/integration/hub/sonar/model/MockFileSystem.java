@@ -30,11 +30,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.sonar.api.batch.fs.FilePredicate;
+import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.DefaultFileSystem;
-import org.sonar.api.batch.fs.internal.DefaultInputFile;
+import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
+
+import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 
 public class MockFileSystem extends DefaultFileSystem {
-
     private final File baseDir;
 
     public MockFileSystem(final File baseDir) {
@@ -46,9 +48,9 @@ public class MockFileSystem extends DefaultFileSystem {
     public Iterable<File> files(final FilePredicate predicate) {
         final List<File> fileList = new ArrayList<>();
         for (final File file : baseDir.listFiles()) {
-            final DefaultInputFile inputFile = new DefaultInputFile(file.getName(), file.getName());
+            InputFile inputFile;
             try {
-                inputFile.setModuleBaseDir(baseDir.toPath().toRealPath(LinkOption.NOFOLLOW_LINKS));
+                inputFile = new TestInputFileBuilder(SonarTestUtils.MY_PROJECT_KEY, file.getName()).setModuleBaseDir(baseDir.toPath().toRealPath(LinkOption.NOFOLLOW_LINKS)).build();
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
@@ -58,5 +60,4 @@ public class MockFileSystem extends DefaultFileSystem {
         }
         return fileList;
     }
-
 }

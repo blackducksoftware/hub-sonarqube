@@ -28,6 +28,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.sonar.api.config.MapSettings;
 import org.sonar.api.config.Settings;
 
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
@@ -36,7 +37,7 @@ import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 public class SonarManagerTest {
     @Test
     public void getGlobalInclusionPatternsTest() {
-        final Settings settings = new Settings();
+        final Settings settings = new MapSettings();
         final String inclusionPatterns = "*.jar, *.gz";
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, inclusionPatterns);
         final SonarManager manager = new SonarManager(settings);
@@ -46,7 +47,7 @@ public class SonarManagerTest {
 
     @Test
     public void getGlobalExclusionPatternsTest() {
-        final Settings settings = new Settings();
+        final Settings settings = new MapSettings();
         final String exclusionPatterns = "*.jar, *.gz";
         settings.setProperty(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, exclusionPatterns);
         final SonarManager manager = new SonarManager(settings);
@@ -56,7 +57,7 @@ public class SonarManagerTest {
 
     @Test
     public void getValueTest() {
-        final Settings settings = new Settings();
+        final Settings settings = new MapSettings();
         final String key = "key";
         final String value = "value";
         settings.setProperty(key, value);
@@ -67,7 +68,7 @@ public class SonarManagerTest {
 
     @Test
     public void getNullValueTest() {
-        final Settings settings = new Settings();
+        final Settings settings = new MapSettings();
         final String key = "key";
         final String value = null;
         settings.setProperty(key, value);
@@ -79,7 +80,7 @@ public class SonarManagerTest {
 
     @Test
     public void getValuesTest() {
-        final Settings settings = new Settings();
+        final Settings settings = new MapSettings();
         final String key = "key";
         final String value = " one, two,three, four             ";
         final String[] values = { "one", "two", "three", "four" };

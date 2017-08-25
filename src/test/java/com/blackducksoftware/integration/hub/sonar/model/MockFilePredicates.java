@@ -28,10 +28,10 @@ import java.util.Collection;
 
 import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
-import org.sonar.api.batch.fs.InputFile.Status;
 import org.sonar.api.batch.fs.InputFile.Type;
 
 public class MockFilePredicates implements FilePredicates {
+    // add method bodies as needed for testing
     private final MockFilePredicate predicate;
 
     public MockFilePredicates() {
@@ -40,31 +40,26 @@ public class MockFilePredicates implements FilePredicates {
 
     @Override
     public FilePredicate all() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public FilePredicate none() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public FilePredicate hasAbsolutePath(final String s) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public FilePredicate hasRelativePath(final String s) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public FilePredicate matchesPathPattern(final String inclusionPattern) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -76,7 +71,6 @@ public class MockFilePredicates implements FilePredicates {
 
     @Override
     public FilePredicate doesNotMatchPathPattern(final String exclusionPattern) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -88,43 +82,31 @@ public class MockFilePredicates implements FilePredicates {
 
     @Override
     public FilePredicate hasPath(final String s) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public FilePredicate is(final File ioFile) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public FilePredicate hasLanguage(final String language) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public FilePredicate hasLanguages(final Collection<String> languages) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public FilePredicate hasLanguages(final String... languages) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public FilePredicate hasStatus(final Status status) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public FilePredicate hasType(final Type type) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -161,5 +143,17 @@ public class MockFilePredicates implements FilePredicates {
     @Override
     public FilePredicate and(final FilePredicate first, final FilePredicate second) {
         return predicate;
+    }
+
+    @Override
+    public FilePredicate hasExtension(final String arg0) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public FilePredicate hasFilename(final String arg0) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

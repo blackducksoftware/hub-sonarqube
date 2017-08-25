@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
+import org.sonar.api.config.MapSettings;
 import org.sonar.api.config.Settings;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
@@ -41,7 +42,7 @@ import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 public class ComponentHelperTest {
     @Test
     public void preProcessComponentListDataTest() throws IntegrationException {
-        final Settings settings = new Settings();
+        final Settings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, "e, o");
 
         final ComponentHelper helper = new ComponentHelper(new SonarManager(settings));
