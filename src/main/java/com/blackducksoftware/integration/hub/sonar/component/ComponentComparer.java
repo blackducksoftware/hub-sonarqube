@@ -23,14 +23,15 @@
  */
 package com.blackducksoftware.integration.hub.sonar.component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 
 public class ComponentComparer {
-    private final List<String> localComponentList;
-    private final List<String> remoteComponentList;
+    private final Collection<String> localComponentList;
+    private final Collection<String> remoteComponentList;
     private final ComponentHelper componentHelper;
     private int sharedComponentCount;
     private final boolean needsValidation;
@@ -43,7 +44,7 @@ public class ComponentComparer {
         this.needsValidation = false;
     }
 
-    public ComponentComparer(final ComponentHelper componentHelper, final List<String> localComponentList, final List<String> remoteComponentList) {
+    public ComponentComparer(final ComponentHelper componentHelper, final Collection<String> localComponentList, final Collection<String> remoteComponentList) {
         this.componentHelper = componentHelper;
         this.localComponentList = localComponentList;
         this.remoteComponentList = remoteComponentList;
@@ -51,12 +52,12 @@ public class ComponentComparer {
         this.needsValidation = true;
     }
 
-    public List<String> getSharedComponents() throws IntegrationException {
+    public Set<String> getSharedComponents() throws IntegrationException {
         if (needsValidation) {
             componentHelper.preProcessComponentListData(localComponentList);
             componentHelper.preProcessComponentListData(remoteComponentList);
         }
-        final List<String> sharedComponents = new ArrayList<>();
+        final Set<String> sharedComponents = new HashSet<>();
 
         // TODO find a better way to do this
         for (final String local : localComponentList) {

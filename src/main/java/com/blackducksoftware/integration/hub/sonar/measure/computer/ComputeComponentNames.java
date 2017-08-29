@@ -21,23 +21,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.sonar.metrics;
+package com.blackducksoftware.integration.hub.sonar.measure.computer;
 
-import java.util.Arrays;
-import java.util.List;
+import org.sonar.api.ce.measure.MeasureComputer;
 
-import org.sonar.api.measures.Metric;
-import org.sonar.api.measures.Metric.ValueType;
-import org.sonar.api.measures.Metrics;
+import com.blackducksoftware.integration.hub.sonar.measure.HubSonarMetrics;
 
-public class HubSonarMetrics implements Metrics {
-    public static final String DOMAIN_HUB = "Hub Security";
-
-    public static final Metric<Integer> NUM_COMPONENTS = new Metric.Builder("num_components", "Number of Vulnerable Components", ValueType.INT).setDescription("Description Test").setQualitative(false).setDomain(DOMAIN_HUB).create();
-    public static final Metric<Integer> NUM_COMPONENTS_RATING = new Metric.Builder("num_components_rating", "Component Ratings", ValueType.RATING).setDescription("Description Test").setQualitative(true).setDomain(DOMAIN_HUB).create();
+public class ComputeComponentNames implements MeasureComputer {
+    private static final String METRIC_KEY = HubSonarMetrics.COMPONENT_NAMES.getKey();
 
     @Override
-    public List<Metric> getMetrics() {
-        return Arrays.asList(NUM_COMPONENTS, NUM_COMPONENTS_RATING);
+    public MeasureComputerDefinition define(final MeasureComputerDefinitionContext defContext) {
+        return defContext.newDefinitionBuilder().setInputMetrics(METRIC_KEY).setOutputMetrics(METRIC_KEY).build();
+    }
+
+    @Override
+    public void compute(final MeasureComputerContext context) {
+        // TODO compute this dynamically
+        context.addMeasure(METRIC_KEY, "View Components");
     }
 }

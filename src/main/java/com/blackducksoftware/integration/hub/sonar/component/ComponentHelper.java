@@ -23,8 +23,16 @@
  */
 package com.blackducksoftware.integration.hub.sonar.component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.sonar.api.batch.fs.FileSystem;
+import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.sensor.SensorContext;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
@@ -32,6 +40,7 @@ import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 public class ComponentHelper {
     public static final String ANY_STRING_PATTERN = "*";
     private final SonarManager sonarManager;
+    private Map<String, InputFile> inputFiles;
 
     public ComponentHelper(final SonarManager sonarManager) {
         this.sonarManager = sonarManager;
@@ -70,15 +79,31 @@ public class ComponentHelper {
         return candidateFilePath;
     }
 
-    public void preProcessComponentListData(final List<String> list) throws IntegrationException {
+    public Collection<InputFile> getInputFilesFromStrings(final Collection<String> sharedComponents) {
+        final Collection<InputFile> inputFiles = new HashSet<>();
+        for (final String filePath : sharedComponents) {
+            inputFiles.add(getInputFileFromString(filePath));
+        }
+        return inputFiles;
+    }
+
+    public InputFile getInputFileFromString(final String filePath) {
+        final SensorContext context = sonarManager.getSensorContext();
+        if (context != null) {
+            return getInputFiles(context.fileSystem()).get(filePath);
+        }
+        return null;
+    }
+
+    public void preProcessComponentListData(final Collection<String> collection) throws IntegrationException {
         if (sonarManager != null) {
-            final List<String> removalCandidates = new ArrayList<>();
-            for (final String str : list) {
+            final Collection<String> removalCandidates = new HashSet<>();
+            for (final String str : collection) {
                 if (!componentMatchesInclusionPatterns(str)) {
                     removalCandidates.add(str);
                 }
             }
-            list.removeAll(removalCandidates);
+            collection.removeAll(removalCandidates);
         }
     }
 
@@ -91,12 +116,26 @@ public class ComponentHelper {
         return false;
     }
 
+    public Set<String> flattenCollectionOfCollections(final Collection<Collection<String>> list) {
+        return list.stream().flatMap(Collection::stream).collect(Collectors.toSet());
+    }
+
     public boolean componentMatchesInclusionPattern(final String str, final String pattern) {
         final String suffix = trimPatternToSuffix(pattern);
         if (str.endsWith(suffix) || (str.contains(suffix) && pattern.endsWith(ANY_STRING_PATTERN))) {
             return true;
         }
         return false;
+    }
+
+    private Map<String, InputFile> getInputFiles(final FileSystem fileSystem) {
+        if (inputFiles == null) {
+            inputFiles = new HashMap<>();
+            for (final InputFile inputFile : fileSystem.inputFiles(fileSystem.predicates().all())) {
+                inputFiles.put(inputFile.absolutePath(), inputFile);
+            }
+        }
+        return inputFiles;
     }
 
     private String trimPatternToSuffix(String pattern) {

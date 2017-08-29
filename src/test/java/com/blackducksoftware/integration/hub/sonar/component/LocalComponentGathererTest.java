@@ -27,8 +27,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 import org.sonar.api.batch.fs.FilePredicate;
@@ -36,6 +35,7 @@ import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.internal.DefaultFileSystem;
 import org.sonar.api.config.MapSettings;
 import org.sonar.api.config.Settings;
+import org.sonar.api.internal.google.common.collect.Sets;
 
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
@@ -62,7 +62,7 @@ public class LocalComponentGathererTest {
         final FilePredicate predicate = predicates.and(predicates.matchesPathPatterns(manager.getGlobalInclusionPatterns()), predicates.doesNotMatchPathPatterns(manager.getGlobalExclusionPatterns()));
 
         final LocalComponentGatherer gatherer = new LocalComponentGatherer(logger, manager, fileSystem, predicate);
-        final List<String> expectedList = Arrays.asList(baseDir.getCanonicalPath() + "/test.jar", baseDir.getCanonicalPath() + "/test.tar");
+        final Set<String> expectedList = Sets.newHashSet(baseDir.getCanonicalPath() + "/test.jar", baseDir.getCanonicalPath() + "/test.tar");
 
         assertTrue(gatherer.gatherComponents().equals(expectedList));
     }

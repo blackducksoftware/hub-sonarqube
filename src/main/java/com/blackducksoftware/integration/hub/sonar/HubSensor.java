@@ -23,7 +23,8 @@
  */
 package com.blackducksoftware.integration.hub.sonar;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
@@ -36,6 +37,7 @@ import org.sonar.api.utils.log.Loggers;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
+import com.blackducksoftware.integration.hub.model.view.VulnerableComponentView;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.sonar.component.ComponentComparer;
 import com.blackducksoftware.integration.hub.sonar.component.ComponentHelper;
@@ -43,8 +45,7 @@ import com.blackducksoftware.integration.hub.sonar.component.HubVulnerableCompon
 import com.blackducksoftware.integration.hub.sonar.component.LocalComponentGatherer;
 import com.blackducksoftware.integration.hub.sonar.manager.HubManager;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
-import com.blackducksoftware.integration.hub.sonar.metrics.HubSonarMetrics;
-import com.blackducksoftware.integration.hub.sonar.metrics.MetricsHelper;
+import com.blackducksoftware.integration.hub.sonar.measure.MetricsHelper;
 
 public class HubSensor implements Sensor {
     @Override
@@ -56,7 +57,7 @@ public class HubSensor implements Sensor {
     @Override
     public void execute(final SensorContext context) {
         final HubSonarLogger logger = new HubSonarLogger(Loggers.get(context.getClass()));
-        final SonarManager sonarManager = new SonarManager(context.settings());
+        final SonarManager sonarManager = new SonarManager(context);
         final ComponentHelper componentHelper = new ComponentHelper(sonarManager);
         final RestConnection restConnection = createRestConnection(logger, sonarManager.getHubServerConfigFromSettings());
         final HubManager hubManager = new HubManager(logger, restConnection);
@@ -70,17 +71,17 @@ public class HubSensor implements Sensor {
 
         logger.info("Gathering local component files...");
         final LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, sonarManager, fileSystem, filePredicate);
-        final List<String> localComponents = localComponentGatherer.gatherComponents();
+        final Set<String> localComponents = localComponentGatherer.gatherComponents();
 
         logger.info("Gathering Hub component files...");
         final HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, hubManager);
-        final List<String> hubComponents = hubComponentGatherer.gatherComponents();
+        final Set<String> hubComponents = hubComponentGatherer.gatherComponents();
 
         logger.info(String.format("--> Number of local component files matched: %d", localComponents.size()));
-        logger.info(String.format("--> Number of vulnerable Hub component files matched: %d", hubComponents.size()));
+        logger.info(String.format("--> Number of Hub component files matched: %d", hubComponents.size()));
 
         ComponentComparer componentComparer = null;
-        List<String> sharedComponents = null;
+        Set<String> sharedComponents = null;
         if (localComponents.isEmpty() || hubComponents.isEmpty()) {
             logger.info("No comparison will be performed because at least one of the lists of components had zero entries.");
         } else {
@@ -90,23 +91,23 @@ public class HubSensor implements Sensor {
                 sharedComponents = componentComparer.getSharedComponents();
                 logger.info(String.format("--> Number of shared components: %d", componentComparer.getSharedComponentCount()));
 
-                logger.debug("Shared Components:");
-                for (final String sharedComponent : sharedComponents) {
-                    logger.debug(sharedComponent);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Shared Components:");
+                    for (final String sharedComponent : sharedComponents) {
+                        logger.debug(sharedComponent);
+                    }
                 }
 
                 // TODO store shared component data
+                final MetricsHelper metricsHelper = new MetricsHelper(logger, context);
+                final Map<String, Set<VulnerableComponentView>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
+                if (vulnerableComponentsMap != null && !vulnerableComponentsMap.isEmpty()) {
+                    metricsHelper.createMeasuresForVulnerableComponents(vulnerableComponentsMap, componentHelper.getInputFilesFromStrings(sharedComponents));
+                }
 
             } catch (final IntegrationException e) {
                 logger.error("Could not get shared components.", e);
             }
-        }
-
-        // TODO move it to the else statement (above) when complete
-        final MetricsHelper metricsHelper = new MetricsHelper(context);
-        for (final InputFile file : fileSystem.inputFiles(filePredicate)) {
-            final int numComponents = 5; // TODO get this number from the hub
-            metricsHelper.createMeasure(HubSonarMetrics.NUM_COMPONENTS, file, numComponents);
         }
     }
 

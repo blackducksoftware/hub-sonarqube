@@ -93,6 +93,13 @@ public class HubSonarLogger extends IntLogger {
         logger.debug(txt, t);
     }
 
+    public boolean isDebugEnabled() {
+        if (getLogLevel() == LogLevel.DEBUG) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void setLogLevel(final LogLevel logLevel) {
         final LoggerLevel level;

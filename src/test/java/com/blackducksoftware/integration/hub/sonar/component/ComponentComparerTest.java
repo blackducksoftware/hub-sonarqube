@@ -26,10 +26,10 @@ package com.blackducksoftware.integration.hub.sonar.component;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
+import org.sonar.api.internal.google.common.collect.Sets;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 
@@ -37,8 +37,8 @@ public class ComponentComparerTest {
     @Test
     public void getSharedComponentsMatchTest() throws IntegrationException {
         final ComponentHelper helper = new ComponentHelper(null);
-        final List<String> first = Arrays.asList("one", "two", "three");
-        final List<String> second = Arrays.asList("one", "two", "three");
+        final Set<String> first = Sets.newHashSet("one", "two", "three");
+        final Set<String> second = Sets.newHashSet("one", "two", "three");
 
         final ComponentComparer comparer = new ComponentComparer(helper, first, second);
 
@@ -49,20 +49,20 @@ public class ComponentComparerTest {
     @Test
     public void getSharedComponentsPartiallyMatchTest() throws IntegrationException {
         final ComponentHelper helper = new ComponentHelper(null);
-        final List<String> first = Arrays.asList("one", "two", "three");
-        final List<String> second = Arrays.asList("uno", "dos", "three");
+        final Set<String> first = Sets.newHashSet("one", "two", "three");
+        final Set<String> second = Sets.newHashSet("uno", "dos", "three");
 
         final ComponentComparer comparer = new ComponentComparer(helper, first, second);
 
-        assertEquals(comparer.getSharedComponents(), Arrays.asList("three"));
+        assertEquals(comparer.getSharedComponents(), Sets.newHashSet("three"));
         assertEquals(comparer.getSharedComponentCount(), 1);
     }
 
     @Test
     public void getSharedComponentsDoNotMatchTest() throws IntegrationException {
         final ComponentHelper helper = new ComponentHelper(null);
-        final List<String> first = Arrays.asList("one", "two", "three");
-        final List<String> second = Arrays.asList("one1", "two2", "three3");
+        final Set<String> first = Sets.newHashSet("one", "two", "three");
+        final Set<String> second = Sets.newHashSet("one1", "two2", "three3");
 
         final ComponentComparer comparer = new ComponentComparer(helper, first, second);
 
@@ -73,8 +73,8 @@ public class ComponentComparerTest {
     @Test
     public void getSharedComponentsPartialMatchTest() throws IntegrationException {
         final ComponentHelper helper = new ComponentHelper(null);
-        final List<String> absolutePathList = Arrays.asList("/dir/one", "/dir/two", "/dir/three");
-        final List<String> relativePathList = Arrays.asList("one", "two", "three");
+        final Set<String> absolutePathList = Sets.newHashSet("/dir/one", "/dir/two", "/dir/three");
+        final Set<String> relativePathList = Sets.newHashSet("one", "two", "three");
 
         final ComponentComparer comparer = new ComponentComparer(helper, absolutePathList, relativePathList);
 

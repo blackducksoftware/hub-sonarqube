@@ -29,9 +29,12 @@ import java.util.List;
 import org.sonar.api.Plugin;
 import org.sonar.api.config.PropertyDefinition;
 
-import com.blackducksoftware.integration.hub.sonar.metrics.ComputeVulnerabilityAverage;
-import com.blackducksoftware.integration.hub.sonar.metrics.ComputeVulnerabilityRating;
-import com.blackducksoftware.integration.hub.sonar.metrics.HubSonarMetrics;
+import com.blackducksoftware.integration.hub.sonar.measure.HubSonarMetrics;
+import com.blackducksoftware.integration.hub.sonar.measure.computer.ComputeHighSecutiryVulnerabilityTotal;
+import com.blackducksoftware.integration.hub.sonar.measure.computer.ComputeLowSecurityVulnerabilityTotal;
+import com.blackducksoftware.integration.hub.sonar.measure.computer.ComputeMediumSecurityVulnerabilityTotal;
+import com.blackducksoftware.integration.hub.sonar.measure.computer.ComputeVulnerabilityAverage;
+import com.blackducksoftware.integration.hub.sonar.measure.computer.ComputeVulnerabilityRating;
 import com.blackducksoftware.integration.hub.sonar.web.HubVulnerabilityWidget;
 
 public class HubPlugin implements Plugin {
@@ -40,7 +43,8 @@ public class HubPlugin implements Plugin {
     @Override
     public void define(final Context context) {
         context.addExtensions(getGlobalPropertyExtensions());
-        context.addExtensions(HubSensor.class, HubSonarMetrics.class, ComputeVulnerabilityRating.class, ComputeVulnerabilityAverage.class, HubVulnerabilityWidget.class);
+        context.addExtensions(HubSensor.class, HubSonarMetrics.class, HubVulnerabilityWidget.class);
+        context.addExtensions(ComputeHighSecutiryVulnerabilityTotal.class, ComputeMediumSecurityVulnerabilityTotal.class, ComputeLowSecurityVulnerabilityTotal.class, ComputeVulnerabilityRating.class, ComputeVulnerabilityAverage.class);
     }
 
     public List<PropertyDefinition> getGlobalPropertyExtensions() {

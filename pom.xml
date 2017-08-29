@@ -14,7 +14,7 @@
 
   <name>Black Duck Hub Plugin for SonarQube</name>
   <description>Maps Black Duck Hub projects to SonarQube projects, identifying vulnerable components and their locations.</description>
-  <!-- <url></url> -->
+  <url>https://github.com/blackducksoftware/hub-sonarqube</url>
   <inceptionYear>2017</inceptionYear>
   <organization>
     <name>Black Duck Software, Inc.</name>

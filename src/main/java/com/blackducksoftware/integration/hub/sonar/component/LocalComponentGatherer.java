@@ -25,9 +25,9 @@ package com.blackducksoftware.integration.hub.sonar.component;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FileSystem;
@@ -49,12 +49,12 @@ public class LocalComponentGatherer implements ComponentGatherer {
     }
 
     @Override
-    public List<String> gatherComponents() {
+    public Set<String> gatherComponents() {
         logger.debug(String.format("Inclusion Patterns: %s", Arrays.toString(sonarManager.getGlobalInclusionPatterns())));
         logger.debug(String.format("Exclusion Patterns: %s", Arrays.toString(sonarManager.getGlobalExclusionPatterns())));
         logger.debug(String.format("Base Directory: %s", fileSystem.baseDir().toString()));
 
-        final List<String> localBinaries = new ArrayList<>();
+        final Set<String> localBinaries = new HashSet<>();
         for (final File file : fileSystem.files(includeExcludePredicate)) {
             try {
                 localBinaries.add(file.getCanonicalPath());

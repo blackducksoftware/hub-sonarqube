@@ -23,13 +23,17 @@
  */
 package com.blackducksoftware.integration.hub.sonar.component;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
+import com.blackducksoftware.integration.hub.api.vulnerablebomcomponent.VulnerableBomComponentRequestService;
 import com.blackducksoftware.integration.hub.dataservice.project.ProjectVersionWrapper;
 import com.blackducksoftware.integration.hub.model.view.MatchedFilesView;
 import com.blackducksoftware.integration.hub.model.view.ProjectVersionView;
@@ -39,7 +43,6 @@ import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 import com.blackducksoftware.integration.hub.sonar.manager.HubManager;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.hub.sonar.service.MatchedFilesRequestService;
-import com.blackducksoftware.integration.hub.sonar.service.VulnerableBomComponentRequestService;
 
 public class HubVulnerableComponentGatherer implements ComponentGatherer {
     private final HubSonarLogger logger;
@@ -47,6 +50,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
     private final SonarManager sonarManager;
     private final HubManager hubManager;
 
+    private final Map<String, Set<VulnerableComponentView>> vulnerableComponentMap;
     private String hubProjectName;
     private String hubProjectVersionName;
 
@@ -55,34 +59,40 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         this.componentHelper = componentHelper;
         this.sonarManager = sonarManager;
         this.hubManager = hubManager;
+
+        this.vulnerableComponentMap = new HashMap<>();
         setProjectAndVersion();
     }
 
     @Override
-    public List<String> gatherComponents() {
-        final List<String> allMatchedFiles = new ArrayList<>();
-        if (hubManager.getRestConnection() != null) {
-            final ProjectVersionWrapper projectVersionWrapper = hubManager.getProjectVersionWrapper(hubProjectName, hubProjectVersionName);
-            if (projectVersionWrapper != null) {
-                // TODO remove: final List<VulnerableComponentView> components = getVulnerableComponents(projectVersionWrapper.getProjectVersionView(), hubManager.getVulnerableBomComponentRequestService(), hubManager.getMetaService());
-                final List<VulnerableComponentView> components = getVulnerableComponents(projectVersionWrapper.getProjectVersionView(), new VulnerableBomComponentRequestService(hubManager.getRestConnection()), hubManager.getMetaService());
-                if (components != null) {
-                    String prevName = "";
-                    for (final VulnerableComponentView component : components) {
-                        if (!prevName.equals(component.componentName)) {
-                            logger.info(String.format("Getting matched files for %s...", component.componentName));
-                            prevName = component.componentName;
+    public Set<String> gatherComponents() {
+        return getVulnerableComponentMap().keySet();
+    }
+
+    public Map<String, Set<VulnerableComponentView>> getVulnerableComponentMap() {
+        if (vulnerableComponentMap.isEmpty()) {
+            if (hubManager.getRestConnection() != null) {
+                final ProjectVersionWrapper projectVersionWrapper = hubManager.getProjectVersionWrapper(hubProjectName, hubProjectVersionName);
+                if (projectVersionWrapper != null) {
+                    final List<VulnerableComponentView> components = getVulnerableComponents(projectVersionWrapper.getProjectVersionView(), hubManager.getVulnerableBomComponentRequestService(), hubManager.getMetaService());
+                    if (components != null) {
+                        String prevName = "";
+                        for (final VulnerableComponentView component : components) {
+                            if (!prevName.equals(component.componentName)) {
+                                logger.info(String.format("Getting matched files for %s...", component.componentName));
+                                prevName = component.componentName;
+                            }
+                            mapMatchedFilesToComponent(component, hubManager.getMatchedFilesRequestService(), hubManager.getMetaService());
                         }
-                        allMatchedFiles.addAll(getMatchedFiles(component, hubManager.getMatchedFilesRequestService(), hubManager.getMetaService()));
+                    } else {
+                        logger.warn("List of vulnerable Hub components was null. No files will be matched.");
                     }
                 } else {
-                    logger.warn("List of vulnerable Hub components was null. No files will be matched.");
+                    logger.warn(String.format("Hub project (%s) and version (%s) not found.", hubProjectName, hubProjectVersionName));
                 }
-            } else {
-                logger.warn(String.format("Hub project (%s) and version (%s) not found.", hubProjectName, hubProjectVersionName));
             }
         }
-        return allMatchedFiles;
+        return vulnerableComponentMap;
     }
 
     private List<VulnerableComponentView> getVulnerableComponents(final ProjectVersionView version, final VulnerableBomComponentRequestService vulnerableBomComponentRequestService, final MetaService metaService) {
@@ -104,8 +114,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         return components;
     }
 
-    private List<String> getMatchedFiles(final VulnerableComponentView component, final MatchedFilesRequestService matchedFilesRequestService, final MetaService metaService) {
-        final List<String> matchedFiles = new ArrayList<>();
+    private void mapMatchedFilesToComponent(final VulnerableComponentView component, final MatchedFilesRequestService matchedFilesRequestService, final MetaService metaService) {
         final String matchedFilesLink = metaService.getFirstLinkSafely(component, MetaService.MATCHED_FILES_LINK);
         List<MatchedFilesView> allMatchedFiles = null;
         try {
@@ -116,15 +125,13 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
 
         if (allMatchedFiles != null) {
             for (final MatchedFilesView matchedFile : allMatchedFiles) {
-                final String filePath = componentHelper.getFileNameFromComposite(matchedFile.filePath.compositePathContext);
-                // TODO find a better way to avoid duplicates
-                if (StringUtils.isNotEmpty(filePath) && !matchedFiles.contains(filePath)) {
-                    matchedFiles.add(filePath);
+                final String fileName = componentHelper.getFileNameFromComposite(matchedFile.filePath.compositePathContext);
+                if (!vulnerableComponentMap.containsKey(fileName)) {
+                    vulnerableComponentMap.put(fileName, new HashSet<VulnerableComponentView>());
                 }
+                vulnerableComponentMap.get(fileName).add(component);
             }
         }
-
-        return matchedFiles;
     }
 
     private void setProjectAndVersion() {

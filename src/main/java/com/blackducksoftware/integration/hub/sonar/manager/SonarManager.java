@@ -24,6 +24,7 @@
 package com.blackducksoftware.integration.hub.sonar.manager;
 
 import org.apache.commons.lang3.StringUtils;
+import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.config.Settings;
 
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
@@ -31,10 +32,21 @@ import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 
 public class SonarManager {
+    private final SensorContext context;
     private final Settings settings;
 
     public SonarManager(final Settings settings) {
+        this.context = null;
         this.settings = settings;
+    }
+
+    public SonarManager(final SensorContext context) {
+        this.context = context;
+        this.settings = context.settings();
+    }
+
+    public SensorContext getSensorContext() {
+        return context;
     }
 
     public HubServerConfig getHubServerConfigFromSettings() {
