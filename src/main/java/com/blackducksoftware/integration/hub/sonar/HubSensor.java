@@ -98,13 +98,11 @@ public class HubSensor implements Sensor {
                     }
                 }
 
-                // TODO store shared component data
                 final MetricsHelper metricsHelper = new MetricsHelper(logger, context);
                 final Map<String, Set<VulnerableComponentView>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
                 if (vulnerableComponentsMap != null && !vulnerableComponentsMap.isEmpty()) {
                     metricsHelper.createMeasuresForVulnerableComponents(vulnerableComponentsMap, componentHelper.getInputFilesFromStrings(sharedComponents));
                 }
-
             } catch (final IntegrationException e) {
                 logger.error("Could not get shared components.", e);
             }

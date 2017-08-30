@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
+import com.blackducksoftware.integration.hub.api.matchedfiles.MatchedFilesRequestService;
 import com.blackducksoftware.integration.hub.api.vulnerablebomcomponent.VulnerableBomComponentRequestService;
 import com.blackducksoftware.integration.hub.dataservice.project.ProjectVersionWrapper;
 import com.blackducksoftware.integration.hub.model.view.MatchedFilesView;
@@ -42,7 +43,6 @@ import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 import com.blackducksoftware.integration.hub.sonar.manager.HubManager;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
-import com.blackducksoftware.integration.hub.sonar.service.MatchedFilesRequestService;
 
 public class HubVulnerableComponentGatherer implements ComponentGatherer {
     private final HubSonarLogger logger;

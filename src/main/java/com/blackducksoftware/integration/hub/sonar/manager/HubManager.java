@@ -25,6 +25,7 @@ package com.blackducksoftware.integration.hub.sonar.manager;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
+import com.blackducksoftware.integration.hub.api.matchedfiles.MatchedFilesRequestService;
 import com.blackducksoftware.integration.hub.api.vulnerablebomcomponent.VulnerableBomComponentRequestService;
 import com.blackducksoftware.integration.hub.dataservice.project.ProjectDataService;
 import com.blackducksoftware.integration.hub.dataservice.project.ProjectVersionWrapper;
@@ -33,7 +34,6 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubResponseService;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
-import com.blackducksoftware.integration.hub.sonar.service.MatchedFilesRequestService;
 
 public class HubManager {
     private final HubSonarLogger logger;

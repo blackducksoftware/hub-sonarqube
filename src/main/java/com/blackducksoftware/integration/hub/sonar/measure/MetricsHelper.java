@@ -75,7 +75,7 @@ public class MetricsHelper {
                     // for (final VulnerableComponentView comp : vulnerableComponentsMap.get(fileName)) {
                     // list.add(comp.componentName);
                     // }
-                    // createMeasure(HubSonarMetrics.NUM_COMPONENTS, inputFile, list.toArray().toString());
+                    // createMeasure(HubSonarMetrics.COMPONENT_NAMES, inputFile, list.toArray().toString());
                 }
             }
         }

@@ -31,11 +31,11 @@ import org.sonar.api.measures.Metric.ValueType;
 import org.sonar.api.measures.Metrics;
 
 public class HubSonarMetrics implements Metrics {
-    public static final String DOMAIN_HUB = "Hub Security";
+    public static final String DOMAIN_HUB = "Black Duck Hub Security";
 
-    public static final Metric<Integer> NUM_VULN_HIGH = new Metric.Builder("num_vuln_high", "High Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).create();
-    public static final Metric<Integer> NUM_VULN_MED = new Metric.Builder("num_vuln_med", "Medium Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).create();
-    public static final Metric<Integer> NUM_VULN_LOW = new Metric.Builder("num_vuln_low", "Low Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).create();
+    public static final Metric<Integer> NUM_VULN_HIGH = new Metric.Builder("0_num_vuln_high", "High Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).create();
+    public static final Metric<Integer> NUM_VULN_MED = new Metric.Builder("1_num_vuln_med", "Medium Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).create();
+    public static final Metric<Integer> NUM_VULN_LOW = new Metric.Builder("2_num_vuln_low", "Low Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).create();
     public static final Metric<String> COMPONENT_NAMES = new Metric.Builder("component_names", "Component Ratings", ValueType.STRING).setQualitative(true).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_NONE).create();
 
     public static final Metric<Integer> NUM_COMPONENTS = new Metric.Builder("num_components", "Number of Vulnerable Components", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_NONE).create();

@@ -35,7 +35,6 @@ import com.blackducksoftware.integration.hub.sonar.measure.computer.ComputeLowSe
 import com.blackducksoftware.integration.hub.sonar.measure.computer.ComputeMediumSecurityVulnerabilityTotal;
 import com.blackducksoftware.integration.hub.sonar.measure.computer.ComputeVulnerabilityAverage;
 import com.blackducksoftware.integration.hub.sonar.measure.computer.ComputeVulnerabilityRating;
-import com.blackducksoftware.integration.hub.sonar.web.HubVulnerabilityWidget;
 
 public class HubPlugin implements Plugin {
     public static final String PLUGIN_NAME = "Black Duck Hub Plugin for SonarQube";
@@ -43,7 +42,7 @@ public class HubPlugin implements Plugin {
     @Override
     public void define(final Context context) {
         context.addExtensions(getGlobalPropertyExtensions());
-        context.addExtensions(HubSensor.class, HubSonarMetrics.class, HubVulnerabilityWidget.class);
+        context.addExtensions(HubSensor.class, HubSonarMetrics.class);
         context.addExtensions(ComputeHighSecutiryVulnerabilityTotal.class, ComputeMediumSecurityVulnerabilityTotal.class, ComputeLowSecurityVulnerabilityTotal.class, ComputeVulnerabilityRating.class, ComputeVulnerabilityAverage.class);
     }
 
