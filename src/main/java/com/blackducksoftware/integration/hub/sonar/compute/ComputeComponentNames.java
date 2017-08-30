@@ -21,32 +21,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.sonar.measure.computer;
+package com.blackducksoftware.integration.hub.sonar.compute;
 
-import org.sonar.api.ce.measure.Component;
-import org.sonar.api.ce.measure.Measure;
 import org.sonar.api.ce.measure.MeasureComputer;
 
-import com.blackducksoftware.integration.hub.sonar.measure.HubSonarMetrics;
+import com.blackducksoftware.integration.hub.sonar.metric.HubSonarMetrics;
 
-public class ComputeVulnerabilityAverage implements MeasureComputer {
+public class ComputeComponentNames implements MeasureComputer {
+    private static final String METRIC_KEY = HubSonarMetrics.COMPONENT_NAMES.getKey();
+
     @Override
     public MeasureComputerDefinition define(final MeasureComputerDefinitionContext defContext) {
-        return defContext.newDefinitionBuilder().setOutputMetrics(HubSonarMetrics.NUM_COMPONENTS.getKey()).build();
+        return defContext.newDefinitionBuilder().setInputMetrics(METRIC_KEY).setOutputMetrics(METRIC_KEY).build();
     }
 
     @Override
     public void compute(final MeasureComputerContext context) {
-        // FIXME needs to be updated to not use children
-        if (context.getComponent().getType() != Component.Type.FILE) {
-            int sum = 0;
-            int count = 0;
-            for (final Measure child : context.getChildrenMeasures(HubSonarMetrics.NUM_COMPONENTS.getKey())) {
-                sum += child.getIntValue();
-                count++;
-            }
-            final int average = count == 0 ? 0 : sum / count;
-            context.addMeasure(HubSonarMetrics.NUM_COMPONENTS.getKey(), average);
-        }
+        // TODO compute this dynamically
+        context.addMeasure(METRIC_KEY, "View Components");
     }
 }

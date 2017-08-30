@@ -45,7 +45,7 @@ import com.blackducksoftware.integration.hub.sonar.component.HubVulnerableCompon
 import com.blackducksoftware.integration.hub.sonar.component.LocalComponentGatherer;
 import com.blackducksoftware.integration.hub.sonar.manager.HubManager;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
-import com.blackducksoftware.integration.hub.sonar.measure.MetricsHelper;
+import com.blackducksoftware.integration.hub.sonar.metric.MetricsHelper;
 
 public class HubSensor implements Sensor {
     @Override

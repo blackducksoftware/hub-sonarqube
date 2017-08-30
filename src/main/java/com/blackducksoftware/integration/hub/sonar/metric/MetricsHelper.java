@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.sonar.measure;
+package com.blackducksoftware.integration.hub.sonar.metric;
 
 import java.io.File;
 import java.io.Serializable;
