@@ -24,6 +24,7 @@
 package com.blackducksoftware.integration.hub.sonar.manager;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.api.aggregate.bom.AggregateBomRequestService;
 import com.blackducksoftware.integration.hub.api.item.MetaService;
 import com.blackducksoftware.integration.hub.api.matchedfiles.MatchedFilesRequestService;
 import com.blackducksoftware.integration.hub.api.vulnerablebomcomponent.VulnerableBomComponentRequestService;
@@ -43,6 +44,7 @@ public class HubManager {
     private HubServicesFactory servicesFactory = null;
     private HubResponseService responseService = null;
     private ProjectDataService projectDataService = null;
+    private AggregateBomRequestService aggregateBomRequestService = null;
     private MatchedFilesRequestService matchedFilesRequestService = null;
     private VulnerableBomComponentRequestService vulnerableBomComponentRequestService = null;
     private MetaService metaService = null;
@@ -87,11 +89,19 @@ public class HubManager {
         return wrapper;
     }
 
+    @Deprecated
     public VulnerableBomComponentRequestService getVulnerableBomComponentRequestService() {
         if (vulnerableBomComponentRequestService == null) {
             vulnerableBomComponentRequestService = getServicesFactory().createVulnerableBomComponentRequestService();
         }
         return vulnerableBomComponentRequestService;
+    }
+
+    public AggregateBomRequestService getAggregateBomRequestService() {
+        if (aggregateBomRequestService == null) {
+            aggregateBomRequestService = getServicesFactory().createAggregateBomRequestService(logger);
+        }
+        return aggregateBomRequestService;
     }
 
     public MatchedFilesRequestService getMatchedFilesRequestService() {

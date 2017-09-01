@@ -37,7 +37,7 @@ import org.sonar.api.utils.log.Loggers;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
-import com.blackducksoftware.integration.hub.model.view.VulnerableComponentView;
+import com.blackducksoftware.integration.hub.model.view.VersionBomComponentView;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.sonar.component.ComponentComparer;
 import com.blackducksoftware.integration.hub.sonar.component.ComponentHelper;
@@ -99,7 +99,7 @@ public class HubSensor implements Sensor {
                 }
 
                 final MetricsHelper metricsHelper = new MetricsHelper(logger, context);
-                final Map<String, Set<VulnerableComponentView>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
+                final Map<String, Set<VersionBomComponentView>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
                 if (vulnerableComponentsMap != null && !vulnerableComponentsMap.isEmpty()) {
                     metricsHelper.createMeasuresForVulnerableComponents(vulnerableComponentsMap, componentHelper.getInputFilesFromStrings(sharedComponents));
                 }

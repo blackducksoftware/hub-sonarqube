@@ -23,6 +23,7 @@
  */
 package com.blackducksoftware.integration.hub.sonar.compute;
 
+import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.MeasureComputer;
 
 import com.blackducksoftware.integration.hub.sonar.metric.HubSonarMetrics;
@@ -32,12 +33,13 @@ public class ComputeComponentNames implements MeasureComputer {
 
     @Override
     public MeasureComputerDefinition define(final MeasureComputerDefinitionContext defContext) {
-        return defContext.newDefinitionBuilder().setInputMetrics(METRIC_KEY).setOutputMetrics(METRIC_KEY).build();
+        return defContext.newDefinitionBuilder().setOutputMetrics(METRIC_KEY).build();
     }
 
     @Override
     public void compute(final MeasureComputerContext context) {
-        // TODO compute this dynamically
-        context.addMeasure(METRIC_KEY, "View Components");
+        if (context.getComponent().getType() != Component.Type.FILE) {
+            context.addMeasure(METRIC_KEY, "View Components");
+        }
     }
 }

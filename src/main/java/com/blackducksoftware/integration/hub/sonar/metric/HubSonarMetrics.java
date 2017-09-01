@@ -33,17 +33,18 @@ import org.sonar.api.measures.Metrics;
 public class HubSonarMetrics implements Metrics {
     public static final String DOMAIN_HUB = "Black Duck Hub Security";
 
-    public static final Metric<Integer> NUM_VULN_HIGH = new Metric.Builder("0_num_vuln_high", "High Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).create();
-    public static final Metric<Integer> NUM_VULN_MED = new Metric.Builder("1_num_vuln_med", "Medium Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).create();
-    public static final Metric<Integer> NUM_VULN_LOW = new Metric.Builder("2_num_vuln_low", "Low Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).create();
-    public static final Metric<String> COMPONENT_NAMES = new Metric.Builder("component_names", "Component Ratings", ValueType.STRING).setQualitative(true).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_NONE).create();
+    public static final Metric<String> COMPONENT_NAMES = new Metric.Builder("hub_component_names", "1. Component Names", ValueType.STRING).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_NONE).create();
+    public static final Metric<Integer> COMPONENT_RATING = new Metric.Builder("num_components_rating", "2. Component Ratings", ValueType.RATING).setQualitative(false).setDomain(DOMAIN_HUB).create();
 
-    public static final Metric<Integer> NUM_COMPONENTS = new Metric.Builder("num_components", "Number of Vulnerable Components", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_NONE).create();
-    public static final Metric<Integer> COMPONENTS_RATING = new Metric.Builder("num_components_rating", "Component Ratings", ValueType.RATING).setQualitative(true).setDomain(DOMAIN_HUB).create();
+    public static final Metric<Integer> NUM_VULN_HIGH = new Metric.Builder("num_vuln_high", "3. High Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).create();
+    public static final Metric<Integer> NUM_VULN_MED = new Metric.Builder("num_vuln_med", "4. Medium Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).create();
+    public static final Metric<Integer> NUM_VULN_LOW = new Metric.Builder("num_vuln_low", "5. Low Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).create();
+
+    public static final Metric<Integer> NUM_COMPONENTS = new Metric.Builder("num_components", "6. Components Mapped To Files Total", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_NONE).create();
 
     @SuppressWarnings("rawtypes")
     @Override
     public List<Metric> getMetrics() {
-        return Arrays.asList(NUM_VULN_HIGH, NUM_VULN_MED, NUM_VULN_LOW, COMPONENT_NAMES, NUM_COMPONENTS, COMPONENTS_RATING);
+        return Arrays.asList(COMPONENT_NAMES, COMPONENT_RATING, NUM_VULN_HIGH, NUM_VULN_MED, NUM_VULN_LOW, NUM_COMPONENTS);
     }
 }
