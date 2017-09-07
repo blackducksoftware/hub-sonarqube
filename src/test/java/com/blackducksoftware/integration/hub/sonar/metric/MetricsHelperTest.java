@@ -24,6 +24,7 @@
 package com.blackducksoftware.integration.hub.sonar.metric;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,7 +77,9 @@ public class MetricsHelperTest {
         assertEquals(numVulnLow.value().intValue(), 1);
         assertEquals(numVulnMed.value().intValue(), 1);
         assertEquals(numVulnHigh.value().intValue(), 1);
-        assertEquals(componentNames.value(), "Test Component 0 | Test Component 1");
         assertEquals(numComponentsTotal.value().intValue(), 2);
+
+        final String compNames = componentNames.value();
+        assertTrue(compNames.contains("Test Component 0") && compNames.contains("Test Component 1"));
     }
 }
