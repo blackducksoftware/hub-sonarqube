@@ -146,14 +146,12 @@ public class MockFilePredicates implements FilePredicates {
     }
 
     @Override
-    public FilePredicate hasExtension(final String arg0) {
-        // TODO Auto-generated method stub
-        return null;
+    public FilePredicate hasExtension(final String extension) {
+        return predicate;
     }
 
     @Override
-    public FilePredicate hasFilename(final String arg0) {
-        // TODO Auto-generated method stub
-        return null;
+    public FilePredicate hasFilename(final String filename) {
+        return predicate;
     }
 }

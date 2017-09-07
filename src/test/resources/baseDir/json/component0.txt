@@ -1,0 +1,198 @@
+{
+"componentName": "Test Component 0",
+"componentVersionName": "1.0",
+"component": "https://eng-hub-docker-valid01.dc1.lan/api/components/2a129a42-ad43-4817-a29d-50f124a01c20",
+"componentVersion": "https://eng-hub-docker-valid01.dc1.lan/api/components/2a129a42-ad43-4817-a29d-50f124a01c20/versions/7b602d9a-7a77-482a-bf5e-759de52f3d45",
+"totalFileMatchCount": 4,
+"licenses": [
+{
+"licenseDisplay": "Creative Commons Attribution 2.5",
+"license": "https://eng-hub-docker-valid01.dc1.lan/api/projects/a89b6cc7-8857-452d-b0bc-c20c55269dce/versions/b7011abd-b1f5-45f2-8e39-17a5c5da0fa3/components/2a129a42-ad43-4817-a29d-50f124a01c20/versions/7b602d9a-7a77-482a-bf5e-759de52f3d45/licenses/b066c1f2-31a8-43d9-9be4-d62e45f5f6bb",
+"licenses": []
+}
+],
+"origins": [
+{
+"name": "1.0",
+"externalNamespace": "maven",
+"externalId": "net.jcip:jcip-annotations:1.0",
+"externalNamespaceDistribution": false,
+"_meta": {
+"allow": [],
+"links": [
+{
+"rel": "origin",
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/components/2a129a42-ad43-4817-a29d-50f124a01c20/versions/7b602d9a-7a77-482a-bf5e-759de52f3d45/origin/95394e62-7d3f-44e8-a26e-2ef1ff83ac46"
+},
+{
+"rel": "matched-files",
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/projects/a89b6cc7-8857-452d-b0bc-c20c55269dce/versions/b7011abd-b1f5-45f2-8e39-17a5c5da0fa3/components/2a129a42-ad43-4817-a29d-50f124a01c20/versions/7b602d9a-7a77-482a-bf5e-759de52f3d45/origins/95394e62-7d3f-44e8-a26e-2ef1ff83ac46/matched-files"
+}
+]
+}
+}
+],
+"usages": [
+"DYNAMICALLY_LINKED"
+],
+"matchTypes": [
+"FILE_EXACT",
+"FILE_DEPENDENCY"
+],
+"releasedOn": "2017-08-31T14:13:23.827Z",
+"licenseRiskProfile": {
+"counts": [
+{
+"countType": "UNKNOWN",
+"count": 0
+},
+{
+"countType": "OK",
+"count": 1
+},
+{
+"countType": "LOW",
+"count": 0
+},
+{
+"countType": "MEDIUM",
+"count": 0
+},
+{
+"countType": "HIGH",
+"count": 0
+}
+]
+},
+"securityRiskProfile": {
+"counts": [
+{
+"countType": "UNKNOWN",
+"count": 0
+},
+{
+"countType": "OK",
+"count": 1
+},
+{
+"countType": "LOW",
+"count": 1
+},
+{
+"countType": "MEDIUM",
+"count": 1
+},
+{
+"countType": "HIGH",
+"count": 1
+}
+]
+},
+"versionRiskProfile": {
+"counts": [
+{
+"countType": "UNKNOWN",
+"count": 0
+},
+{
+"countType": "OK",
+"count": 0
+},
+{
+"countType": "LOW",
+"count": 0
+},
+{
+"countType": "MEDIUM",
+"count": 0
+},
+{
+"countType": "HIGH",
+"count": 1
+}
+]
+},
+"activityRiskProfile": {
+"counts": [
+{
+"countType": "UNKNOWN",
+"count": 0
+},
+{
+"countType": "OK",
+"count": 1
+},
+{
+"countType": "LOW",
+"count": 0
+},
+{
+"countType": "MEDIUM",
+"count": 0
+},
+{
+"countType": "HIGH",
+"count": 0
+}
+]
+},
+"operationalRiskProfile": {
+"counts": [
+{
+"countType": "UNKNOWN",
+"count": 0
+},
+{
+"countType": "OK",
+"count": 0
+},
+{
+"countType": "LOW",
+"count": 0
+},
+{
+"countType": "MEDIUM",
+"count": 0
+},
+{
+"countType": "HIGH",
+"count": 1
+}
+]
+},
+"activityData": {
+"lastCommitDate": "2008-08-14T06:48:05.000Z"
+},
+"reviewStatus": "NOT_REVIEWED",
+"approvalStatus": "NOT_IN_VIOLATION",
+"policyStatus": "NOT_IN_VIOLATION",
+"_meta": {
+"allow": [
+"GET",
+"PUT"
+],
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/projects/a89b6cc7-8857-452d-b0bc-c20c55269dce/versions/b7011abd-b1f5-45f2-8e39-17a5c5da0fa3/components/2a129a42-ad43-4817-a29d-50f124a01c20/versions/7b602d9a-7a77-482a-bf5e-759de52f3d45",
+"links": [
+{
+"rel": "comments",
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/projects/a89b6cc7-8857-452d-b0bc-c20c55269dce/versions/b7011abd-b1f5-45f2-8e39-17a5c5da0fa3/components/2a129a42-ad43-4817-a29d-50f124a01c20/component-versions/7b602d9a-7a77-482a-bf5e-759de52f3d45/comments"
+},
+{
+"rel": "component-issues",
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/projects/a89b6cc7-8857-452d-b0bc-c20c55269dce/versions/b7011abd-b1f5-45f2-8e39-17a5c5da0fa3/components/2a129a42-ad43-4817-a29d-50f124a01c20/component-versions/7b602d9a-7a77-482a-bf5e-759de52f3d45/issues"
+},
+{
+"rel": "policy-rules",
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/projects/a89b6cc7-8857-452d-b0bc-c20c55269dce/versions/b7011abd-b1f5-45f2-8e39-17a5c5da0fa3/components/2a129a42-ad43-4817-a29d-50f124a01c20/versions/7b602d9a-7a77-482a-bf5e-759de52f3d45/policy-rules"
+},
+{
+"rel": "vulnerabilities",
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/components/2a129a42-ad43-4817-a29d-50f124a01c20/versions/7b602d9a-7a77-482a-bf5e-759de52f3d45/vulnerabilities"
+},
+{
+"rel": "matched-files",
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/projects/a89b6cc7-8857-452d-b0bc-c20c55269dce/versions/b7011abd-b1f5-45f2-8e39-17a5c5da0fa3/components/2a129a42-ad43-4817-a29d-50f124a01c20/versions/7b602d9a-7a77-482a-bf5e-759de52f3d45/origins/95394e62-7d3f-44e8-a26e-2ef1ff83ac46/matched-files"
+}
+]
+}
+}

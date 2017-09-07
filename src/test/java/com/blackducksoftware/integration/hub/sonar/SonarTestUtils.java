@@ -23,17 +23,33 @@
  */
 package com.blackducksoftware.integration.hub.sonar;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.sonar.api.internal.apachecommons.io.IOUtils;
+
 public class SonarTestUtils {
     public static String MY_PROJECT_KEY = "myProjectKey";
-    public static String TEST_DIRECTORY = "src/test/resources/baseDir";
+    public static String TEST_DIRECTORY = "./src/test/resources/baseDir";
+    public static String JSON_DIRECTORY = TEST_DIRECTORY + "/json";
+    public static final String[] JSON_COMPONENT_FILES = { "component0.txt", "component1.txt" };
     public static String[] TEST_FILE_NAMES = { "test.jar", "test.tar", "test.png" };
 
     public static boolean stringArrayEquals(final String[] firstArray, final String secondArray[]) {
         final List<String> first = Arrays.asList(firstArray);
         final List<String> second = Arrays.asList(secondArray);
         return first.equals(second);
+    }
+
+    @SuppressWarnings("resource")
+    public static String getJsonFromFile(final String fileName) throws IOException {
+        final File file = new File(JSON_DIRECTORY + "/" + fileName);
+        final FileInputStream input = new FileInputStream(file);
+        final String json = IOUtils.toString(input);
+        input.close();
+        return json;
     }
 }

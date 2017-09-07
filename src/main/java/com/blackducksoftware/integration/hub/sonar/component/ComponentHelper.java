@@ -116,8 +116,8 @@ public class ComponentHelper {
         return false;
     }
 
-    public Set<String> flattenCollectionOfCollections(final Collection<Collection<String>> list) {
-        return list.stream().flatMap(Collection::stream).collect(Collectors.toSet());
+    public Set<String> flattenCollectionOfCollections(final Collection<Collection<String>> collection) {
+        return collection.stream().flatMap(Collection::stream).collect(Collectors.toSet());
     }
 
     public boolean componentMatchesInclusionPattern(final String str, final String pattern) {

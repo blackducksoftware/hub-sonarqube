@@ -1,0 +1,201 @@
+{
+"componentName": "Test Component 1",
+"componentVersionName": "1.1.9",
+"component": "https://eng-hub-docker-valid01.dc1.lan/api/components/863eaa34-72df-4407-8471-a1aeeb850a50",
+"componentVersion": "https://eng-hub-docker-valid01.dc1.lan/api/components/863eaa34-72df-4407-8471-a1aeeb850a50/versions/4c20ff54-4433-43ca-8090-a3d91854ee76",
+"totalFileMatchCount": 107,
+"licenses": [
+{
+"licenseDisplay": "BSD 3-clause \"New\" or \"Revised\" License",
+"license": "https://eng-hub-docker-valid01.dc1.lan/api/projects/a89b6cc7-8857-452d-b0bc-c20c55269dce/versions/b7011abd-b1f5-45f2-8e39-17a5c5da0fa3/components/863eaa34-72df-4407-8471-a1aeeb850a50/versions/4c20ff54-4433-43ca-8090-a3d91854ee76/licenses/3d238144-44e6-450e-b523-3defbdaed9dc",
+"licenses": []
+}
+],
+"origins": [
+{
+"name": "v1.1.9",
+"externalNamespace": "github",
+"externalId": "ajaxorg/ace-builds:v1.1.9",
+"externalNamespaceDistribution": false,
+"_meta": {
+"allow": [],
+"links": [
+{
+"rel": "origin",
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/components/863eaa34-72df-4407-8471-a1aeeb850a50/versions/4c20ff54-4433-43ca-8090-a3d91854ee76/origin/13e680f5-36f3-41b4-9557-e436d2c678a1"
+},
+{
+"rel": "matched-files",
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/projects/a89b6cc7-8857-452d-b0bc-c20c55269dce/versions/b7011abd-b1f5-45f2-8e39-17a5c5da0fa3/components/863eaa34-72df-4407-8471-a1aeeb850a50/versions/4c20ff54-4433-43ca-8090-a3d91854ee76/origins/13e680f5-36f3-41b4-9557-e436d2c678a1/matched-files"
+}
+]
+}
+}
+],
+"usages": [
+"DYNAMICALLY_LINKED"
+],
+"matchTypes": [
+"FILE_EXACT_FILE_MATCH",
+"FILE_EXACT"
+],
+"releasedOn": "2017-08-31T14:16:50.064Z",
+"licenseRiskProfile": {
+"counts": [
+{
+"countType": "UNKNOWN",
+"count": 0
+},
+{
+"countType": "OK",
+"count": 1
+},
+{
+"countType": "LOW",
+"count": 0
+},
+{
+"countType": "MEDIUM",
+"count": 0
+},
+{
+"countType": "HIGH",
+"count": 0
+}
+]
+},
+"securityRiskProfile": {
+"counts": [
+{
+"countType": "UNKNOWN",
+"count": 0
+},
+{
+"countType": "OK",
+"count": 1
+},
+{
+"countType": "LOW",
+"count": 0
+},
+{
+"countType": "MEDIUM",
+"count": 0
+},
+{
+"countType": "HIGH",
+"count": 0
+}
+]
+},
+"versionRiskProfile": {
+"counts": [
+{
+"countType": "UNKNOWN",
+"count": 0
+},
+{
+"countType": "OK",
+"count": 0
+},
+{
+"countType": "LOW",
+"count": 0
+},
+{
+"countType": "MEDIUM",
+"count": 1
+},
+{
+"countType": "HIGH",
+"count": 0
+}
+]
+},
+"activityRiskProfile": {
+"counts": [
+{
+"countType": "UNKNOWN",
+"count": 0
+},
+{
+"countType": "OK",
+"count": 0
+},
+{
+"countType": "LOW",
+"count": 0
+},
+{
+"countType": "MEDIUM",
+"count": 0
+},
+{
+"countType": "HIGH",
+"count": 1
+}
+]
+},
+"operationalRiskProfile": {
+"counts": [
+{
+"countType": "UNKNOWN",
+"count": 0
+},
+{
+"countType": "OK",
+"count": 0
+},
+{
+"countType": "LOW",
+"count": 0
+},
+{
+"countType": "MEDIUM",
+"count": 0
+},
+{
+"countType": "HIGH",
+"count": 1
+}
+]
+},
+"activityData": {
+"contributorCount12Month": 5,
+"commitCount12Month": 10,
+"lastCommitDate": "2015-06-02T15:58:47.000Z",
+"trending": "DECREASING"
+},
+"reviewStatus": "NOT_REVIEWED",
+"approvalStatus": "NOT_IN_VIOLATION",
+"policyStatus": "NOT_IN_VIOLATION",
+"_meta": {
+"allow": [
+"GET",
+"PUT"
+],
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/projects/a89b6cc7-8857-452d-b0bc-c20c55269dce/versions/b7011abd-b1f5-45f2-8e39-17a5c5da0fa3/components/863eaa34-72df-4407-8471-a1aeeb850a50/versions/4c20ff54-4433-43ca-8090-a3d91854ee76",
+"links": [
+{
+"rel": "comments",
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/projects/a89b6cc7-8857-452d-b0bc-c20c55269dce/versions/b7011abd-b1f5-45f2-8e39-17a5c5da0fa3/components/863eaa34-72df-4407-8471-a1aeeb850a50/component-versions/4c20ff54-4433-43ca-8090-a3d91854ee76/comments"
+},
+{
+"rel": "component-issues",
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/projects/a89b6cc7-8857-452d-b0bc-c20c55269dce/versions/b7011abd-b1f5-45f2-8e39-17a5c5da0fa3/components/863eaa34-72df-4407-8471-a1aeeb850a50/component-versions/4c20ff54-4433-43ca-8090-a3d91854ee76/issues"
+},
+{
+"rel": "policy-rules",
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/projects/a89b6cc7-8857-452d-b0bc-c20c55269dce/versions/b7011abd-b1f5-45f2-8e39-17a5c5da0fa3/components/863eaa34-72df-4407-8471-a1aeeb850a50/versions/4c20ff54-4433-43ca-8090-a3d91854ee76/policy-rules"
+},
+{
+"rel": "vulnerabilities",
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/components/863eaa34-72df-4407-8471-a1aeeb850a50/versions/4c20ff54-4433-43ca-8090-a3d91854ee76/vulnerabilities"
+},
+{
+"rel": "matched-files",
+"href": "https://eng-hub-docker-valid01.dc1.lan/api/projects/a89b6cc7-8857-452d-b0bc-c20c55269dce/versions/b7011abd-b1f5-45f2-8e39-17a5c5da0fa3/components/863eaa34-72df-4407-8471-a1aeeb850a50/versions/4c20ff54-4433-43ca-8090-a3d91854ee76/origins/13e680f5-36f3-41b4-9557-e436d2c678a1/matched-files"
+}
+]
+}
+}

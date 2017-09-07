@@ -58,8 +58,6 @@ public class ComponentComparer {
             componentHelper.preProcessComponentListData(remoteComponentList);
         }
         final Set<String> sharedComponents = new HashSet<>();
-
-        // TODO find a better way to do this
         for (final String local : localComponentList) {
             for (final String remote : remoteComponentList) {
                 if (local.contains(remote)) {

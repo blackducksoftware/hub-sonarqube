@@ -56,7 +56,7 @@ public class LocalComponentGathererTest {
         settings.setProperty(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, exclude);
         final SonarManager manager = new SonarManager(settings);
 
-        final File baseDir = new File("./" + SonarTestUtils.TEST_DIRECTORY);
+        final File baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
         final DefaultFileSystem fileSystem = new MockFileSystem(baseDir);
         final FilePredicates predicates = new MockFilePredicates();
         final FilePredicate predicate = predicates.and(predicates.matchesPathPatterns(manager.getGlobalInclusionPatterns()), predicates.doesNotMatchPathPatterns(manager.getGlobalExclusionPatterns()));
