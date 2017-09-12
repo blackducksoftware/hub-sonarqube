@@ -268,7 +268,7 @@ function compareHigh(a,b) {
 		return -1;
 	if (a.high < b.high)
 		return 1;
-	return 0;
+	return compareMed(a,b);
 }
 
 function compareMed(a,b) {
@@ -276,7 +276,7 @@ function compareMed(a,b) {
 		return -1;
 	if (a.med < b.med)
 		return 1;
-	return 0;
+	return compareLow(a,b);
 }
 
 function compareLow(a,b) {
