@@ -25,7 +25,9 @@ var PLUGIN_NAME = 'Black Duck Hub Plugin for SonarQube';
 var MAX_COMPONENTS_PER_ROW = 5;
 
 window.registerExtension('hubsonarqube/overview', function (options) {
-	var isDisplayed = true;
+	window.globalOptions = options;
+	window.isDisplayed = true;
+	window.tableSorted = true;
 	
 	var wrapper = document.createElement('div');
 	wrapper.setAttribute('id', 'blackduck_wrapper');
@@ -41,40 +43,52 @@ window.registerExtension('hubsonarqube/overview', function (options) {
     header.textContent = PLUGIN_NAME;
     wrapper.appendChild(header);
 
-    // TODO find a way to get these more dynamically
+    // TODO find a way to get the base component key
 	window.SonarRequest.getJSON('/api/measures/component_tree', {
 		baseComponentKey: 'blackduck:hub',
 		ps: 500,
 		metricKeys: 'num_vuln_low, num_vuln_med, num_vuln_high, hub_component_names'
 	}).then(function (response) {
-		if (isDisplayed) {
-			var componentsArray = response.components;
-			var componentHelperArray = getComponentHelperObjects(componentsArray);
-			var tableRowsAsString = getTableRowsAsString(componentHelperArray);
-			
-			var table = document.createElement('table');
-			table.setAttribute('id', 'blackduck_table');
-			table.innerHTML =
-				'<tbody>' +
-					'<tr>' + 
-						formatTableHead('File', '') +
-						formatTableHead('Low', 'sortOnLow') +
-						formatTableHead('Med', 'sortOnMed') +
-						formatTableHead('High', 'sortOnHigh') +
-						formatTableHead('Vulnerable Components', '') +
-					'</tr>' +
-					tableRowsAsString +
-				'</tbody>';
-			wrapper.appendChild(table);
-			
-			options.el.appendChild(wrapper);
-			getSetting('sonar.hub.url', linkComponentsToHub);
-		}
+		window.componentsArray = response.components;
+		displayMainTable(wrapper, window.componentsArray, window.isDisplayed);
 	});
 	return function () {
-		isDisplayed = false;
+		window.isDisplayed = false;
 	};
 });
+
+function resetTable() {
+	var wrapper = document.getElementById('blackduck_wrapper');
+	var table = wrapper.getElementsByTagName('table')[0];
+	table.innerHTML = '';
+	table.remove();
+	displayMainTable(wrapper, window.componentsArray, window.isDisplayed);
+}
+
+function displayMainTable(parentElement, componentsArray, visible) {
+	if (visible) {
+		var componentHelperArray = getComponentHelperObjects(componentsArray);
+		var tableRowsAsString = getTableRowsAsString(componentHelperArray);
+		
+		var table = document.createElement('table');
+		table.setAttribute('id', 'blackduck_table');
+		table.innerHTML =
+			'<tbody>' +
+				'<tr>' + 
+					formatTableHead('File', '') +
+					formatTableHead('Low', 'sortOnLow') +
+					formatTableHead('Med', 'sortOnMed') +
+					formatTableHead('High', 'sortOnHigh') +
+					formatTableHead('Vulnerable Components', '') +
+				'</tr>' +
+				tableRowsAsString +
+			'</tbody>';
+		parentElement.appendChild(table);
+		
+		window.globalOptions.el.appendChild(parentElement);
+		getSetting('sonar.hub.url', linkComponentsToHub);
+	}
+}
 
 function formatTableHead(value, fnName) {
 	var beginTag = '<th><strong>';
@@ -142,7 +156,7 @@ function getTableRowsAsString(componentHelperArray) {
 	med.sort(compareMed);
 	low.sort(compareLow);
 	
-	var sortedComponents = (high.concat(med)).concat(low);
+	var sortedComponents = high.concat(med, low);
 	var tableRows = '';
 	for (var i = 0; i < sortedComponents.length; i++) {
 		var curComp = sortedComponents[i];
@@ -218,28 +232,34 @@ function sortOnHigh() {
 }
 
 function sortIntColumn(index) {
-	var table = document.getElementById('blackduck_table');
-	var rows = table.getElementsByTagName('tr');
-	var switching = true;
-	var i;
-	while (switching) {
-		switching = false;
-		var shouldSwitch;
-		for (i = 1; i < (rows.length - 1); i++) {
-			shouldSwitch = false;
-			var x = rows[i].getElementsByTagName('td')[index];
-			var y = rows[i + 1].getElementsByTagName('td')[index];
-			var xContent = parseInt(x.innerHTML);
-			var yContent = parseInt(y.innerHTML);
-			if (xContent < yContent) {
-				shouldSwitch = true;
-				break;
+	if (window.tableSorted) {
+		var table = document.getElementById('blackduck_table');
+		var rows = table.getElementsByTagName('tr');
+		var switching = true;
+		var i;
+		while (switching) {
+			switching = false;
+			var shouldSwitch;
+			for (i = 1; i < (rows.length - 1); i++) {
+				shouldSwitch = false;
+				var x = rows[i].getElementsByTagName('td')[index];
+				var y = rows[i + 1].getElementsByTagName('td')[index];
+				var xContent = parseInt(x.innerHTML);
+				var yContent = parseInt(y.innerHTML);
+				if (xContent < yContent) {
+					shouldSwitch = true;
+					break;
+				}
+			}
+			if (shouldSwitch) {
+				rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+				switching = true;
 			}
 		}
-		if (shouldSwitch) {
-			rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-			switching = true;
-		}
+		window.tableSorted = false;
+	} else {
+		resetTable();
+		window.tableSorted = true;
 	}
 }
 
