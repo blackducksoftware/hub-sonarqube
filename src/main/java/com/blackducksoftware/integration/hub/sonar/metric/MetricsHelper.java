@@ -36,14 +36,13 @@ import org.sonar.api.ce.measure.Measure;
 import org.sonar.api.ce.measure.MeasureComputer.MeasureComputerContext;
 import org.sonar.api.measures.Metric;
 
+import com.blackducksoftware.integration.hub.dataservice.model.RiskProfileCounts;
+import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
 import com.blackducksoftware.integration.hub.model.enumeration.RiskCountEnum;
-import com.blackducksoftware.integration.hub.model.view.VersionBomComponentView;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
-import com.blackducksoftware.integration.hub.sonar.risk.model.RiskProfileModel;
 
 public class MetricsHelper {
-    private static final int MAX_COMPONENT_NAME_LENGTH = 20;
-    private static final int MAX_COMPONENT_LIST_LENGTH = 140;
+    private static final int MAX_COMPONENT_NAME_LENGTH = 100;
 
     private final SensorContext context;
     private final HubSonarLogger logger;
@@ -53,13 +52,13 @@ public class MetricsHelper {
         this.context = context;
     }
 
-    public void createMeasuresForInputFiles(final Map<String, Set<VersionBomComponentView>> vulnerableComponentsMap, final Iterable<InputFile> inputFiles) {
+    public void createMeasuresForInputFiles(final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap, final Iterable<InputFile> inputFiles) {
         for (final InputFile inputFile : inputFiles) {
             createMeasuresForInputFile(vulnerableComponentsMap, inputFile);
         }
     }
 
-    public void createMeasuresForInputFile(final Map<String, Set<VersionBomComponentView>> vulnerableComponentsMap, final InputFile inputFile) {
+    public void createMeasuresForInputFile(final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap, final InputFile inputFile) {
         final File actualFile = inputFile.file();
         if (actualFile != null) {
             final String[] fileTokens = actualFile.getName().split("/");
@@ -70,28 +69,27 @@ public class MetricsHelper {
                 int high = 0;
                 int med = 0;
                 int low = 0;
-                for (final VersionBomComponentView component : vulnerableComponentsMap.get(fileName)) {
-                    String compName = component.componentName;
+                for (final VersionBomComponentModel component : vulnerableComponentsMap.get(fileName)) {
+                    String compName = component.getComponentName();
                     if (compName.length() > MAX_COMPONENT_NAME_LENGTH) {
                         compName = compName.substring(0, MAX_COMPONENT_NAME_LENGTH) + "...";
                     }
-                    compListBuilder.append(compName + " | ");
+                    compListBuilder.append(compName + ",");
 
-                    final RiskProfileModel riskProfile = new RiskProfileModel(component.securityRiskProfile);
-                    high += riskProfile.getCountsMap().get(RiskCountEnum.HIGH);
-                    med += riskProfile.getCountsMap().get(RiskCountEnum.MEDIUM);
-                    low += riskProfile.getCountsMap().get(RiskCountEnum.LOW);
+                    final RiskProfileCounts riskProfile = component.getSecurityRiskProfile();
+                    high += riskProfile.getCount(RiskCountEnum.HIGH);
+                    med += riskProfile.getCount(RiskCountEnum.MEDIUM);
+                    low += riskProfile.getCount(RiskCountEnum.LOW);
                     numComponents++;
                 }
                 createMeasure(HubSonarMetrics.NUM_VULN_LOW, inputFile, low);
                 createMeasure(HubSonarMetrics.NUM_VULN_MED, inputFile, med);
                 createMeasure(HubSonarMetrics.NUM_VULN_HIGH, inputFile, high);
                 if ((low + med + high) > 0) {
-                    String compList = compListBuilder.toString().substring(0, compListBuilder.length() - 2);
-                    if (compList.length() > MAX_COMPONENT_LIST_LENGTH) {
-                        compList = compList.substring(0, MAX_COMPONENT_LIST_LENGTH) + "...";
-                    }
+                    final String compList = compListBuilder.toString();
                     createMeasure(HubSonarMetrics.COMPONENT_NAMES, inputFile, compList.trim());
+                } else {
+                    createMeasure(HubSonarMetrics.COMPONENT_NAMES, inputFile, "");
                 }
                 createMeasure(HubSonarMetrics.NUM_COMPONENTS, inputFile, numComponents);
             }
@@ -103,7 +101,7 @@ public class MetricsHelper {
         context.newMeasure().forMetric(metric).on(inputComponent).withValue(value).save();
     }
 
-    public static void computeSecurityVulnerabilityMeasure(final MeasureComputerContext context, final Metric<Integer> metric) {
+    public static void createSecurityVulnerabilitySumMeasure(final MeasureComputerContext context, final Metric<Integer> metric) {
         if (context.getComponent().getType() != Component.Type.FILE) {
             final String metricKey = metric.getKey();
             int sum = 0;

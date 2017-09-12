@@ -34,7 +34,7 @@
   </scm>
 
   <properties>
-    <hub.common.version>14.4.0</hub.common.version>
+    <hub.common.version>14.6.0</hub.common.version>
     <source.java.version>1.8</source.java.version>
     <target.java.version>1.8</target.java.version>
   </properties>
@@ -77,10 +77,10 @@
         <version>1.17</version>
         <extensions>true</extensions>
         <configuration>
+          <pluginKey>hubsonarqube</pluginKey>
           <pluginClass>com.blackducksoftware.integration.hub.sonar.HubPlugin</pluginClass>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>

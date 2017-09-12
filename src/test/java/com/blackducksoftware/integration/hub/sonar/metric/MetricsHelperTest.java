@@ -29,6 +29,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,8 @@ import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.batch.sensor.measure.Measure;
 import org.sonar.api.internal.google.common.collect.Sets;
 
+import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
+import com.blackducksoftware.integration.hub.model.view.MatchedFilesView;
 import com.blackducksoftware.integration.hub.model.view.VersionBomComponentView;
 import com.blackducksoftware.integration.hub.service.HubResponseService;
 import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
@@ -56,11 +59,12 @@ public class MetricsHelperTest {
         final String file1 = "test.jar";
         final String componentKey1 = SonarTestUtils.MY_PROJECT_KEY + ":" + file1;
 
-        final Map<String, Set<VersionBomComponentView>> vulnerableComponentsMap = new HashMap<>();
+        final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap = new HashMap<>();
         final HubResponseService hubResponseService = new HubResponseService(new MockRestConnection(LOG));
         final VersionBomComponentView component0 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.JSON_COMPONENT_FILES[0]), VersionBomComponentView.class);
         final VersionBomComponentView component1 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.JSON_COMPONENT_FILES[1]), VersionBomComponentView.class);
-        vulnerableComponentsMap.put(file1, Sets.newHashSet(component0, component1));
+        final List<MatchedFilesView> matchedFiles = Collections.EMPTY_LIST;
+        vulnerableComponentsMap.put(file1, Sets.newHashSet(new VersionBomComponentModel(component0, matchedFiles), (new VersionBomComponentModel(component1, matchedFiles))));
 
         final List<InputFile> inputFiles = Arrays.asList(TestInputFileBuilder.create(SonarTestUtils.MY_PROJECT_KEY, file1).build());
 

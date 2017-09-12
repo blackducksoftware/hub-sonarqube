@@ -36,14 +36,14 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.utils.log.Loggers;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
-import com.blackducksoftware.integration.hub.model.view.VersionBomComponentView;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.hub.sonar.component.ComponentComparer;
 import com.blackducksoftware.integration.hub.sonar.component.ComponentHelper;
 import com.blackducksoftware.integration.hub.sonar.component.HubVulnerableComponentGatherer;
 import com.blackducksoftware.integration.hub.sonar.component.LocalComponentGatherer;
-import com.blackducksoftware.integration.hub.sonar.manager.HubManager;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.hub.sonar.metric.MetricsHelper;
 
@@ -60,7 +60,7 @@ public class HubSensor implements Sensor {
         final SonarManager sonarManager = new SonarManager(context);
         final ComponentHelper componentHelper = new ComponentHelper(sonarManager);
         final RestConnection restConnection = createRestConnection(logger, sonarManager.getHubServerConfigFromSettings());
-        final HubManager hubManager = new HubManager(logger, restConnection);
+        final HubServicesFactory hubServicesFactory = new HubServicesFactory(restConnection);
         final FileSystem fileSystem = context.fileSystem();
         final FilePredicates filePredicates = fileSystem.predicates();
         final FilePredicate filePredicate = filePredicates.and(filePredicates.matchesPathPatterns(sonarManager.getGlobalInclusionPatterns()), filePredicates.doesNotMatchPathPatterns(sonarManager.getGlobalExclusionPatterns()));
@@ -74,7 +74,7 @@ public class HubSensor implements Sensor {
         final Set<String> localComponents = localComponentGatherer.gatherComponents();
 
         logger.info("Gathering Hub component files...");
-        final HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, hubManager);
+        final HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, hubServicesFactory.createVersionBomComponentDataservice());
         final Set<String> hubComponents = hubComponentGatherer.gatherComponents();
 
         logger.info(String.format("--> Number of local component files matched: %d", localComponents.size()));
@@ -97,9 +97,8 @@ public class HubSensor implements Sensor {
                         logger.debug(sharedComponent);
                     }
                 }
-
                 final MetricsHelper metricsHelper = new MetricsHelper(logger, context);
-                final Map<String, Set<VersionBomComponentView>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
+                final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
                 if (vulnerableComponentsMap != null && !vulnerableComponentsMap.isEmpty()) {
                     metricsHelper.createMeasuresForInputFiles(vulnerableComponentsMap, componentHelper.getInputFilesFromStrings(sharedComponents));
                 }

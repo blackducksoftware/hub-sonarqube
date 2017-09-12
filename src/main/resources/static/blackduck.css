@@ -1,0 +1,52 @@
+div#blackduck_wrapper {
+	padding-left: 100px;
+}
+
+table#blackduck_table {
+	width: auto;
+	border: 1px solid black;
+	padding-right: 10px;
+	padding-left: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+table#blackduck_table th {
+	width: auto;
+	background-color: #DCDCDC;
+    border: 1px solid black;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+table#blackduck_table th a {
+	text-decoration: none;
+}
+
+table#blackduck_table td {
+    width: auto;
+    border: 1px solid #DCDCDC;
+    text-align: center;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.large_header {
+	font-size: x-large;
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+.expandableTableRow {
+	text-decoration: none;
+}
+
+@media screen and (max-width: 900px) {
+	div#blackduck_wrapper {
+	   padding-left: 2px;
+	}
+}

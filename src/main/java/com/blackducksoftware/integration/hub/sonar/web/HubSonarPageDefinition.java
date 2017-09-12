@@ -21,21 +21,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.sonar.compute;
+package com.blackducksoftware.integration.hub.sonar.web;
 
-import org.sonar.api.ce.measure.MeasureComputer;
+import org.sonar.api.web.page.Context;
+import org.sonar.api.web.page.Page;
+import org.sonar.api.web.page.Page.Qualifier;
+import org.sonar.api.web.page.Page.Scope;
+import org.sonar.api.web.page.PageDefinition;
 
-import com.blackducksoftware.integration.hub.sonar.metric.HubSonarMetrics;
-import com.blackducksoftware.integration.hub.sonar.metric.MetricsHelper;
+import com.blackducksoftware.integration.hub.sonar.HubPlugin;
 
-public class ComputeVulnerabilityTotal implements MeasureComputer {
+public class HubSonarPageDefinition implements PageDefinition {
     @Override
-    public MeasureComputerDefinition define(final MeasureComputerDefinitionContext defContext) {
-        return defContext.newDefinitionBuilder().setOutputMetrics(HubSonarMetrics.NUM_COMPONENTS.getKey()).build();
-    }
-
-    @Override
-    public void compute(final MeasureComputerContext context) {
-        MetricsHelper.createSecurityVulnerabilitySumMeasure(context, HubSonarMetrics.NUM_COMPONENTS);
+    public void define(final Context context) {
+        context.addPage(Page.builder("hubsonarqube/overview").setName(HubPlugin.PLUGIN_NAME).setScope(Scope.COMPONENT).setComponentQualifiers(Qualifier.PROJECT).build());
     }
 }
