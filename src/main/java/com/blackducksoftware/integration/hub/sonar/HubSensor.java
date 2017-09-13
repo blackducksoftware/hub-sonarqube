@@ -60,14 +60,14 @@ public class HubSensor implements Sensor {
         final SonarManager sonarManager = new SonarManager(context);
         final ComponentHelper componentHelper = new ComponentHelper(sonarManager);
         final RestConnection restConnection = createRestConnection(logger, sonarManager.getHubServerConfigFromSettings());
+        if (restConnection == null) {
+            logger.warn("No connection to the Hub server could be established, skipping Black Duck Hub Sensor.");
+            return;
+        }
         final HubServicesFactory hubServicesFactory = new HubServicesFactory(restConnection);
         final FileSystem fileSystem = context.fileSystem();
         final FilePredicates filePredicates = fileSystem.predicates();
         final FilePredicate filePredicate = filePredicates.and(filePredicates.matchesPathPatterns(sonarManager.getGlobalInclusionPatterns()), filePredicates.doesNotMatchPathPatterns(sonarManager.getGlobalExclusionPatterns()));
-
-        logger.info("=============================");
-        logger.info("|| Black Duck Hub Analysis ||");
-        logger.info("=============================");
 
         logger.info("Gathering local component files...");
         final LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, sonarManager, fileSystem, filePredicate);
@@ -77,8 +77,8 @@ public class HubSensor implements Sensor {
         final HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, hubServicesFactory.createVersionBomComponentDataservice());
         final Set<String> hubComponents = hubComponentGatherer.gatherComponents();
 
-        logger.info(String.format("--> Number of local component files matched: %d", localComponents.size()));
-        logger.info(String.format("--> Number of Hub component files matched: %d", hubComponents.size()));
+        logger.info(String.format("--> Number of local files matching inclusion/exclusion patterns: %d", localComponents.size()));
+        logger.info(String.format("--> Number of vulnerable Hub component files matched: %d", hubComponents.size()));
 
         ComponentComparer componentComparer = null;
         Set<String> sharedComponents = null;
@@ -116,6 +116,7 @@ public class HubSensor implements Sensor {
             logger.info(String.format("Successfully connected to %s", hubServerConfig.getHubUrl()));
         } catch (final IntegrationException e) {
             logger.error(String.format("Error connecting to %s: ", hubServerConfig.getHubUrl(), e));
+            return null;
         }
         return restConnection;
     }

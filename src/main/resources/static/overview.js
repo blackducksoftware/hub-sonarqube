@@ -22,12 +22,15 @@
  * under the License.
  */
 var PLUGIN_NAME = 'Black Duck Hub Plugin for SonarQube';
+var PAGE_SIZE = 100;
+var METRIC_KEYS = 'num_vuln_low, num_vuln_med, num_vuln_high, hub_component_names, num_components_rating';
 var MAX_COMPONENTS_PER_ROW = 5;
 
 window.registerExtension('hubsonarqube/overview', function (options) {
 	window.globalOptions = options;
 	window.isDisplayed = true;
 	window.tableSorted = true;
+	window.componentsArray = [];
 	
 	var wrapper = document.createElement('div');
 	wrapper.setAttribute('id', 'blackduck_wrapper');
@@ -42,27 +45,54 @@ window.registerExtension('hubsonarqube/overview', function (options) {
 	header.setAttribute('class', 'large_header');
     header.textContent = PLUGIN_NAME;
     wrapper.appendChild(header);
+    
+    var link_span = document.createElement('span');
+    link_span.setAttribute('id', 'blackduck_link_span');
+    link_span.innerHTML = 'For more details, please vist your <a id="blackduck_link">Hub Server</a>.';
+    wrapper.appendChild(link_span);
 
-    // TODO find a way to get the base component key
-	window.SonarRequest.getJSON('/api/measures/component_tree', {
-		baseComponentKey: 'blackduck:hub',
-		ps: 500,
-		metricKeys: 'num_vuln_low, num_vuln_med, num_vuln_high, hub_component_names'
-	}).then(function (response) {
-		window.componentsArray = response.components;
-		displayMainTable(wrapper, window.componentsArray, window.isDisplayed);
-	});
+    var loadingGif = document.createElement('img');
+    loadingGif.setAttribute('id', 'blackduck_loading');
+    loadingGif.setAttribute('src', '/static/hubsonarqube/loading.gif');
+    loadingGif.setAttribute('alt', 'Loading...');
+    wrapper.appendChild(loadingGif);
+    
+    options.el.appendChild(wrapper);
+    getSetting('sonar.hub.url', linkToHub);
+    
+    getAndDisplayData(wrapper, 1);
 	return function () {
 		window.isDisplayed = false;
 	};
 });
 
-function resetTable() {
-	var wrapper = document.getElementById('blackduck_wrapper');
-	var table = wrapper.getElementsByTagName('table')[0];
-	table.innerHTML = '';
-	table.remove();
-	displayMainTable(wrapper, window.componentsArray, window.isDisplayed);
+function getAndDisplayData(wrapper, page) {
+	// TODO find a way to get the base component key
+	window.SonarRequest.getJSON('/api/measures/component_tree', {
+		baseComponentKey: 'blackduck:hub',
+		p: page,
+		ps: PAGE_SIZE,
+		metricKeys: METRIC_KEYS
+	}).then(function (response) {
+		window.componentsArray = window.componentsArray.concat(response.components);
+		if (page > (response.paging.total / PAGE_SIZE)) {
+			handleResponse(wrapper);
+			var loadingGif = document.getElementById('blackduck_loading');
+			loadingGif.parentNode.removeChild(loadingGif);
+		} else {
+			getAndDisplayData(wrapper, page + 1);
+		}
+	});
+}
+
+function handleResponse(wrapper) {
+	if (window.componentsArray != null && window.componentsArray.length != 0) {
+		displayMainTable(wrapper, window.componentsArray, window.isDisplayed);
+	} else {
+		var message = document.createElement('p');
+		message.innerHTML = 'No Hub component data to display...';
+		window.globalOptions.el.appendChild(message);
+	}
 }
 
 function displayMainTable(parentElement, componentsArray, visible) {
@@ -80,13 +110,13 @@ function displayMainTable(parentElement, componentsArray, visible) {
 					formatTableHead('Med', 'sortOnMed') +
 					formatTableHead('High', 'sortOnHigh') +
 					formatTableHead('Vulnerable Components', '') +
+					formatTableHead('Rating', '') +
 				'</tr>' +
 				tableRowsAsString +
 			'</tbody>';
 		parentElement.appendChild(table);
 		
 		window.globalOptions.el.appendChild(parentElement);
-		getSetting('sonar.hub.url', linkComponentsToHub);
 	}
 }
 
@@ -130,7 +160,9 @@ function getComponentHelperObject(fileName, measuresArray) {
 		} else if (curMetric == 'num_vuln_high') {
 			helper.high = curValue;
 		} else if (curMetric == 'hub_component_names') {
-			helper.comps = parseComponents(curValue); // getComponentsAsArray(curValue);
+			helper.comps = parseComponents(curValue);
+		} else if (curMetric == 'num_components_rating') {
+			helper.rating = curValue;
 		}
 	}
 	return helper;
@@ -161,13 +193,14 @@ function getTableRowsAsString(componentHelperArray) {
 	for (var i = 0; i < sortedComponents.length; i++) {
 		var curComp = sortedComponents[i];
 		if ((curComp.low + curComp.med + curComp.high) > 0 && curComp.comps != '') {
-			var textLeft = 'style="text-align:left;"';
-			tableRows += '<tr><td ' + textLeft + '>' 
+			var textLeft = 'style="text-align:left;">';
+			tableRows += '<tr><td ' + textLeft
 				+ curComp.name + '</td><td>' 
 				+ curComp.low + '</td><td>' 
 				+ curComp.med + '</td><td>' 
-				+ curComp.high + '</td><td ' + textLeft + '>' 
-				+ curComp.comps 
+				+ curComp.high + '</td><td ' + textLeft
+				+ curComp.comps + '</td><td>'
+				+ getRating(curComp.rating)
 				+ '</td></tr>';
 		} else {
 			continue;
@@ -176,20 +209,50 @@ function getTableRowsAsString(componentHelperArray) {
 	return tableRows;
 }
 
+function getRating(givenRating) {
+	var intRating = parseInt(givenRating);
+	var charRating = 'E';
+	switch (intRating) {
+		case 1:
+			charRating = 'A';
+			break;
+		case 2:
+			charRating = 'B';
+			break;
+		case 3:
+			charRating = 'C';
+			break;
+		case 4:
+			charRating = 'D';
+			break;
+		case 5:
+			charRating = 'E';
+			break;
+		case 6:
+			charRating = 'F';
+			break;
+	}
+	return '<span class="rating rating-'+ charRating + '">' + charRating + '</span>';
+}
+
 function parseComponents(componentCsv) {
 	var componentArray = componentCsv.split(',');
 	var components = '';
-	
+	var flag = false;
 	var lastIndex = componentArray.length - 1;
 	for (var i = 0; i < lastIndex; i++) {
-		if (i >= MAX_COMPONENTS_PER_ROW) {
-			components += '<a class="expandableTableRow">See more...</a>';
-			return components;
+		if (i == MAX_COMPONENTS_PER_ROW - 1) {
+			components += '<a onclick="seeMoreComponents(this);">See more...<br /></a>';
+			components += '<div class="expandableTableRow">';
+			flag = true;
 		}
 		components += componentArray[i] + '<br />';
 	}
 	if (lastIndex >= 0) {
 		components += componentArray[lastIndex];
+		if (flag) {
+			components += '</div>';
+		}
 	}
 	return components;
 }
@@ -208,11 +271,17 @@ function getSetting(settingsKey, callback) {
 	});
 }
 
-function linkComponentsToHub(link) {
-	var componentLinks = document.getElementsByClassName('expandableTableRow');
-	for (var i = 0; i < componentLinks.length; i++) {
-		componentLinks[i].setAttribute('href', link);
-	}
+function linkToHub(link) {
+	var componentLink = document.getElementById('blackduck_link_span');
+	var anchor = componentLink.getElementsByTagName('a')[0];
+	anchor.setAttribute('href', link);
+}
+
+function seeMoreComponents(element) {
+	var sibling = element.parentElement.getElementsByTagName('div')[0];
+	sibling.style['max-height'] = "100%";
+	sibling.style.overflow = "visible";
+	element.remove();
 }
 
 function sortOnFileName() {
@@ -261,6 +330,13 @@ function sortIntColumn(index) {
 		resetTable();
 		window.tableSorted = true;
 	}
+}
+
+function resetTable() {
+	var wrapper = document.getElementById('blackduck_wrapper');
+	var table = wrapper.getElementsByTagName('table')[0];
+	table.remove();
+	displayMainTable(wrapper, window.componentsArray, window.isDisplayed);
 }
 
 function compareHigh(a,b) {

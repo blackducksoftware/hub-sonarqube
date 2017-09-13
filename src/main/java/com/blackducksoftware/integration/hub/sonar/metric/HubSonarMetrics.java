@@ -42,8 +42,8 @@ public class HubSonarMetrics implements Metrics {
     public static final Metric<Integer> NUM_VULN_LOW = new Metric.Builder("num_vuln_low", "Low Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).setHidden(true)
             .create();
 
-    public static final Metric<Integer> COMPONENT_RATING = new Metric.Builder("num_components_rating", "Component Ratings", ValueType.RATING).setQualitative(true).setDomain(DOMAIN_HUB).create();
-    public static final Metric<Integer> NUM_COMPONENTS = new Metric.Builder("num_components", "Components Mapped To Files Total", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_NONE)
+    public static final Metric<Integer> COMPONENT_RATING = new Metric.Builder("num_components_rating", "Component Ratings", ValueType.RATING).setQualitative(true).setDomain(DOMAIN_HUB).setHidden(true).create();
+    public static final Metric<Integer> NUM_COMPONENTS = new Metric.Builder("num_components", "Components Mapped To Files Total", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_NONE).setHidden(true)
             .setDeleteHistoricalData(true).create();
 
     @SuppressWarnings("rawtypes")

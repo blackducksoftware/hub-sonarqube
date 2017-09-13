@@ -35,6 +35,32 @@ table#blackduck_table td {
     padding-bottom: 5px;
 }
 
+#blackduck_link_span {
+	display: block;
+	text-size: large;
+}
+
+#blackduck_link {
+	text-decoration: none;
+}
+
+#blackduck_loading {
+	max-width: 100%;
+    height: auto;
+}
+
+.blackduck_rating {
+	font-size: large;
+	color: white;
+	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+	text-align: center;
+	padding-top: 5px;
+	border-radius: 50%;
+	border: none;
+	height: 25px;
+	width: 30px;
+}
+
 .large_header {
 	font-size: x-large;
 	font-weight: bold;
@@ -42,7 +68,8 @@ table#blackduck_table td {
 }
 
 .expandableTableRow {
-	text-decoration: none;
+    max-height: 0px;
+    overflow: hidden;
 }
 
 @media screen and (max-width: 900px) {
