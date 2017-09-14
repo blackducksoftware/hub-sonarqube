@@ -46,6 +46,7 @@ import com.blackducksoftware.integration.hub.sonar.component.HubVulnerableCompon
 import com.blackducksoftware.integration.hub.sonar.component.LocalComponentGatherer;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.hub.sonar.metric.MetricsHelper;
+import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
 
 public class HubSensor implements Sensor {
     @Override
@@ -65,6 +66,8 @@ public class HubSensor implements Sensor {
             return;
         }
         final HubServicesFactory hubServicesFactory = new HubServicesFactory(restConnection);
+        hubServicesFactory.createPhoneHomeDataService().phoneHome(ThirdPartyName.SONARQUBE, context.getSonarQubeVersion().toString(), sonarManager.getHubPluginVersion());
+
         final FileSystem fileSystem = context.fileSystem();
         final FilePredicates filePredicates = fileSystem.predicates();
         final FilePredicate filePredicate = filePredicates.and(filePredicates.matchesPathPatterns(sonarManager.getGlobalInclusionPatterns()), filePredicates.doesNotMatchPathPatterns(sonarManager.getGlobalExclusionPatterns()));

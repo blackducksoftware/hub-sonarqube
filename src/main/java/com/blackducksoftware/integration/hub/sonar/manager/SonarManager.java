@@ -23,6 +23,9 @@
  */
 package com.blackducksoftware.integration.hub.sonar.manager;
 
+import java.io.IOException;
+import java.util.Properties;
+
 import org.apache.commons.lang3.StringUtils;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.config.Settings;
@@ -81,5 +84,20 @@ public class SonarManager {
 
     public String[] getValues(final String key) {
         return settings.getStringArray(key);
+    }
+
+    public String getHubPluginVersion() {
+        final Properties properties = new Properties();
+        String version = null;
+        try {
+            properties.load(this.getClass().getResourceAsStream("/plugin.properties"));
+            version = properties.getProperty("version");
+            if (version != null) {
+                return version;
+            }
+        } catch (final IOException e) {
+            // Do nothing
+        }
+        return "<unknown>";
     }
 }
