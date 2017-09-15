@@ -43,12 +43,10 @@ public class HubSonarMetrics implements Metrics {
             .create();
 
     public static final Metric<Integer> COMPONENT_RATING = new Metric.Builder("num_components_rating", "Component Ratings", ValueType.RATING).setQualitative(true).setDomain(DOMAIN_HUB).setHidden(true).create();
-    public static final Metric<Integer> NUM_COMPONENTS = new Metric.Builder("num_components", "Components Mapped To Files Total", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_NONE).setHidden(true)
-            .setDeleteHistoricalData(true).create();
 
     @SuppressWarnings("rawtypes")
     @Override
     public List<Metric> getMetrics() {
-        return Arrays.asList(COMPONENT_NAMES, COMPONENT_RATING, NUM_VULN_HIGH, NUM_VULN_MED, NUM_VULN_LOW, NUM_COMPONENTS);
+        return Arrays.asList(COMPONENT_NAMES, COMPONENT_RATING, NUM_VULN_HIGH, NUM_VULN_MED, NUM_VULN_LOW);
     }
 }

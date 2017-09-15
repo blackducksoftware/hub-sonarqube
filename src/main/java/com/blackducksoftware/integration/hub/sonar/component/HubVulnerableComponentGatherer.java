@@ -32,11 +32,9 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.dataservice.model.RiskProfileCounts;
 import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.VersionBomComponentDataService;
 import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.MatchedFilesModel;
 import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
-import com.blackducksoftware.integration.hub.model.enumeration.RiskCountEnum;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
@@ -84,8 +82,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
     private void mapMatchedFilesToComponents(final List<VersionBomComponentModel> components) {
         String prevName = "";
         for (final VersionBomComponentModel component : components) {
-            final RiskProfileCounts secturityRisk = component.getSecurityRiskProfile();
-            if (secturityRisk.getCount(RiskCountEnum.LOW) + secturityRisk.getCount(RiskCountEnum.MEDIUM) + secturityRisk.getCount(RiskCountEnum.HIGH) > 0) {
+            if (component.hasSecurityRisk()) {
                 final String curName = component.getComponentName();
                 if (!prevName.equals(curName)) {
                     logger.info(String.format("Getting matched files for %s...", curName));

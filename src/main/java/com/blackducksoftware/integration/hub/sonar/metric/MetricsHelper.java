@@ -31,9 +31,6 @@ import java.util.Set;
 import org.sonar.api.batch.fs.InputComponent;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.ce.measure.Component;
-import org.sonar.api.ce.measure.Measure;
-import org.sonar.api.ce.measure.MeasureComputer.MeasureComputerContext;
 import org.sonar.api.measures.Metric;
 
 import com.blackducksoftware.integration.hub.dataservice.model.RiskProfileCounts;
@@ -100,16 +97,5 @@ public class MetricsHelper {
     public void createMeasure(@SuppressWarnings("rawtypes") final Metric metric, final InputComponent inputComponent, final Serializable value) {
         logger.debug(String.format("Creating measure: Metric='%s', Component='%s', Value='%s'", metric.getName(), inputComponent, value));
         context.newMeasure().forMetric(metric).on(inputComponent).withValue(value).save();
-    }
-
-    public static void createSecurityVulnerabilitySumMeasure(final MeasureComputerContext context, final Metric<Integer> metric) {
-        if (context.getComponent().getType() != Component.Type.FILE) {
-            final String metricKey = metric.getKey();
-            int sum = 0;
-            for (final Measure child : context.getChildrenMeasures(metricKey)) {
-                sum += child.getIntValue();
-            }
-            context.addMeasure(metricKey, sum);
-        }
     }
 }
