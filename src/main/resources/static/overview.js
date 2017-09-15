@@ -59,7 +59,6 @@ window.registerExtension('hubsonarqube/overview', function (options) {
     wrapper.appendChild(loadingGif);
     
     options.el.appendChild(wrapper);
-    // getSetting('sonar.hub.url', linkToHub); // TODO
     
     getAndDisplayData(wrapper);
 	return function () {
@@ -68,7 +67,6 @@ window.registerExtension('hubsonarqube/overview', function (options) {
 });
 
 function getAndDisplayData(wrapper, page = 1) {
-	// TODO find a way to get the base component key
 	window.SonarRequest.getJSON('/api/measures/component_tree', {
 		baseComponentKey: window.globalOptions.component.key,
 		p: page,
@@ -79,7 +77,7 @@ function getAndDisplayData(wrapper, page = 1) {
 		if (page > (response.paging.total / PAGE_SIZE)) {
 			handleResponse(wrapper);
 			var loadingGif = document.getElementById('blackduck_loading');
-			loadingGif.parentNode.removeChild(loadingGif);
+			loadingGif.remove();
 		} else {
 			getAndDisplayData(wrapper, page + 1);
 		}
@@ -285,35 +283,11 @@ function formatComponentVersion(version, link) {
 	return ' <span id="blackduck_version"><a title="Click here for remediation information." target="_blank" href="' + link + '">' + version + '</a></span>';
 }
 
-function getSetting(settingsKey, callback) {
-	window.SonarRequest.getJSON('/api/settings/values', {
-	}).then(function (response) {
-		var globalSettings = response.settings;
-		for (var i = 0; i < globalSettings.length; i++) {
-			var curSetting = globalSettings[i];
-			if (curSetting.key == settingsKey) {
-				callback(curSetting.value);
-				break;
-			}
-		}
-	});
-}
-
-function linkToHub(link) {
-	var componentLink = document.getElementById('blackduck_link_span');
-	var anchor = componentLink.getElementsByTagName('a')[0];
-	anchor.setAttribute('href', link);
-}
-
 function seeMoreComponents(element) {
 	var sibling = element.parentElement.getElementsByTagName('div')[0];
 	sibling.style['max-height'] = "100%";
 	sibling.style.overflow = "visible";
 	element.remove();
-}
-
-function sortOnFileName() {
-	sortIntColumn(0);
 }
 
 function sortOnRisk() {

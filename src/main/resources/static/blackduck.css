@@ -39,32 +39,35 @@ table#blackduck_table td {
 
 #highRisk {
 	color: white;
+	font-size: 9pt;
 	background-color: #9C251F;
 	border: 1px solid #9C251F;
 	border-radius: 15%;
 	padding: 1px;
-	padding-left: 2px;
-    padding-right: 2px;
+	padding-left: 5px;
+    padding-right: 5px;
 }
 
 #medRisk {
     color: white;
+    font-size: 9pt;
     background-color: #E78C87;
     border: 1px solid #E78C87;
     border-radius: 15%;
     padding: 1px;
-    padding-left: 2px;
-    padding-right: 2px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 #lowRisk {
     color: white;
+    font-size: 9pt;
     background-color: #999;
     border: 1px solid #999;
     border-radius: 15%;
     padding: 1px;
-    padding-left: 2px;
-    padding-right: 2px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 #blackduck_link_span {
