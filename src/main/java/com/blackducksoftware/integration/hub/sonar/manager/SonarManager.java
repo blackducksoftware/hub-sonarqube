@@ -23,7 +23,6 @@
  */
 package com.blackducksoftware.integration.hub.sonar.manager;
 
-import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
@@ -95,7 +94,7 @@ public class SonarManager {
             if (version != null) {
                 return version;
             }
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             // Do nothing
         }
         return "<unknown>";

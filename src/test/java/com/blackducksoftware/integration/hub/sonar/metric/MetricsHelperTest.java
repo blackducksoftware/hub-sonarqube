@@ -76,12 +76,10 @@ public class MetricsHelperTest {
         final Measure<Integer> numVulnMed = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_MED);
         final Measure<Integer> numVulnHigh = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_HIGH);
         final Measure<String> componentNames = context.measure(componentKey1, HubSonarMetrics.COMPONENT_NAMES);
-        final Measure<Integer> numComponentsTotal = context.measure(componentKey1, HubSonarMetrics.NUM_COMPONENTS);
 
         assertEquals(numVulnLow.value().intValue(), 1);
         assertEquals(numVulnMed.value().intValue(), 1);
         assertEquals(numVulnHigh.value().intValue(), 1);
-        assertEquals(numComponentsTotal.value().intValue(), 2);
 
         final String compNames = componentNames.value();
         assertTrue(compNames.contains("Test Component 0") && compNames.contains("Test Component 1"));

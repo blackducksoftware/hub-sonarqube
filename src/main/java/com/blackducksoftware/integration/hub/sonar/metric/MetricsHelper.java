@@ -65,33 +65,34 @@ public class MetricsHelper {
             final String fileName = fileTokens[fileTokens.length - 1];
             if (vulnerableComponentsMap.containsKey(fileName)) {
                 final StringBuilder compListBuilder = new StringBuilder();
-                int numComponents = 0;
                 int high = 0;
                 int med = 0;
                 int low = 0;
                 for (final VersionBomComponentModel component : vulnerableComponentsMap.get(fileName)) {
                     String compName = component.getComponentName();
+                    final String compVersion = component.getComponentVersionName();
+                    final String compVersionUrl = component.getComponentVersion();
                     if (compName.length() > MAX_COMPONENT_NAME_LENGTH) {
                         compName = compName.substring(0, MAX_COMPONENT_NAME_LENGTH) + "...";
                     }
                     compListBuilder.append(compName + ",");
+                    compListBuilder.append(compVersion + ",");
+                    compListBuilder.append(compVersionUrl + ",");
 
                     final RiskProfileCounts riskProfile = component.getSecurityRiskProfile();
                     high += riskProfile.getCount(RiskCountEnum.HIGH);
                     med += riskProfile.getCount(RiskCountEnum.MEDIUM);
                     low += riskProfile.getCount(RiskCountEnum.LOW);
-                    numComponents++;
                 }
                 createMeasure(HubSonarMetrics.NUM_VULN_LOW, inputFile, low);
                 createMeasure(HubSonarMetrics.NUM_VULN_MED, inputFile, med);
                 createMeasure(HubSonarMetrics.NUM_VULN_HIGH, inputFile, high);
                 if ((low + med + high) > 0) {
-                    final String compList = compListBuilder.toString();
+                    String compList = compListBuilder.toString();
+                    compListBuilder.deleteCharAt(compList.lastIndexOf(","));
+                    compList = compListBuilder.toString();
                     createMeasure(HubSonarMetrics.COMPONENT_NAMES, inputFile, compList.trim());
-                } else {
-                    createMeasure(HubSonarMetrics.COMPONENT_NAMES, inputFile, "");
                 }
-                createMeasure(HubSonarMetrics.NUM_COMPONENTS, inputFile, numComponents);
             }
         }
     }

@@ -60,16 +60,16 @@ window.registerExtension('hubsonarqube/overview', function (options) {
     options.el.appendChild(wrapper);
     getSetting('sonar.hub.url', linkToHub);
     
-    getAndDisplayData(wrapper, 1);
+    getAndDisplayData(wrapper);
 	return function () {
 		window.isDisplayed = false;
 	};
 });
 
-function getAndDisplayData(wrapper, page) {
+function getAndDisplayData(wrapper, page = 1) {
 	// TODO find a way to get the base component key
 	window.SonarRequest.getJSON('/api/measures/component_tree', {
-		baseComponentKey: 'blackduck:hub',
+		baseComponentKey: window.globalOptions.component.key,
 		p: page,
 		ps: PAGE_SIZE,
 		metricKeys: METRIC_KEYS
@@ -91,7 +91,8 @@ function handleResponse(wrapper) {
 	} else {
 		var message = document.createElement('p');
 		message.innerHTML = 'No Hub component data to display...';
-		window.globalOptions.el.appendChild(message);
+		wrapper.append(message);
+		window.globalOptions.el.appendChild(wrapper);
 	}
 }
 
@@ -105,12 +106,12 @@ function displayMainTable(parentElement, componentsArray, visible) {
 		table.innerHTML =
 			'<tbody>' +
 				'<tr>' + 
-					formatTableHead('File', '') +
-					formatTableHead('Low', 'sortOnLow') +
-					formatTableHead('Med', 'sortOnMed') +
+					formatTableHead('File') +
 					formatTableHead('High', 'sortOnHigh') +
-					formatTableHead('Vulnerable Components', '') +
-					formatTableHead('Rating', '') +
+					formatTableHead('Med', 'sortOnMed') +
+					formatTableHead('Low', 'sortOnLow') +
+					formatTableHead('Vulnerable Components') +
+					formatTableHead('Rating', 'sortOnRating') +
 				'</tr>' +
 				tableRowsAsString +
 			'</tbody>';
@@ -120,7 +121,7 @@ function displayMainTable(parentElement, componentsArray, visible) {
 	}
 }
 
-function formatTableHead(value, fnName) {
+function formatTableHead(value, fnName = '') {
 	var beginTag = '<th><strong>';
 	var endTag = '</strong></th>';
 	if (fnName != '') {
@@ -193,12 +194,12 @@ function getTableRowsAsString(componentHelperArray) {
 	for (var i = 0; i < sortedComponents.length; i++) {
 		var curComp = sortedComponents[i];
 		if ((curComp.low + curComp.med + curComp.high) > 0 && curComp.comps != '') {
-			var textLeft = 'style="text-align:left;">';
-			tableRows += '<tr><td ' + textLeft
-				+ curComp.name + '</td><td>' 
-				+ curComp.low + '</td><td>' 
-				+ curComp.med + '</td><td>' 
-				+ curComp.high + '</td><td ' + textLeft
+			var textShift = 'style="padding-left:18px;">';
+			tableRows += '<tr><td><i class="icon-qualifier-fil"></i> '
+				+ curComp.name + '</td><td ' + textShift
+				+ curComp.high + '</td><td ' + textShift
+				+ curComp.med + '</td><td ' + textShift
+				+ curComp.low + '</td><td>'
 				+ curComp.comps + '</td><td>'
 				+ getRating(curComp.rating)
 				+ '</td></tr>';
@@ -232,29 +233,55 @@ function getRating(givenRating) {
 			charRating = 'F';
 			break;
 	}
-	return '<span class="rating rating-'+ charRating + '">' + charRating + '</span>';
+	return '<span title="' + getToolTip(charRating) + '" class="rating rating-'+ charRating + '">' + charRating + '</span>';
+}
+
+function getToolTip(rating) {
+	var prefix = 'At least one ';
+	var suffix = ' security vulnerability is present.';
+	var fix;
+	switch (rating) {
+		case 'A':
+			return 'No security vulnerabilities exist!';
+		case 'B':
+			fix = 'low';
+			break;
+		case 'C':
+			fix = 'medium';
+			break;
+		case 'D':
+			fix = 'high';
+			break;
+		default:
+			return '';
+	}
+	return prefix + fix + suffix;
 }
 
 function parseComponents(componentCsv) {
 	var componentArray = componentCsv.split(',');
 	var components = '';
 	var flag = false;
-	var lastIndex = componentArray.length - 1;
-	for (var i = 0; i < lastIndex; i++) {
-		if (i == MAX_COMPONENTS_PER_ROW - 1) {
+	var lastIndex = componentArray.length - 3;
+	for (var i = 0; i < lastIndex; i += 3) {
+		if (i == (MAX_COMPONENTS_PER_ROW * 3) - 1) {
 			components += '<a onclick="seeMoreComponents(this);">See more...<br /></a>';
 			components += '<div class="expandableTableRow">';
 			flag = true;
 		}
-		components += componentArray[i] + '<br />';
+		components += componentArray[i] + formatComponentVersion(componentArray[i + 1], componentArray[i + 2]) + '<br />';
 	}
 	if (lastIndex >= 0) {
-		components += componentArray[lastIndex];
+		components += componentArray[lastIndex] + formatComponentVersion(componentArray[lastIndex + 1], componentArray[lastIndex + 2]);
 		if (flag) {
 			components += '</div>';
 		}
 	}
 	return components;
+}
+
+function formatComponentVersion(version, link) {
+	return ' <span id="blackduck_version"><a target="_blank" href="' + link + '">' + version + '</a></span>';
 }
 
 function getSetting(settingsKey, callback) {
@@ -288,7 +315,7 @@ function sortOnFileName() {
 	sortIntColumn(0);
 }
 
-function sortOnLow() {
+function sortOnHigh() {
 	sortIntColumn(1);
 }
 
@@ -296,11 +323,15 @@ function sortOnMed() {
 	sortIntColumn(2);
 }
 
-function sortOnHigh() {
+function sortOnLow() {
 	sortIntColumn(3);
 }
 
-function sortIntColumn(index) {
+function sortOnRating() {
+	sortIntColumn(5, true);
+}
+
+function sortIntColumn(index, isChar = false) {
 	if (window.tableSorted) {
 		var table = document.getElementById('blackduck_table');
 		var rows = table.getElementsByTagName('tr');
@@ -313,8 +344,14 @@ function sortIntColumn(index) {
 				shouldSwitch = false;
 				var x = rows[i].getElementsByTagName('td')[index];
 				var y = rows[i + 1].getElementsByTagName('td')[index];
-				var xContent = parseInt(x.innerHTML);
-				var yContent = parseInt(y.innerHTML);
+				var xContent;
+				var yContent
+				xContent = x.innerHTML;
+				yContent = y.innerHTML;
+				if (!isChar) {
+					xContent = parseInt(xContent);
+					yContent = parseInt(yContent);
+				}
 				if (xContent < yContent) {
 					shouldSwitch = true;
 					break;

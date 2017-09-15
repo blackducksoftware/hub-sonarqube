@@ -1,10 +1,13 @@
 div#blackduck_wrapper {
-	padding-left: 100px;
+	max-width: 1300px;
+    margin-left: auto;
+	margin-right: auto;
+	padding-left: 20px;
 }
 
 table#blackduck_table {
-	width: auto;
-	border: 1px solid black;
+	width: 100%;
+	min-width: 720px;
 	padding-right: 10px;
 	padding-left: 10px;
 	padding-top: 5px;
@@ -13,8 +16,7 @@ table#blackduck_table {
 
 table#blackduck_table th {
 	width: auto;
-	background-color: #DCDCDC;
-    border: 1px solid black;
+    border-bottom: 1px solid #DCDCDC;
     padding-right: 10px;
     padding-left: 10px;
     padding-top: 5px;
@@ -26,9 +28,9 @@ table#blackduck_table th a {
 }
 
 table#blackduck_table td {
+	border-bottom: 1px solid #DCDCDC;
     width: auto;
-    border: 1px solid #DCDCDC;
-    text-align: center;
+    text-align: left;
     padding-right: 10px;
     padding-left: 10px;
     padding-top: 5px;
@@ -49,31 +51,22 @@ table#blackduck_table td {
     height: auto;
 }
 
-.blackduck_rating {
-	font-size: large;
-	color: white;
-	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
-	text-align: center;
-	padding-top: 5px;
-	border-radius: 50%;
-	border: none;
-	height: 25px;
-	width: 30px;
+#blackduck_version {
+	font-size: 8.5pt;
+	text-decoration: none;
+	border: 1px solid #DCDCDC;
+	border-radius: 12%;
+	padding-left: 1px;
+	padding-right: 1px;
 }
 
 .large_header {
-	font-size: x-large;
-	font-weight: bold;
+	font-size: large;
+	font-weight: none;
 	margin-bottom: 10px;
 }
 
 .expandableTableRow {
     max-height: 0px;
     overflow: hidden;
-}
-
-@media screen and (max-width: 900px) {
-	div#blackduck_wrapper {
-	   padding-left: 2px;
-	}
 }
