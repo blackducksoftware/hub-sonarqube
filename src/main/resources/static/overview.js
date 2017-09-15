@@ -29,7 +29,8 @@ var MAX_COMPONENTS_PER_ROW = 5;
 window.registerExtension('hubsonarqube/overview', function (options) {
 	window.globalOptions = options;
 	window.isDisplayed = true;
-	window.tableSorted = true;
+	window.riskSorted = true;
+	window.ratingSorted = false;
 	window.componentsArray = [];
 	
 	var wrapper = document.createElement('div');
@@ -48,7 +49,7 @@ window.registerExtension('hubsonarqube/overview', function (options) {
     
     var link_span = document.createElement('span');
     link_span.setAttribute('id', 'blackduck_link_span');
-    link_span.innerHTML = 'For more details, please vist your <a id="blackduck_link">Hub Server</a>.';
+    link_span.innerHTML = 'Click on the vulnerable component versions for remediation information.';
     wrapper.appendChild(link_span);
 
     var loadingGif = document.createElement('img');
@@ -58,7 +59,7 @@ window.registerExtension('hubsonarqube/overview', function (options) {
     wrapper.appendChild(loadingGif);
     
     options.el.appendChild(wrapper);
-    getSetting('sonar.hub.url', linkToHub);
+    // getSetting('sonar.hub.url', linkToHub); // TODO
     
     getAndDisplayData(wrapper);
 	return function () {
@@ -107,11 +108,9 @@ function displayMainTable(parentElement, componentsArray, visible) {
 			'<tbody>' +
 				'<tr>' + 
 					formatTableHead('File') +
-					formatTableHead('High', 'sortOnHigh') +
-					formatTableHead('Med', 'sortOnMed') +
-					formatTableHead('Low', 'sortOnLow') +
+					formatTableHead('Security Risk', 'sortOnRisk', true) +
 					formatTableHead('Vulnerable Components') +
-					formatTableHead('Rating', 'sortOnRating') +
+					formatTableHead('Rating', 'sortOnRating', true) +
 				'</tr>' +
 				tableRowsAsString +
 			'</tbody>';
@@ -121,9 +120,12 @@ function displayMainTable(parentElement, componentsArray, visible) {
 	}
 }
 
-function formatTableHead(value, fnName = '') {
+function formatTableHead(value, fnName = '', center = false) {
 	var beginTag = '<th><strong>';
 	var endTag = '</strong></th>';
+	if (center) {
+		beginTag = '<th style="text-align:center;"><strong>';
+	}
 	if (fnName != '') {
 		return beginTag + '<a onclick="' + fnName + '();">' + value + '</a>' + endTag;
 	}
@@ -194,13 +196,12 @@ function getTableRowsAsString(componentHelperArray) {
 	for (var i = 0; i < sortedComponents.length; i++) {
 		var curComp = sortedComponents[i];
 		if ((curComp.low + curComp.med + curComp.high) > 0 && curComp.comps != '') {
-			var textShift = 'style="padding-left:18px;">';
 			tableRows += '<tr><td><i class="icon-qualifier-fil"></i> '
-				+ curComp.name + '</td><td ' + textShift
-				+ curComp.high + '</td><td ' + textShift
-				+ curComp.med + '</td><td ' + textShift
-				+ curComp.low + '</td><td>'
-				+ curComp.comps + '</td><td>'
+				+ curComp.name + '</td><td style="text-align:center;"><span title="High" id="highRisk">'
+				+ curComp.high + '</span> <span title="Medium" id="medRisk">'
+				+ curComp.med + '</span> <span title="Low" id="lowRisk">'
+				+ curComp.low + '</span></td><td>'
+				+ curComp.comps + '</td><td style="text-align:center;">'
 				+ getRating(curComp.rating)
 				+ '</td></tr>';
 		} else {
@@ -281,7 +282,7 @@ function parseComponents(componentCsv) {
 }
 
 function formatComponentVersion(version, link) {
-	return ' <span id="blackduck_version"><a target="_blank" href="' + link + '">' + version + '</a></span>';
+	return ' <span id="blackduck_version"><a title="Click here for remediation information." target="_blank" href="' + link + '">' + version + '</a></span>';
 }
 
 function getSetting(settingsKey, callback) {
@@ -315,45 +316,52 @@ function sortOnFileName() {
 	sortIntColumn(0);
 }
 
-function sortOnHigh() {
-	sortIntColumn(1);
+function sortOnRisk() {
+	sortColumn(1, sortInt, window.riskSorted);
+	window.riskSorted = !window.riskSorted;
+	window.ratingSorted = false;
 }
 
-function sortOnMed() {
-	sortIntColumn(2);
-}
-
-function sortOnLow() {
-	sortIntColumn(3);
+function sortInt(tdX, tdY, reverse, index = 0) {
+	if (index < 3) {
+		var x = tdX.getElementsByTagName('span')[index];
+		var y = tdY.getElementsByTagName('span')[index];
+		var xContent = parseInt(x.innerHTML);
+		var yContent = parseInt(y.innerHTML);
+		if (xContent == yContent) {
+			return sortInt(tdX, tdY, reverse, index + 1);
+		} else {
+			return reverse ? xContent > yContent : xContent < yContent;
+		}
+	}
+	return false;
 }
 
 function sortOnRating() {
-	sortIntColumn(5, true);
+	sortColumn(3, sortChar, !window.ratingSorted);
+	window.ratingSorted = !window.ratingSorted;
+	window.riskSorted = false;
 }
 
-function sortIntColumn(index, isChar = false) {
-	if (window.tableSorted) {
+function sortChar(tdX, tdY, reverse) {
+	var xContent = tdX.innerHTML;
+	var yContent = tdY.innerHTML;
+	return reverse ? xContent < yContent : xContent > yContent;
+}
+
+function sortColumn(index, sortFunc, reverse) {
 		var table = document.getElementById('blackduck_table');
 		var rows = table.getElementsByTagName('tr');
 		var switching = true;
 		var i;
 		while (switching) {
 			switching = false;
-			var shouldSwitch;
+			var shouldSwitch = false;
 			for (i = 1; i < (rows.length - 1); i++) {
-				shouldSwitch = false;
 				var x = rows[i].getElementsByTagName('td')[index];
 				var y = rows[i + 1].getElementsByTagName('td')[index];
-				var xContent;
-				var yContent
-				xContent = x.innerHTML;
-				yContent = y.innerHTML;
-				if (!isChar) {
-					xContent = parseInt(xContent);
-					yContent = parseInt(yContent);
-				}
-				if (xContent < yContent) {
-					shouldSwitch = true;
+				shouldSwitch = sortFunc(x, y, reverse);
+				if (shouldSwitch) {
 					break;
 				}
 			}
@@ -362,11 +370,6 @@ function sortIntColumn(index, isChar = false) {
 				switching = true;
 			}
 		}
-		window.tableSorted = false;
-	} else {
-		resetTable();
-		window.tableSorted = true;
-	}
 }
 
 function resetTable() {
