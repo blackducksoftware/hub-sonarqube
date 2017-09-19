@@ -46,7 +46,7 @@ public class HubPlugin implements Plugin {
     public List<PropertyDefinition> getGlobalPropertyExtensions() {
         return Arrays.asList(HubPropertyConstants.Definitions.HUB_URL, HubPropertyConstants.Definitions.HUB_USERNAME, HubPropertyConstants.Definitions.HUB_PASSWORD, HubPropertyConstants.Definitions.HUB_TIMEOUT,
                 HubPropertyConstants.Definitions.HUB_IMPORT_SSL_CERT, HubPropertyConstants.Definitions.HUB_PROXY_HOST, HubPropertyConstants.Definitions.HUB_PROXY_PORT, HubPropertyConstants.Definitions.HUB_NO_PROXY_HOSTS,
-                HubPropertyConstants.Definitions.HUB_PROXY_USERNAME, HubPropertyConstants.Definitions.HUB_PROXY_PASSWORD, HubPropertyConstants.Definitions.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE,
-                HubPropertyConstants.Definitions.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE);
+                HubPropertyConstants.Definitions.HUB_PROXY_USERNAME, HubPropertyConstants.Definitions.HUB_PROXY_PASSWORD, HubPropertyConstants.Definitions.HUB_PROJECT_OVERRIDE, HubPropertyConstants.Definitions.HUB_PROJECT_VERSION_OVERRIED,
+                HubPropertyConstants.Definitions.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, HubPropertyConstants.Definitions.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE);
     }
 }
