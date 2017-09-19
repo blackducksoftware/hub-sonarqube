@@ -58,7 +58,7 @@ public class SonarManager {
             configBuilder.setUsername(getValue(HubPropertyConstants.HUB_USERNAME));
             configBuilder.setPassword(getValue(HubPropertyConstants.HUB_PASSWORD));
             configBuilder.setTimeout(getValue(HubPropertyConstants.HUB_TIMEOUT));
-            configBuilder.setAlwaysTrustServerCertificate(Boolean.parseBoolean(getValue(HubPropertyConstants.HUB_IMPORT_SSL_CERT)));
+            configBuilder.setAlwaysTrustServerCertificate(Boolean.parseBoolean(getValue(HubPropertyConstants.HUB_TRUST_SSL_CERT)));
 
             configBuilder.setProxyHost(getValue(HubPropertyConstants.HUB_PROXY_HOST));
             configBuilder.setProxyPort(getValue(HubPropertyConstants.HUB_PROXY_PORT));

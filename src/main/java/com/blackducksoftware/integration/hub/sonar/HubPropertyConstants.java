@@ -41,7 +41,7 @@ public class HubPropertyConstants {
     public static final String HUB_USERNAME = HUB_SONAR_PREFIX + "username";
     public static final String HUB_PASSWORD = HUB_SONAR_PREFIX + "password";
     public static final String HUB_TIMEOUT = HUB_SONAR_PREFIX + "timeout";
-    public static final String HUB_IMPORT_SSL_CERT = HUB_SONAR_PREFIX + "auto.import.https.certs";
+    public static final String HUB_TRUST_SSL_CERT = HUB_SONAR_PREFIX + "trust.ssl.cert";
 
     public static final String HUB_SONAR_PROXY_PREFIX = HUB_SONAR_PREFIX + "proxy.";
     public static final String HUB_PROXY_HOST = HUB_SONAR_PROXY_PREFIX + "host";
@@ -66,8 +66,8 @@ public class HubPropertyConstants {
         public static final PropertyDefinition HUB_USERNAME = buildGlobalDef(HubPropertyConstants.HUB_USERNAME, PropertyType.STRING, "Username: ", "The Hub username.", "", CATEGORY_GENERAL, 1);
         public static final PropertyDefinition HUB_PASSWORD = buildGlobalDef(HubPropertyConstants.HUB_PASSWORD, PropertyType.PASSWORD, "Password: ", "The password for the specified Hub user.", "", CATEGORY_GENERAL, 2);
         public static final PropertyDefinition HUB_TIMEOUT = buildGlobalDef(HubPropertyConstants.HUB_TIMEOUT, PropertyType.INTEGER, "Timeout (secs): ", "Hub connection timeout.", "120", CATEGORY_GENERAL, 3);
-        public static final PropertyDefinition HUB_IMPORT_SSL_CERT = buildGlobalDef(HubPropertyConstants.HUB_IMPORT_SSL_CERT, PropertyType.BOOLEAN, "Import SSL Certificate: ",
-                "This will import the SSL certificate of the specified HTTPS Hub server. Note: For this to work, the Java keystore must be writable by the proper user.", "false", CATEGORY_GENERAL, 4);
+        public static final PropertyDefinition HUB_TRUST_SSL_CERT = buildGlobalDef(HubPropertyConstants.HUB_TRUST_SSL_CERT, PropertyType.BOOLEAN, "Trust Hub SSL Certificate: ",
+                "This will trust the SSL certificate of the specified HTTPS Hub server.", "false", CATEGORY_GENERAL, 4);
         public static final PropertyDefinition HUB_PROXY_HOST = buildGlobalDef(HubPropertyConstants.HUB_PROXY_HOST, PropertyType.STRING, "Proxy Host: ",
                 "If the server is behind a firewall and does not have direct access to the internet, you may want to specify a proxy server. This will send any requests from the Hub Plugin to this server first.", "", CATEGORY_PROXY, 5);
         public static final PropertyDefinition HUB_PROXY_PORT = buildGlobalDef(HubPropertyConstants.HUB_PROXY_PORT, PropertyType.INTEGER, "Proxy Port: ", "The port to be used to connect to the Proxy Server.", "", CATEGORY_PROXY, 6);
