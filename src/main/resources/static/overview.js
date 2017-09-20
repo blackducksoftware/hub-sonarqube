@@ -88,10 +88,7 @@ function handleResponse(wrapper) {
 	if (window.componentsArray != null && window.componentsArray.length != 0) {
 		displayMainTable(wrapper, window.componentsArray, window.isDisplayed);
 	} else {
-		var message = document.createElement('p');
-		message.innerHTML = 'No Hub component data to display...';
-		wrapper.append(message);
-		window.globalOptions.el.appendChild(wrapper);
+		displayNoDataMessage(wrapper);
 	}
 }
 
@@ -100,22 +97,33 @@ function displayMainTable(parentElement, componentsArray, visible) {
 		var componentHelperArray = getComponentHelperObjects(componentsArray);
 		var tableRowsAsString = getTableRowsAsString(componentHelperArray);
 		
-		var table = document.createElement('table');
-		table.setAttribute('id', 'blackduck_table');
-		table.innerHTML =
-			'<tbody>' +
-				'<tr>' + 
-					formatTableHead('File') +
-					formatTableHead('Security Risk', 'sortOnRisk', true) +
-					formatTableHead('Vulnerable Components') +
-					formatTableHead('Rating', 'sortOnRating', true) +
-				'</tr>' +
-				tableRowsAsString +
-			'</tbody>';
-		parentElement.appendChild(table);
-		
-		window.globalOptions.el.appendChild(parentElement);
+		if (tableRowsAsString != '') {
+			var table = document.createElement('table');
+			table.setAttribute('id', 'blackduck_table');
+			table.innerHTML =
+				'<tbody>' +
+					'<tr>' + 
+						formatTableHead('File') +
+						formatTableHead('Security Risk', 'sortOnRisk', true) +
+						formatTableHead('Vulnerable Components') +
+						formatTableHead('Rating', 'sortOnRating', true) +
+					'</tr>' +
+					tableRowsAsString +
+				'</tbody>';
+			parentElement.appendChild(table);
+			
+			window.globalOptions.el.appendChild(parentElement);
+		} else {
+			displayNoDataMessage(parentElement);
+		}
 	}
+}
+
+function displayNoDataMessage(parent) {
+	var message = document.createElement('p');
+	message.innerHTML = 'No Hub component data to display...';
+	parent.append(message);
+	window.globalOptions.el.appendChild(parent);
 }
 
 function formatTableHead(value, fnName = '', center = false) {
