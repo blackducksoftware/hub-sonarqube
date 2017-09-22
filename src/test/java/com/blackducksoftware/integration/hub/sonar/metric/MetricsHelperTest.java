@@ -47,12 +47,14 @@ import com.blackducksoftware.integration.hub.model.view.MatchedFilesView;
 import com.blackducksoftware.integration.hub.model.view.VersionBomComponentView;
 import com.blackducksoftware.integration.hub.service.HubResponseService;
 import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
-import com.blackducksoftware.integration.hub.sonar.model.MockLogger;
 import com.blackducksoftware.integration.hub.sonar.model.MockRestConnection;
+import com.blackducksoftware.integration.log.IntLogger;
+import com.blackducksoftware.integration.log.LogLevel;
+import com.blackducksoftware.integration.log.PrintStreamIntLogger;
 
 public class MetricsHelperTest {
     private static final File BASE_DIR = new File(SonarTestUtils.TEST_DIRECTORY);
-    private static final MockLogger LOG = new MockLogger();
+    private static final IntLogger LOG = new PrintStreamIntLogger(System.out, LogLevel.INFO);
 
     @Test
     public void createMeasuresForVulnerableComponentsTest() throws IOException {
@@ -77,9 +79,14 @@ public class MetricsHelperTest {
         final Measure<Integer> numVulnHigh = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_HIGH);
         final Measure<String> componentNames = context.measure(componentKey1, HubSonarMetrics.COMPONENT_NAMES);
 
-        assertEquals(numVulnLow.value().intValue(), 1);
-        assertEquals(numVulnMed.value().intValue(), 1);
-        assertEquals(numVulnHigh.value().intValue(), 1);
+        final int low = numVulnLow.value().intValue();
+        final int med = numVulnMed.value().intValue();
+        final int high = numVulnHigh.value().intValue();
+
+        assertTrue((low + med + high) > 0);
+        assertEquals(low, 1);
+        assertEquals(med, 1);
+        assertEquals(high, 1);
 
         final String compNames = componentNames.value();
         assertTrue(compNames.contains("Test Component 0") && compNames.contains("Test Component 1"));

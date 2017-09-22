@@ -38,17 +38,17 @@ import org.sonar.api.config.Settings;
 import org.sonar.api.internal.google.common.collect.Sets;
 
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
-import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.hub.sonar.model.MockFilePredicates;
 import com.blackducksoftware.integration.hub.sonar.model.MockFileSystem;
-import com.blackducksoftware.integration.hub.sonar.model.MockLogger;
+import com.blackducksoftware.integration.log.LogLevel;
+import com.blackducksoftware.integration.log.PrintStreamIntLogger;
 
 public class LocalComponentGathererTest {
     @Test
     public void gatherComponentsTest() throws IOException {
-        final HubSonarLogger logger = new MockLogger();
+        final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
         final Settings settings = new MapSettings();
         final String include = ".jar,.tar";
         final String exclude = ".png";

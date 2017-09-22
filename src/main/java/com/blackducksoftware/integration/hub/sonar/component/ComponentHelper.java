@@ -57,8 +57,8 @@ public class ComponentHelper {
 
     public String getFilePathFromComposite(final String composite) {
         final int lastIndex = composite.length() - 1;
-        final int archiveMarkIndex = composite.indexOf("!");
-        final int otherMarkIndex = composite.indexOf("#");
+        final int archiveMarkIndex = composite.indexOf('!');
+        final int otherMarkIndex = composite.indexOf('#');
 
         final int startIndex;
         if (otherMarkIndex >= 0 && otherMarkIndex < lastIndex) {
@@ -80,11 +80,11 @@ public class ComponentHelper {
     }
 
     public Collection<InputFile> getInputFilesFromStrings(final Collection<String> sharedComponents) {
-        final Collection<InputFile> inputFiles = new HashSet<>();
+        final Collection<InputFile> inputFilesFromStrings = new HashSet<>();
         for (final String filePath : sharedComponents) {
-            inputFiles.add(getInputFileFromString(filePath));
+            inputFilesFromStrings.add(getInputFileFromString(filePath));
         }
-        return inputFiles;
+        return inputFilesFromStrings;
     }
 
     public InputFile getInputFileFromString(final String filePath) {
@@ -122,10 +122,7 @@ public class ComponentHelper {
 
     public boolean componentMatchesInclusionPattern(final String str, final String pattern) {
         final String suffix = trimPatternToSuffix(pattern);
-        if (str.endsWith(suffix) || (str.contains(suffix) && pattern.endsWith(ANY_STRING_PATTERN))) {
-            return true;
-        }
-        return false;
+        return str.endsWith(suffix) || (str.contains(suffix) && pattern.endsWith(ANY_STRING_PATTERN));
     }
 
     private Map<String, InputFile> getInputFiles(final FileSystem fileSystem) {

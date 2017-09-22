@@ -36,11 +36,11 @@ import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.Ver
 import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.MatchedFilesModel;
 import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
-import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
+import com.blackducksoftware.integration.log.IntLogger;
 
 public class HubVulnerableComponentGatherer implements ComponentGatherer {
-    private final HubSonarLogger logger;
+    private final IntLogger logger;
     private final ComponentHelper componentHelper;
     private final SonarManager sonarManager;
     private final VersionBomComponentDataService versionBomComponentDataService;
@@ -49,7 +49,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
     private String hubProjectName;
     private String hubProjectVersionName;
 
-    public HubVulnerableComponentGatherer(final HubSonarLogger logger, final ComponentHelper componentHelper, final SonarManager sonarManager, final VersionBomComponentDataService versionBomComponentDataService) {
+    public HubVulnerableComponentGatherer(final IntLogger logger, final ComponentHelper componentHelper, final SonarManager sonarManager, final VersionBomComponentDataService versionBomComponentDataService) {
         this.logger = logger;
         this.componentHelper = componentHelper;
         this.sonarManager = sonarManager;

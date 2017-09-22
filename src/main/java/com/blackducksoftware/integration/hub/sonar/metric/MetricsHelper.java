@@ -36,15 +36,15 @@ import org.sonar.api.measures.Metric;
 import com.blackducksoftware.integration.hub.dataservice.model.RiskProfileCounts;
 import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
 import com.blackducksoftware.integration.hub.model.enumeration.RiskCountEnum;
-import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
+import com.blackducksoftware.integration.log.IntLogger;
 
 public class MetricsHelper {
     private static final int MAX_COMPONENT_NAME_LENGTH = 100;
 
     private final SensorContext context;
-    private final HubSonarLogger logger;
+    private final IntLogger logger;
 
-    public MetricsHelper(final HubSonarLogger logger, final SensorContext context) {
+    public MetricsHelper(final IntLogger logger, final SensorContext context) {
         this.logger = logger;
         this.context = context;
     }
@@ -86,7 +86,7 @@ public class MetricsHelper {
                 createMeasure(HubSonarMetrics.NUM_VULN_HIGH, inputFile, high);
                 if ((low + med + high) > 0) {
                     String compList = compListBuilder.toString();
-                    compListBuilder.deleteCharAt(compList.lastIndexOf(","));
+                    compListBuilder.deleteCharAt(compList.lastIndexOf(','));
                     compList = compListBuilder.toString();
                     createMeasure(HubSonarMetrics.COMPONENT_NAMES, inputFile, compList.trim());
                 }

@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-var PLUGIN_NAME = 'Black Duck Hub Plugin for SonarQube';
+var HEADER_CONTENT = 'Black Duck Hub Security Analysis';
 var PAGE_SIZE = 100;
 var METRIC_KEYS = 'num_vuln_low, num_vuln_med, num_vuln_high, hub_component_names, num_components_rating';
 var MAX_COMPONENTS_PER_ROW = 5;
@@ -44,7 +44,7 @@ window.registerExtension('hubsonarqube/overview', function (options) {
 
 	var header = document.createElement('span');
 	header.setAttribute('class', 'large_header');
-    header.textContent = PLUGIN_NAME;
+    header.textContent = HEADER_CONTENT;
     wrapper.appendChild(header);
     
     var link_span = document.createElement('span');

@@ -32,16 +32,16 @@ import java.util.Set;
 import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FileSystem;
 
-import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
+import com.blackducksoftware.integration.log.IntLogger;
 
 public class LocalComponentGatherer implements ComponentGatherer {
-    private final HubSonarLogger logger;
+    private final IntLogger logger;
     private final SonarManager sonarManager;
     private final FileSystem fileSystem;
     private final FilePredicate includeExcludePredicate;
 
-    public LocalComponentGatherer(final HubSonarLogger logger, final SonarManager sonarManager, final FileSystem fileSystem, final FilePredicate includeExcludePredicate) {
+    public LocalComponentGatherer(final IntLogger logger, final SonarManager sonarManager, final FileSystem fileSystem, final FilePredicate includeExcludePredicate) {
         this.logger = logger;
         this.sonarManager = sonarManager;
         this.fileSystem = fileSystem;

@@ -46,6 +46,7 @@ import com.blackducksoftware.integration.hub.sonar.component.HubVulnerableCompon
 import com.blackducksoftware.integration.hub.sonar.component.LocalComponentGatherer;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.hub.sonar.metric.MetricsHelper;
+import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
 
 public class HubSensor implements Sensor {
@@ -111,7 +112,7 @@ public class HubSensor implements Sensor {
         }
     }
 
-    private RestConnection createRestConnection(final HubSonarLogger logger, final HubServerConfig hubServerConfig) {
+    private RestConnection createRestConnection(final IntLogger logger, final HubServerConfig hubServerConfig) {
         RestConnection restConnection = null;
         try {
             restConnection = hubServerConfig.createCredentialsRestConnection(logger);

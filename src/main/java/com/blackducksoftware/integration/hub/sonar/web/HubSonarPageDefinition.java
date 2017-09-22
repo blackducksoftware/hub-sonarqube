@@ -29,11 +29,9 @@ import org.sonar.api.web.page.Page.Qualifier;
 import org.sonar.api.web.page.Page.Scope;
 import org.sonar.api.web.page.PageDefinition;
 
-import com.blackducksoftware.integration.hub.sonar.HubPlugin;
-
 public class HubSonarPageDefinition implements PageDefinition {
     @Override
     public void define(final Context context) {
-        context.addPage(Page.builder("hubsonarqube/overview").setName(HubPlugin.PLUGIN_NAME).setScope(Scope.COMPONENT).setComponentQualifiers(Qualifier.PROJECT).build());
+        context.addPage(Page.builder("hubsonarqube/overview").setName("Black Duck Hub Security Analysis").setScope(Scope.COMPONENT).setComponentQualifiers(Qualifier.PROJECT).build());
     }
 }

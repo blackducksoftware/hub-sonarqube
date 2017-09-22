@@ -37,13 +37,12 @@ public class ComponentComparerTest {
     @Test
     public void getSharedComponentsMatchTest() throws IntegrationException {
         final ComponentHelper helper = new ComponentHelper(null);
-        final Set<String> first = Sets.newHashSet("one", "two", "three");
-        final Set<String> second = Sets.newHashSet("one", "two", "three");
+        final Set<String> sameSet = Sets.newHashSet("one", "two", "three");
 
-        final ComponentComparer comparer = new ComponentComparer(helper, first, second);
+        final ComponentComparer comparer = new ComponentComparer(helper, sameSet, sameSet);
 
-        assertEquals(comparer.getSharedComponents(), first);
-        assertEquals(comparer.getSharedComponentCount(), first.size());
+        assertEquals(comparer.getSharedComponents(), sameSet);
+        assertEquals(comparer.getSharedComponentCount(), sameSet.size());
     }
 
     @Test
