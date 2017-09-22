@@ -55,6 +55,10 @@ public class HubPropertyConstants {
     public static final String HUB_BINARY_INCLUSION_PATTERN_OVERRIDE = HUB_SONAR_PREFIX + "binary.inclusion.pattern" + HUB_SONAR_SUFFIX;
     public static final String HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE = HUB_SONAR_PREFIX + "binary.exclusion.pattern" + HUB_SONAR_SUFFIX;
 
+    private HubPropertyConstants() {
+        // This class should not be instantiated. Added to meet SonarQube standard.
+    }
+
     public static class Definitions {
         private static final String CATEGORY_GENERAL = "Hub Settings";
         private static final String CATEGORY_PROXY = "Proxy Settings";
@@ -86,6 +90,10 @@ public class HubPropertyConstants {
                 "File patterns used for gathering local components.", ComponentHelper.DEFAULT_INCLUSION_PATTERNS, CATEGORY_PATTERN_OVERRIDE, 2);
         public static final PropertyDefinition HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE = buildProjectDef(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, PropertyType.STRING, "Binary Exclusion Patterns: ",
                 "File patterns used for gathering local components.", ComponentHelper.DEFAULT_EXCLUSION_PATTERNS, CATEGORY_PATTERN_OVERRIDE, 3);
+
+        private Definitions() {
+            // This class should not be instantiated. Added to meet SonarQube standard.
+        }
 
         private static PropertyDefinition buildGlobalDef(final String prop, final PropertyType type, final String name, final String desc, final String defaultVal, final String subCategory, final int index) {
             return PropertyDefinition.builder(prop).type(type).name(name).description(desc).defaultValue(defaultVal).subCategory(subCategory).index(index).build();
