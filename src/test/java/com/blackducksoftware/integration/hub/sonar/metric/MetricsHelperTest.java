@@ -63,9 +63,9 @@ public class MetricsHelperTest {
 
         final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap = new HashMap<>();
         final HubResponseService hubResponseService = new HubResponseService(new MockRestConnection(LOG));
-        final VersionBomComponentView component0 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.JSON_COMPONENT_FILES[0]), VersionBomComponentView.class);
-        final VersionBomComponentView component1 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.JSON_COMPONENT_FILES[1]), VersionBomComponentView.class);
-        final List<MatchedFilesView> matchedFiles = Collections.EMPTY_LIST;
+        final VersionBomComponentView component0 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[0]), VersionBomComponentView.class);
+        final VersionBomComponentView component1 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[1]), VersionBomComponentView.class);
+        final List<MatchedFilesView> matchedFiles = Collections.emptyList();
         vulnerableComponentsMap.put(file1, Sets.newHashSet(new VersionBomComponentModel(component0, matchedFiles), (new VersionBomComponentModel(component1, matchedFiles))));
 
         final List<InputFile> inputFiles = Arrays.asList(TestInputFileBuilder.create(SonarTestUtils.MY_PROJECT_KEY, file1).build());

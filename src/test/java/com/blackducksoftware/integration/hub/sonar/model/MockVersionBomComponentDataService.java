@@ -49,10 +49,10 @@ public class MockVersionBomComponentDataService extends VersionBomComponentDataS
         VersionBomComponentView component0;
         VersionBomComponentView component1;
         try {
-            component0 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.JSON_COMPONENT_FILES[0]), VersionBomComponentView.class);
-            component1 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.JSON_COMPONENT_FILES[1]), VersionBomComponentView.class);
+            component0 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[0]), VersionBomComponentView.class);
+            component1 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[1]), VersionBomComponentView.class);
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw new MockException(e);
         }
         return Arrays.asList(new VersionBomComponentModel(component0, null), new VersionBomComponentModel(component1, null));
     }

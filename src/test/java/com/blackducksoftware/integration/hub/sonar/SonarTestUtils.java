@@ -36,8 +36,13 @@ public class SonarTestUtils {
     public static final String TEST_DIRECTORY = "./src/test/resources/baseDir";
     public static final String JSON_DIRECTORY = TEST_DIRECTORY + "/json";
     public static final String PATH_DELIM = "/";
-    public static final String[] JSON_COMPONENT_FILES = { "component0.txt", "component1.txt" };
-    public static final String[] TEST_FILE_NAMES = { "test.jar", "test.tar", "test.png" };
+
+    private static final String[] JSON_COMPONENT_FILE_NAMES = { "component0.txt", "component1.txt" };
+    private static final String[] TEST_FILE_NAMES = { "test.jar", "test.tar", "test.png" };
+
+    private SonarTestUtils() {
+        // This class should not be instantiated.
+    }
 
     public static boolean stringArrayEquals(final String[] firstArray, final String[] secondArray) {
         final List<String> first = Arrays.asList(firstArray);
@@ -52,5 +57,13 @@ public class SonarTestUtils {
         final String json = IOUtils.toString(input);
         input.close();
         return json;
+    }
+
+    public static String[] getJsonComponentFileNames() {
+        return JSON_COMPONENT_FILE_NAMES;
+    }
+
+    public static String[] getTestFileNames() {
+        return TEST_FILE_NAMES;
     }
 }

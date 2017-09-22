@@ -36,6 +36,9 @@ public class HubSonarLogger extends IntLogger {
         this.logger = logger;
     }
 
+    /**
+     * @deprecated (Since 1.0.0, No equivalent operation)
+     */
     @Override
     @Deprecated
     public void alwaysLog(final String txt) {
@@ -94,10 +97,7 @@ public class HubSonarLogger extends IntLogger {
     }
 
     public boolean isDebugEnabled() {
-        if (getLogLevel() == LogLevel.DEBUG) {
-            return true;
-        }
-        return false;
+        return getLogLevel() == LogLevel.DEBUG;
     }
 
     @Override

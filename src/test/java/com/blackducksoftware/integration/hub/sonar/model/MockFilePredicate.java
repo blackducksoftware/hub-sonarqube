@@ -47,21 +47,31 @@ public class MockFilePredicate implements FilePredicate {
 
     @Override
     public boolean apply(final InputFile inputFile) {
+        boolean shouldApply = false;
         if (inputFile != null) {
             final String[] pathArray = inputFile.absolutePath().split("/");
             final String fileName = pathArray[pathArray.length - 1];
-            if (exclusionPatterns != null) {
-                for (final String exclude : exclusionPatterns) {
-                    if (fileName.endsWith(exclude)) {
-                        return false;
-                    }
+            shouldApply = !shouldExclude(fileName) && shouldInclude(fileName);
+        }
+        return shouldApply;
+    }
+
+    private boolean shouldExclude(final String fileName) {
+        if (exclusionPatterns != null) {
+            for (final String exclude : exclusionPatterns) {
+                if (fileName.endsWith(exclude)) {
+                    return true;
                 }
             }
-            if (inclusionPatterns != null) {
-                for (final String include : inclusionPatterns) {
-                    if (fileName.endsWith(include)) {
-                        return true;
-                    }
+        }
+        return false;
+    }
+
+    private boolean shouldInclude(final String fileName) {
+        if (inclusionPatterns != null) {
+            for (final String include : inclusionPatterns) {
+                if (fileName.endsWith(include)) {
+                    return true;
                 }
             }
         }
@@ -69,7 +79,7 @@ public class MockFilePredicate implements FilePredicate {
     }
 
     public String[] getInclusionPatterns() {
-        return (String[]) inclusionPatterns.toArray();
+        return inclusionPatterns.toArray(new String[0]);
     }
 
     public void addInclusionPatterns(final String[] inclusionPatterns) {
@@ -79,7 +89,7 @@ public class MockFilePredicate implements FilePredicate {
     }
 
     public String[] getExclusionPatterns() {
-        return (String[]) exclusionPatterns.toArray();
+        return exclusionPatterns.toArray(new String[0]);
     }
 
     public void addExclusionPatterns(final String[] exclusuionPatterns) {

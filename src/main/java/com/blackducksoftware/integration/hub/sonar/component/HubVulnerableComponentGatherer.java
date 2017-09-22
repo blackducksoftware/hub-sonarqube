@@ -72,34 +72,43 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
             } catch (final IntegrationException e) {
                 logger.error(String.format("Problem getting BOM components: %s", e));
             }
-            if (components != null && !components.isEmpty()) {
-                mapMatchedFilesToComponents(components);
-            }
+            mapMatchedFilesToComponents(components);
         }
         return vulnerableComponentMap;
     }
 
     private void mapMatchedFilesToComponents(final List<VersionBomComponentModel> components) {
-        String prevName = "";
-        for (final VersionBomComponentModel component : components) {
-            if (component.hasSecurityRisk()) {
-                final String curName = component.getComponentName();
-                if (!prevName.equals(curName)) {
-                    logger.info(String.format("Getting matched files for %s...", curName));
-                    prevName = curName;
-                }
-                final List<MatchedFilesModel> allMatchedFiles = component.getMatchedFiles();
-                if (allMatchedFiles != null && !allMatchedFiles.isEmpty()) {
-                    for (final MatchedFilesModel matchedFile : allMatchedFiles) {
-                        final String fileName = componentHelper.getFileNameFromComposite(matchedFile.getCompositePathContext());
-                        if (!vulnerableComponentMap.containsKey(fileName)) {
-                            vulnerableComponentMap.put(fileName, new HashSet<VersionBomComponentModel>());
-                        }
-                        vulnerableComponentMap.get(fileName).add(component);
-                    }
+        if (components != null && !components.isEmpty()) {
+            String prevName = "";
+            for (final VersionBomComponentModel component : components) {
+                if (component.hasSecurityRisk()) {
+                    prevName = logComponentName(prevName, component.getComponentName());
+                    mapMatchedFilesToComponent(component);
                 }
             }
         }
+
+    }
+
+    private void mapMatchedFilesToComponent(final VersionBomComponentModel component) {
+        final List<MatchedFilesModel> allMatchedFiles = component.getMatchedFiles();
+        if (allMatchedFiles != null && !allMatchedFiles.isEmpty()) {
+            for (final MatchedFilesModel matchedFile : allMatchedFiles) {
+                final String fileName = componentHelper.getFileNameFromComposite(matchedFile.getCompositePathContext());
+                if (!vulnerableComponentMap.containsKey(fileName)) {
+                    vulnerableComponentMap.put(fileName, new HashSet<VersionBomComponentModel>());
+                }
+                vulnerableComponentMap.get(fileName).add(component);
+            }
+        }
+    }
+
+    private String logComponentName(final String prevName, final String curName) {
+        if (!prevName.equals(curName)) {
+            logger.info(String.format("Getting matched files for %s...", curName));
+            return curName;
+        }
+        return prevName;
     }
 
     private void setProjectAndVersion() {

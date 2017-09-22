@@ -183,13 +183,13 @@ function getTableRowsAsString(componentHelperArray) {
 	var low = [];
 	
 	for (var i = 0; i < componentHelperArray.length; i++) {
-		var curComp = componentHelperArray[i];
-		if (curComp.high > 0) {
-			high[high.length] = curComp;
-		} else if (curComp.med > 0) {
-			med[med.length] = curComp;
+		var helperComp = componentHelperArray[i];
+		if (helperComp.high > 0) {
+			high[high.length] = helperComp;
+		} else if (helperComp.med > 0) {
+			med[med.length] = helperComp;
 		} else {
-			low[low.length] = curComp;
+			low[low.length] = helperComp;
 		}
 	}
 	
@@ -199,8 +199,8 @@ function getTableRowsAsString(componentHelperArray) {
 	
 	var sortedComponents = high.concat(med, low);
 	var tableRows = '';
-	for (var i = 0; i < sortedComponents.length; i++) {
-		var curComp = sortedComponents[i];
+	for (var j = 0; j < sortedComponents.length; j++) {
+		var curComp = sortedComponents[j];
 		if ((curComp.low + curComp.med + curComp.high) > 0 && curComp.comps != '') {
 			tableRows += '<tr><td><i class="icon-qualifier-fil"></i> '
 				+ curComp.name + '</td><td style="text-align:center;"><span title="High" id="highRisk">'

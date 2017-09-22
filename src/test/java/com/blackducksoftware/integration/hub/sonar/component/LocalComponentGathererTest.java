@@ -50,10 +50,8 @@ public class LocalComponentGathererTest {
     public void gatherComponentsTest() throws IOException {
         final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
         final Settings settings = new MapSettings();
-        final String include = ".jar,.tar";
-        final String exclude = ".png";
-        settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, include);
-        settings.setProperty(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, exclude);
+        settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, ".jar,.tar");
+        settings.setProperty(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, ".png");
         final SonarManager manager = new SonarManager(settings);
 
         final File baseDir = new File(SonarTestUtils.TEST_DIRECTORY);

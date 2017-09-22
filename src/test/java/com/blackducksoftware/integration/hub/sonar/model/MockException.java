@@ -23,22 +23,11 @@
  */
 package com.blackducksoftware.integration.hub.sonar.model;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
-import com.blackducksoftware.integration.log.IntLogger;
+public class MockException extends RuntimeException {
+    // RuntimeException UID + 1010
+    private static final long serialVersionUID = -7034897190745765929L;
 
-public class MockRestConnection extends RestConnection {
-    public MockRestConnection(final IntLogger logger) {
-        super(logger, null, 120);
-    }
-
-    @Override
-    public void addBuilderAuthentication() throws IntegrationException {
-        throw new UnsupportedOperationException("Unimplemented method in Mock class.");
-    }
-
-    @Override
-    public void clientAuthenticate() throws IntegrationException {
-        throw new UnsupportedOperationException("Unimplemented method in Mock class.");
+    public MockException(final Exception e) {
+        super(e);
     }
 }

@@ -35,58 +35,58 @@ import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 
 public class SonarManagerTest {
+    private static final String EXAMPLE_INCLUSION_OR_EXCLUSION_PATTERNS = "*.jar, *.gz";
+    private static final String DELIMITER = ", ";
+
+    private static final String EXAMPLE_KEY = "key";
+
     @Test
     public void getGlobalInclusionPatternsTest() {
         final Settings settings = new MapSettings();
-        final String inclusionPatterns = "*.jar, *.gz";
-        settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, inclusionPatterns);
+        settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, EXAMPLE_INCLUSION_OR_EXCLUSION_PATTERNS);
         final SonarManager manager = new SonarManager(settings);
 
-        assertTrue(SonarTestUtils.stringArrayEquals(manager.getGlobalInclusionPatterns(), inclusionPatterns.split(", ")));
+        assertTrue(SonarTestUtils.stringArrayEquals(manager.getGlobalInclusionPatterns(), EXAMPLE_INCLUSION_OR_EXCLUSION_PATTERNS.split(DELIMITER)));
     }
 
     @Test
     public void getGlobalExclusionPatternsTest() {
         final Settings settings = new MapSettings();
-        final String exclusionPatterns = "*.jar, *.gz";
-        settings.setProperty(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, exclusionPatterns);
+        settings.setProperty(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, EXAMPLE_INCLUSION_OR_EXCLUSION_PATTERNS);
         final SonarManager manager = new SonarManager(settings);
 
-        assertTrue(SonarTestUtils.stringArrayEquals(manager.getGlobalExclusionPatterns(), exclusionPatterns.split(", ")));
+        assertTrue(SonarTestUtils.stringArrayEquals(manager.getGlobalExclusionPatterns(), EXAMPLE_INCLUSION_OR_EXCLUSION_PATTERNS.split(DELIMITER)));
     }
 
     @Test
     public void getValueTest() {
         final Settings settings = new MapSettings();
-        final String key = "key";
         final String value = "value";
-        settings.setProperty(key, value);
+        settings.setProperty(EXAMPLE_KEY, value);
         final SonarManager manager = new SonarManager(settings);
 
-        assertEquals(manager.getValue(key), value);
+        assertEquals(manager.getValue(EXAMPLE_KEY), value);
     }
 
     @Test
     public void getNullValueTest() {
         final Settings settings = new MapSettings();
-        final String key = "key";
         final String value = null;
-        settings.setProperty(key, value);
+        settings.setProperty(EXAMPLE_KEY, value);
         final SonarManager manager = new SonarManager(settings);
 
-        assertNotNull(manager.getValue(key));
-        assertEquals(manager.getValue(key), "");
+        assertNotNull(manager.getValue(EXAMPLE_KEY));
+        assertEquals(manager.getValue(EXAMPLE_KEY), "");
     }
 
     @Test
     public void getValuesTest() {
         final Settings settings = new MapSettings();
-        final String key = "key";
         final String value = " one, two,three, four             ";
         final String[] values = { "one", "two", "three", "four" };
-        settings.setProperty(key, value);
+        settings.setProperty(EXAMPLE_KEY, value);
         final SonarManager manager = new SonarManager(settings);
 
-        assertTrue(SonarTestUtils.stringArrayEquals(manager.getValues(key), values));
+        assertTrue(SonarTestUtils.stringArrayEquals(manager.getValues(EXAMPLE_KEY), values));
     }
 }

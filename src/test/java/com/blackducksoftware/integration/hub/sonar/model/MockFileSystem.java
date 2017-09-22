@@ -52,7 +52,7 @@ public class MockFileSystem extends DefaultFileSystem {
             try {
                 inputFile = new TestInputFileBuilder(SonarTestUtils.MY_PROJECT_KEY, file.getName()).setModuleBaseDir(baseDir.toPath().toRealPath(LinkOption.NOFOLLOW_LINKS)).build();
             } catch (final IOException e) {
-                throw new RuntimeException(e);
+                throw new MockException(e);
             }
             if (predicate.apply(inputFile)) {
                 fileList.add(file);

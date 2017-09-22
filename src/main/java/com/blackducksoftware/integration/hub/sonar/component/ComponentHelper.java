@@ -74,9 +74,7 @@ public class ComponentHelper {
             endIndex = lastIndex;
         }
 
-        final String candidateFilePath = composite.substring(startIndex, endIndex);
-
-        return candidateFilePath;
+        return composite.substring(startIndex, endIndex);
     }
 
     public Collection<InputFile> getInputFilesFromStrings(final Collection<String> sharedComponents) {
@@ -135,15 +133,16 @@ public class ComponentHelper {
         return inputFiles;
     }
 
-    private String trimPatternToSuffix(String pattern) {
+    private String trimPatternToSuffix(final String pattern) {
+        String suffix = pattern;
         if (pattern.contains(ANY_STRING_PATTERN)) {
             final int lastIndex = pattern.lastIndexOf(ANY_STRING_PATTERN);
             if (lastIndex == pattern.length() - 1) {
-                pattern = trimPatternToSuffix(pattern.substring(0, lastIndex));
+                suffix = trimPatternToSuffix(pattern.substring(0, lastIndex));
             } else {
-                pattern = pattern.substring(lastIndex + 1, pattern.length()).trim();
+                suffix = pattern.substring(lastIndex + 1, pattern.length()).trim();
             }
         }
-        return pattern;
+        return suffix;
     }
 }

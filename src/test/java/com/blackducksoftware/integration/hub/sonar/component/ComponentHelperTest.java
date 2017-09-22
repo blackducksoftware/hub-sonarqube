@@ -40,6 +40,15 @@ import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 
 public class ComponentHelperTest {
+    private static final String EXAMPLE_COMPOSITE_PATH_LONG = "/windows-service/jenkins.exe.config#bin/target/jenkins-for-test/WEB-INF/lib/jenkins-core-1.580.3.jar!/";
+    private static final String EXAMPLE_COMPOSITE_PATH_LONG_FILE_PATH = "bin/target/jenkins-for-test/WEB-INF/lib/jenkins-core-1.580.3.jar";
+    private static final String EXAMPLE_COMPOSITE_PATH_LONG_FILE_NAME = "jenkins-core-1.580.3.jar";
+    private static final String EXAMPLE_COMPOSITE_PATH_SHORT = "libs/provided/commons-beanutils-1.7.0.jar#";
+    private static final String EXAMPLE_COMPOSITE_PATH_SHORT_FILE_PATH = "libs/provided/commons-beanutils-1.7.0.jar";
+    private static final String EXAMPLE_COMPOSITE_PATH_SHORT_FILE_NAME = "commons-beanutils-1.7.0.jar";
+
+    private static final String EXAMPLE_COMPONENT_FILE_NAME = "something.jar";
+
     @Test
     public void preProcessComponentListDataTest() throws IntegrationException {
         final Settings settings = new MapSettings();
@@ -58,64 +67,48 @@ public class ComponentHelperTest {
     @Test
     public void getFilePathForTrueCompositePathTest() {
         final ComponentHelper helper = new ComponentHelper(null);
-        final String compositePath = "/windows-service/jenkins.exe.config#bin/target/jenkins-for-test/WEB-INF/lib/jenkins-core-1.580.3.jar!/";
-        final String expectedResult = "bin/target/jenkins-for-test/WEB-INF/lib/jenkins-core-1.580.3.jar";
-        assertEquals(helper.getFilePathFromComposite(compositePath), expectedResult);
+        assertEquals(helper.getFilePathFromComposite(EXAMPLE_COMPOSITE_PATH_LONG), EXAMPLE_COMPOSITE_PATH_LONG_FILE_PATH);
     }
 
     @Test
     public void getFilePathForPartialCompositePathTest() {
         final ComponentHelper helper = new ComponentHelper(null);
-        final String compositePath = "libs/provided/commons-beanutils-1.7.0.jar#";
-        final String expectedResult = "libs/provided/commons-beanutils-1.7.0.jar";
-        assertEquals(helper.getFilePathFromComposite(compositePath), expectedResult);
+        assertEquals(helper.getFilePathFromComposite(EXAMPLE_COMPOSITE_PATH_SHORT), EXAMPLE_COMPOSITE_PATH_SHORT_FILE_PATH);
     }
 
     @Test
     public void getFileNameForTrueCompositePathTest() {
         final ComponentHelper helper = new ComponentHelper(null);
-        final String compositePath = "/windows-service/jenkins.exe.config#bin/target/jenkins-for-test/WEB-INF/lib/jenkins-core-1.580.3.jar!/";
-        final String expectedResult = "jenkins-core-1.580.3.jar";
-        assertEquals(helper.getFileNameFromComposite(compositePath), expectedResult);
+        assertEquals(helper.getFileNameFromComposite(EXAMPLE_COMPOSITE_PATH_LONG), EXAMPLE_COMPOSITE_PATH_LONG_FILE_NAME);
     }
 
     @Test
     public void getFileNameForPartialCompositePathTest() {
         final ComponentHelper helper = new ComponentHelper(null);
-        final String compositePath = "libs/provided/commons-beanutils-1.7.0.jar#";
-        final String expectedResult = "commons-beanutils-1.7.0.jar";
-        assertEquals(helper.getFileNameFromComposite(compositePath), expectedResult);
+        assertEquals(helper.getFileNameFromComposite(EXAMPLE_COMPOSITE_PATH_SHORT), EXAMPLE_COMPOSITE_PATH_SHORT_FILE_NAME);
     }
 
     @Test
     public void testComponentMatchesNonSuffixInclusionPattern() {
         final ComponentHelper helper = new ComponentHelper(null);
-        final String component = "something.jar";
-        final String pattern = "**/*.jar";
-        assertTrue(helper.componentMatchesInclusionPattern(component, pattern));
+        assertTrue(helper.componentMatchesInclusionPattern(EXAMPLE_COMPONENT_FILE_NAME, "**/*.jar"));
     }
 
     @Test
     public void testComponentMatchesSuffixInclusionPattern() {
         final ComponentHelper helper = new ComponentHelper(null);
-        final String component = "something.jar";
-        final String pattern = ".jar";
-        assertTrue(helper.componentMatchesInclusionPattern(component, pattern));
+        assertTrue(helper.componentMatchesInclusionPattern(EXAMPLE_COMPONENT_FILE_NAME, ".jar"));
     }
 
     @Test
     public void testComponentMatchesPartialSuffixInclusionPattern() {
         final ComponentHelper helper = new ComponentHelper(null);
-        final String component = "something.tar.gz";
-        final String pattern = "*.tar*";
-        assertTrue(helper.componentMatchesInclusionPattern(component, pattern));
+        assertTrue(helper.componentMatchesInclusionPattern("something.tar.gz", "*.tar*"));
     }
 
     @Test
     public void testComponentDoesNotMatchInclusionPattern() {
         final ComponentHelper helper = new ComponentHelper(null);
-        final String component = "something.jar";
-        final String pattern = "**/*.tar";
-        assertFalse(helper.componentMatchesInclusionPattern(component, pattern));
+        assertFalse(helper.componentMatchesInclusionPattern(EXAMPLE_COMPONENT_FILE_NAME, "**/*.tar"));
     }
 }
