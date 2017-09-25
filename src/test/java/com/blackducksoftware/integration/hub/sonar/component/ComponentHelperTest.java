@@ -27,17 +27,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.MapSettings;
 import org.sonar.api.config.Settings;
+import org.sonar.api.internal.google.common.collect.Sets;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
+import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
+import com.blackducksoftware.integration.hub.sonar.model.MockFileSystem;
 
 public class ComponentHelperTest {
     private static final String EXAMPLE_COMPOSITE_PATH_LONG = "/windows-service/jenkins.exe.config#bin/target/jenkins-for-test/WEB-INF/lib/jenkins-core-1.580.3.jar!/";
@@ -48,6 +57,13 @@ public class ComponentHelperTest {
     private static final String EXAMPLE_COMPOSITE_PATH_SHORT_FILE_NAME = "commons-beanutils-1.7.0.jar";
 
     private static final String EXAMPLE_COMPONENT_FILE_NAME = "something.jar";
+
+    private ComponentHelper helper;
+
+    @Before
+    public void init() {
+        helper = new ComponentHelper(null);
+    }
 
     @Test
     public void preProcessComponentListDataTest() throws IntegrationException {
@@ -66,49 +82,73 @@ public class ComponentHelperTest {
 
     @Test
     public void getFilePathForTrueCompositePathTest() {
-        final ComponentHelper helper = new ComponentHelper(null);
-        assertEquals(helper.getFilePathFromComposite(EXAMPLE_COMPOSITE_PATH_LONG), EXAMPLE_COMPOSITE_PATH_LONG_FILE_PATH);
+        assertEquals(EXAMPLE_COMPOSITE_PATH_LONG_FILE_PATH, helper.getFilePathFromComposite(EXAMPLE_COMPOSITE_PATH_LONG));
     }
 
     @Test
     public void getFilePathForPartialCompositePathTest() {
-        final ComponentHelper helper = new ComponentHelper(null);
-        assertEquals(helper.getFilePathFromComposite(EXAMPLE_COMPOSITE_PATH_SHORT), EXAMPLE_COMPOSITE_PATH_SHORT_FILE_PATH);
+        assertEquals(EXAMPLE_COMPOSITE_PATH_SHORT_FILE_PATH, helper.getFilePathFromComposite(EXAMPLE_COMPOSITE_PATH_SHORT));
     }
 
     @Test
     public void getFileNameForTrueCompositePathTest() {
-        final ComponentHelper helper = new ComponentHelper(null);
-        assertEquals(helper.getFileNameFromComposite(EXAMPLE_COMPOSITE_PATH_LONG), EXAMPLE_COMPOSITE_PATH_LONG_FILE_NAME);
+        assertEquals(EXAMPLE_COMPOSITE_PATH_LONG_FILE_NAME, helper.getFileNameFromComposite(EXAMPLE_COMPOSITE_PATH_LONG));
     }
 
     @Test
     public void getFileNameForPartialCompositePathTest() {
-        final ComponentHelper helper = new ComponentHelper(null);
-        assertEquals(helper.getFileNameFromComposite(EXAMPLE_COMPOSITE_PATH_SHORT), EXAMPLE_COMPOSITE_PATH_SHORT_FILE_NAME);
+        assertEquals(EXAMPLE_COMPOSITE_PATH_SHORT_FILE_NAME, helper.getFileNameFromComposite(EXAMPLE_COMPOSITE_PATH_SHORT));
     }
 
     @Test
-    public void testComponentMatchesNonSuffixInclusionPattern() {
-        final ComponentHelper helper = new ComponentHelper(null);
+    public void getInputFilesFromStringsTest() {
+        final File baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
+        final Set<String> inputFiles = LocalComponentGathererTest.createGatherer(baseDir).gatherComponents();
+
+        final SensorContextTester context = SensorContextTester.create(baseDir);
+        context.setFileSystem(new MockFileSystem(baseDir));
+
+        final SonarManager manager = new SonarManager(context);
+        final ComponentHelper helper = new ComponentHelper(manager);
+        final Collection<InputFile> collection = helper.getInputFilesFromStrings(inputFiles);
+
+        assertTrue(collection != null && !collection.isEmpty());
+        assertEquals(2, collection.size());
+    }
+
+    @Test
+    public void getInputFilesFromStringsWithNullContextTest() {
+        final SonarManager manager = new SonarManager(new MapSettings());
+        final ComponentHelper helper = new ComponentHelper(manager);
+        final InputFile inputFile = helper.getInputFileFromString("INVALID_FILE");
+
+        assertEquals(null, inputFile);
+    }
+
+    @Test
+    public void componentMatchesNonSuffixInclusionPatternTest() {
         assertTrue(helper.componentMatchesInclusionPattern(EXAMPLE_COMPONENT_FILE_NAME, "**/*.jar"));
     }
 
     @Test
-    public void testComponentMatchesSuffixInclusionPattern() {
-        final ComponentHelper helper = new ComponentHelper(null);
+    public void componentMatchesSuffixInclusionPatternTest() {
         assertTrue(helper.componentMatchesInclusionPattern(EXAMPLE_COMPONENT_FILE_NAME, ".jar"));
     }
 
     @Test
-    public void testComponentMatchesPartialSuffixInclusionPattern() {
-        final ComponentHelper helper = new ComponentHelper(null);
+    public void componentMatchesPartialSuffixInclusionPatternTest() {
         assertTrue(helper.componentMatchesInclusionPattern("something.tar.gz", "*.tar*"));
     }
 
     @Test
-    public void testComponentDoesNotMatchInclusionPattern() {
-        final ComponentHelper helper = new ComponentHelper(null);
+    public void componentDoesNotMatchInclusionPatternTest() {
         assertFalse(helper.componentMatchesInclusionPattern(EXAMPLE_COMPONENT_FILE_NAME, "**/*.tar"));
+    }
+
+    @Test
+    public void flattenCollectionOfCollectionsTest() {
+        final Collection<Collection<String>> collectionOfCollections = Arrays.asList(Arrays.asList("element 1", "element 2"), Arrays.asList("element 3"));
+        final Set<String> flattenedSet = helper.flattenCollectionOfCollections(collectionOfCollections);
+        assertEquals(Sets.newHashSet("element 1", "element 2", "element 3"), flattenedSet);
     }
 }

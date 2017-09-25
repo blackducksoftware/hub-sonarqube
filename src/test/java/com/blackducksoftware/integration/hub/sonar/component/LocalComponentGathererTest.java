@@ -48,20 +48,24 @@ import com.blackducksoftware.integration.log.PrintStreamIntLogger;
 public class LocalComponentGathererTest {
     @Test
     public void gatherComponentsTest() throws IOException {
+        final File baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
+        final LocalComponentGatherer gatherer = createGatherer(baseDir);
+        final Set<String> expectedList = Sets.newHashSet(baseDir.getCanonicalPath() + "/test.jar", baseDir.getCanonicalPath() + "/test.tar");
+
+        assertTrue(gatherer.gatherComponents().equals(expectedList));
+    }
+
+    static protected LocalComponentGatherer createGatherer(final File baseDir) {
         final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
         final Settings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, ".jar,.tar");
         settings.setProperty(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, ".png");
         final SonarManager manager = new SonarManager(settings);
 
-        final File baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
         final DefaultFileSystem fileSystem = new MockFileSystem(baseDir);
         final FilePredicates predicates = new MockFilePredicates();
         final FilePredicate predicate = predicates.and(predicates.matchesPathPatterns(manager.getGlobalInclusionPatterns()), predicates.doesNotMatchPathPatterns(manager.getGlobalExclusionPatterns()));
 
-        final LocalComponentGatherer gatherer = new LocalComponentGatherer(logger, manager, fileSystem, predicate);
-        final Set<String> expectedList = Sets.newHashSet(baseDir.getCanonicalPath() + "/test.jar", baseDir.getCanonicalPath() + "/test.tar");
-
-        assertTrue(gatherer.gatherComponents().equals(expectedList));
+        return new LocalComponentGatherer(logger, manager, fileSystem, predicate);
     }
 }

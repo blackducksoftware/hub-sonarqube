@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
@@ -56,12 +57,57 @@ public class MetricsHelperTest {
     private static final File BASE_DIR = new File(SonarTestUtils.TEST_DIRECTORY);
     private static final IntLogger LOG = new PrintStreamIntLogger(System.out, LogLevel.INFO);
 
+    private SensorContextTester context;
+    private Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap;
+    private MetricsHelper metricsHelper;
+
+    @Before
+    public void init() {
+        context = SensorContextTester.create(BASE_DIR);
+        metricsHelper = new MetricsHelper(LOG, context);
+        vulnerableComponentsMap = new HashMap<>();
+    }
+
+    @Test
+    public void createMeasuresForInputFileWhenMapDoesNotContainFileTest() {
+        final String componentKey1 = SonarTestUtils.MY_PROJECT_KEY + ":INVALID_FILE";
+        final InputFile inputFile = TestInputFileBuilder.create(SonarTestUtils.MY_PROJECT_KEY, "INVALID_FILE").build();
+        metricsHelper.createMeasuresForInputFile(vulnerableComponentsMap, inputFile);
+
+        assertEquals(null, context.measure(componentKey1, HubSonarMetrics.NUM_VULN_LOW));
+        assertEquals(null, context.measure(componentKey1, HubSonarMetrics.NUM_VULN_MED));
+        assertEquals(null, context.measure(componentKey1, HubSonarMetrics.NUM_VULN_HIGH));
+        assertEquals(null, context.measure(componentKey1, HubSonarMetrics.COMPONENT_NAMES));
+    }
+
+    @Test
+    public void createMeasuresForInputFileWhenFileIsMappedToEmptySet() {
+        final String file1 = "test.jar";
+        final String componentKey1 = SonarTestUtils.MY_PROJECT_KEY + ":" + file1;
+
+        vulnerableComponentsMap.put(file1, Sets.newHashSet());
+        metricsHelper.createMeasuresForInputFile(vulnerableComponentsMap, TestInputFileBuilder.create(SonarTestUtils.MY_PROJECT_KEY, file1).build());
+
+        final Measure<Integer> numVulnLow = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_LOW);
+        final Measure<Integer> numVulnMed = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_MED);
+        final Measure<Integer> numVulnHigh = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_HIGH);
+        final Measure<String> componentNames = context.measure(componentKey1, HubSonarMetrics.COMPONENT_NAMES);
+
+        final int low = numVulnLow.value().intValue();
+        final int med = numVulnMed.value().intValue();
+        final int high = numVulnHigh.value().intValue();
+
+        assertEquals(0, low);
+        assertEquals(0, med);
+        assertEquals(0, high);
+        assertEquals(null, componentNames);
+    }
+
     @Test
     public void createMeasuresForVulnerableComponentsTest() throws IOException {
         final String file1 = "test.jar";
         final String componentKey1 = SonarTestUtils.MY_PROJECT_KEY + ":" + file1;
 
-        final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap = new HashMap<>();
         final HubResponseService hubResponseService = new HubResponseService(new MockRestConnection(LOG));
         final VersionBomComponentView component0 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[0]), VersionBomComponentView.class);
         final VersionBomComponentView component1 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[1]), VersionBomComponentView.class);
@@ -70,8 +116,6 @@ public class MetricsHelperTest {
 
         final List<InputFile> inputFiles = Arrays.asList(TestInputFileBuilder.create(SonarTestUtils.MY_PROJECT_KEY, file1).build());
 
-        final SensorContextTester context = SensorContextTester.create(BASE_DIR);
-        final MetricsHelper metricsHelper = new MetricsHelper(LOG, context);
         metricsHelper.createMeasuresForInputFiles(vulnerableComponentsMap, inputFiles);
 
         final Measure<Integer> numVulnLow = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_LOW);
@@ -84,9 +128,9 @@ public class MetricsHelperTest {
         final int high = numVulnHigh.value().intValue();
 
         assertTrue((low + med + high) > 0);
-        assertEquals(low, 1);
-        assertEquals(med, 1);
-        assertEquals(high, 1);
+        assertEquals(1, low);
+        assertEquals(1, med);
+        assertEquals(1, high);
 
         final String compNames = componentNames.value();
         assertTrue(compNames.contains("Test Component 0") && compNames.contains("Test Component 1"));

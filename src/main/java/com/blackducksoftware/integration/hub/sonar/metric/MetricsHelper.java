@@ -57,39 +57,37 @@ public class MetricsHelper {
 
     public void createMeasuresForInputFile(final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap, final InputFile inputFile) {
         final File actualFile = inputFile.file();
-        if (actualFile != null) {
-            final String[] fileTokens = actualFile.getName().split("/");
-            final String fileName = fileTokens[fileTokens.length - 1];
-            if (vulnerableComponentsMap.containsKey(fileName)) {
-                final StringBuilder compListBuilder = new StringBuilder();
-                int high = 0;
-                int med = 0;
-                int low = 0;
-                for (final VersionBomComponentModel component : vulnerableComponentsMap.get(fileName)) {
-                    String compName = component.getComponentName();
-                    final String compVersion = component.getComponentVersionName();
-                    final String compVersionUrl = component.getComponentVersion();
-                    if (compName.length() > MAX_COMPONENT_NAME_LENGTH) {
-                        compName = compName.substring(0, MAX_COMPONENT_NAME_LENGTH) + "...";
-                    }
-                    compListBuilder.append(compName + ",");
-                    compListBuilder.append(compVersion + ",");
-                    compListBuilder.append(compVersionUrl + ",");
+        final String[] fileTokens = actualFile.getName().split("/");
+        final String fileName = fileTokens[fileTokens.length - 1];
+        if (vulnerableComponentsMap.containsKey(fileName)) {
+            final StringBuilder compListBuilder = new StringBuilder();
+            int high = 0;
+            int med = 0;
+            int low = 0;
+            for (final VersionBomComponentModel component : vulnerableComponentsMap.get(fileName)) {
+                String compName = component.getComponentName();
+                final String compVersion = component.getComponentVersionName();
+                final String compVersionUrl = component.getComponentVersion();
+                if (compName.length() > MAX_COMPONENT_NAME_LENGTH) {
+                    compName = compName.substring(0, MAX_COMPONENT_NAME_LENGTH) + "...";
+                }
+                compListBuilder.append(compName + ",");
+                compListBuilder.append(compVersion + ",");
+                compListBuilder.append(compVersionUrl + ",");
 
-                    final RiskProfileCounts riskProfile = component.getSecurityRiskProfile();
-                    high += riskProfile.getCount(RiskCountEnum.HIGH);
-                    med += riskProfile.getCount(RiskCountEnum.MEDIUM);
-                    low += riskProfile.getCount(RiskCountEnum.LOW);
-                }
-                createMeasure(HubSonarMetrics.NUM_VULN_LOW, inputFile, low);
-                createMeasure(HubSonarMetrics.NUM_VULN_MED, inputFile, med);
-                createMeasure(HubSonarMetrics.NUM_VULN_HIGH, inputFile, high);
-                if ((low + med + high) > 0) {
-                    String compList = compListBuilder.toString();
-                    compListBuilder.deleteCharAt(compList.lastIndexOf(','));
-                    compList = compListBuilder.toString();
-                    createMeasure(HubSonarMetrics.COMPONENT_NAMES, inputFile, compList.trim());
-                }
+                final RiskProfileCounts riskProfile = component.getSecurityRiskProfile();
+                high += riskProfile.getCount(RiskCountEnum.HIGH);
+                med += riskProfile.getCount(RiskCountEnum.MEDIUM);
+                low += riskProfile.getCount(RiskCountEnum.LOW);
+            }
+            createMeasure(HubSonarMetrics.NUM_VULN_LOW, inputFile, low);
+            createMeasure(HubSonarMetrics.NUM_VULN_MED, inputFile, med);
+            createMeasure(HubSonarMetrics.NUM_VULN_HIGH, inputFile, high);
+            if ((low + med + high) > 0) {
+                String compList = compListBuilder.toString();
+                compListBuilder.deleteCharAt(compList.lastIndexOf(','));
+                compList = compListBuilder.toString();
+                createMeasure(HubSonarMetrics.COMPONENT_NAMES, inputFile, compList.trim());
             }
         }
     }

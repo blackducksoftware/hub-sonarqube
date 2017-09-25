@@ -38,7 +38,6 @@ public class SonarTestUtils {
     public static final String PATH_DELIM = "/";
 
     private static final String[] JSON_COMPONENT_FILE_NAMES = { "component0.txt", "component1.txt" };
-    private static final String[] TEST_FILE_NAMES = { "test.jar", "test.tar", "test.png" };
 
     private SonarTestUtils() {
         // This class should not be instantiated.
@@ -61,9 +60,5 @@ public class SonarTestUtils {
 
     public static String[] getJsonComponentFileNames() {
         return JSON_COMPONENT_FILE_NAMES;
-    }
-
-    public static String[] getTestFileNames() {
-        return TEST_FILE_NAMES;
     }
 }
