@@ -25,11 +25,13 @@ package com.blackducksoftware.integration.hub.sonar.model;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.VersionBomComponentDataService;
 import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
+import com.blackducksoftware.integration.hub.model.view.MatchedFilesView;
 import com.blackducksoftware.integration.hub.model.view.VersionBomComponentView;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubResponseService;
@@ -38,13 +40,24 @@ import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 public class MockVersionBomComponentDataService extends VersionBomComponentDataService {
     private final RestConnection restConnection;
 
+    private List<MatchedFilesView> matchedFiles0;
+    private List<MatchedFilesView> matchedFiles1;
+    private boolean makeEmpty;
+
     public MockVersionBomComponentDataService(final RestConnection restConnection) {
         super(null, null, null, null, null);
         this.restConnection = restConnection;
+
+        matchedFiles0 = Collections.emptyList();
+        matchedFiles1 = Collections.emptyList();
+        makeEmpty = false;
     }
 
     @Override
     public List<VersionBomComponentModel> getComponentsForProjectVersion(final String projectName, final String projectVersionName) throws IntegrationException {
+        if (makeEmpty) {
+            return Collections.emptyList();
+        }
         final HubResponseService hubResponseService = new HubResponseService(restConnection);
         VersionBomComponentView component0;
         VersionBomComponentView component1;
@@ -54,6 +67,15 @@ public class MockVersionBomComponentDataService extends VersionBomComponentDataS
         } catch (final IOException e) {
             throw new MockException(e);
         }
-        return Arrays.asList(new VersionBomComponentModel(component0, null), new VersionBomComponentModel(component1, null));
+        return Arrays.asList(new VersionBomComponentModel(component0, matchedFiles0), new VersionBomComponentModel(component1, matchedFiles1));
+    }
+
+    public void setMatchedFiles(final List<MatchedFilesView> matchedFiles0, final List<MatchedFilesView> matchedFiles1) {
+        this.matchedFiles0 = matchedFiles0;
+        this.matchedFiles1 = matchedFiles1;
+    }
+
+    public void setEmpty(final boolean makeEmpty) {
+        this.makeEmpty = makeEmpty;
     }
 }

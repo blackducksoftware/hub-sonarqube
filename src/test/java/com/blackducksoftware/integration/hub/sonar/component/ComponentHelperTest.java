@@ -70,12 +70,12 @@ public class ComponentHelperTest {
         final Settings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, "e, o");
 
-        final ComponentHelper helper = new ComponentHelper(new SonarManager(settings));
+        final ComponentHelper compHelper = new ComponentHelper(new SonarManager(settings));
 
         final List<String> first = new ArrayList<>(Arrays.asList("one", "two", "three"));
         final List<String> second = new ArrayList<>(Arrays.asList("one", "two", "three", "three and a half"));
 
-        helper.preProcessComponentListData(second);
+        compHelper.preProcessComponentListData(second);
 
         assertEquals(first, second);
     }
@@ -109,8 +109,8 @@ public class ComponentHelperTest {
         context.setFileSystem(new MockFileSystem(baseDir));
 
         final SonarManager manager = new SonarManager(context);
-        final ComponentHelper helper = new ComponentHelper(manager);
-        final Collection<InputFile> collection = helper.getInputFilesFromStrings(inputFiles);
+        final ComponentHelper compHelper = new ComponentHelper(manager);
+        final Collection<InputFile> collection = compHelper.getInputFilesFromStrings(inputFiles);
 
         assertTrue(collection != null && !collection.isEmpty());
         assertEquals(2, collection.size());
@@ -119,8 +119,8 @@ public class ComponentHelperTest {
     @Test
     public void getInputFilesFromStringsWithNullContextTest() {
         final SonarManager manager = new SonarManager(new MapSettings());
-        final ComponentHelper helper = new ComponentHelper(manager);
-        final InputFile inputFile = helper.getInputFileFromString("INVALID_FILE");
+        final ComponentHelper compHelper = new ComponentHelper(manager);
+        final InputFile inputFile = compHelper.getInputFileFromString("INVALID_FILE");
 
         assertEquals(null, inputFile);
     }

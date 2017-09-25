@@ -92,7 +92,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
 
     private void mapMatchedFilesToComponent(final VersionBomComponentModel component) {
         final List<MatchedFilesModel> allMatchedFiles = component.getMatchedFiles();
-        if (allMatchedFiles != null && !allMatchedFiles.isEmpty()) {
+        if (!allMatchedFiles.isEmpty()) {
             for (final MatchedFilesModel matchedFile : allMatchedFiles) {
                 final String fileName = componentHelper.getFileNameFromComposite(matchedFile.getCompositePathContext());
                 if (!vulnerableComponentMap.containsKey(fileName)) {
