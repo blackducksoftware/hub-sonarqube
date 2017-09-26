@@ -23,15 +23,33 @@
  */
 package com.blackducksoftware.integration.hub.sonar.model;
 
-public class MockException extends RuntimeException {
-    // RuntimeException UID + 1010
-    private static final long serialVersionUID = -7034897190745765929L;
+import java.util.List;
 
-    public MockException(final Exception e) {
-        super(e);
+import org.sonar.api.utils.log.LogTester;
+import org.sonar.api.utils.log.LoggerLevel;
+
+public class HubSonarLogTester extends LogTester {
+    public HubSonarLogTester() {
+        after();
     }
 
-    public MockException(final Throwable e) {
-        super(e);
+    @Override
+    public List<String> logs() {
+        try {
+            before();
+        } catch (final Throwable e) {
+            throw new MockException(e);
+        }
+        return super.logs();
+    }
+
+    @Override
+    public List<String> logs(final LoggerLevel level) {
+        try {
+            before();
+        } catch (final Throwable e) {
+            throw new MockException(e);
+        }
+        return super.logs(level);
     }
 }

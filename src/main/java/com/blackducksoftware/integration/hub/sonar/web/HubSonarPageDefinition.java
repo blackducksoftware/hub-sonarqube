@@ -30,8 +30,11 @@ import org.sonar.api.web.page.Page.Scope;
 import org.sonar.api.web.page.PageDefinition;
 
 public class HubSonarPageDefinition implements PageDefinition {
+    public static final String PLUGIN_PAGE_LOCATION = "hubsonarqube/overview";
+    public static final String PLUGIN_PAGE_NAME = "Black Duck Hub Security Analysis";
+
     @Override
     public void define(final Context context) {
-        context.addPage(Page.builder("hubsonarqube/overview").setName("Black Duck Hub Security Analysis").setScope(Scope.COMPONENT).setComponentQualifiers(Qualifier.PROJECT).build());
+        context.addPage(Page.builder(PLUGIN_PAGE_LOCATION).setName(PLUGIN_PAGE_NAME).setScope(Scope.COMPONENT).setComponentQualifiers(Qualifier.PROJECT).build());
     }
 }

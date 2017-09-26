@@ -89,4 +89,18 @@ public class SonarManagerTest {
 
         assertTrue(SonarTestUtils.stringArrayEquals(manager.getValues(EXAMPLE_KEY), values));
     }
+
+    @Test
+    public void getHubPluginVersionTest() {
+        final SonarManager manager = new SonarManager(new MapSettings());
+
+        assertTrue("<unknown>" != manager.getHubPluginVersionFromFile("/plugin.properties"));
+    }
+
+    @Test
+    public void getHubPluginVersionUnknownTest() {
+        final SonarManager manager = new SonarManager(new MapSettings());
+
+        assertEquals("<unknown>", manager.getHubPluginVersionFromFile("/NULL"));
+    }
 }

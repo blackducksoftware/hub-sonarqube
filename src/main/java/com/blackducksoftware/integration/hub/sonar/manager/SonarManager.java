@@ -85,11 +85,11 @@ public class SonarManager {
         return settings.getStringArray(key);
     }
 
-    public String getHubPluginVersion() {
+    public String getHubPluginVersionFromFile(final String fileName) {
         final Properties properties = new Properties();
         String version = null;
         try {
-            properties.load(this.getClass().getResourceAsStream("/plugin.properties"));
+            properties.load(this.getClass().getResourceAsStream(fileName));
             version = properties.getProperty("version");
             if (version != null) {
                 return version;

@@ -21,17 +21,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.sonar.model;
+package com.blackducksoftware.integration.hub.sonar.web;
 
-public class MockException extends RuntimeException {
-    // RuntimeException UID + 1010
-    private static final long serialVersionUID = -7034897190745765929L;
+import static org.junit.Assert.assertTrue;
 
-    public MockException(final Exception e) {
-        super(e);
-    }
+import java.util.Set;
+import java.util.stream.Collectors;
 
-    public MockException(final Throwable e) {
-        super(e);
+import org.junit.Test;
+import org.sonar.api.web.page.Context;
+
+public class HubSonarPageDefinitionTest {
+    @Test
+    public void addPageDefinitionTest() {
+        final HubSonarPageDefinition pageDefinition = new HubSonarPageDefinition();
+        final Context pageContext = new Context();
+        pageDefinition.define(pageContext);
+
+        final Set<String> pageKeys = pageContext.getPages().stream().map(page -> page.getKey()).collect(Collectors.toSet());
+
+        assertTrue(pageKeys.contains(HubSonarPageDefinition.PLUGIN_PAGE_LOCATION));
     }
 }
