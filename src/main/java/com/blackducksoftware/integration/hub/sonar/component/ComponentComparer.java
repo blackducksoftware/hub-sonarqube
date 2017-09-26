@@ -27,8 +27,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
-
 public class ComponentComparer {
     private final Collection<String> localComponentList;
     private final Collection<String> remoteComponentList;
@@ -52,7 +50,7 @@ public class ComponentComparer {
         this.needsValidation = true;
     }
 
-    public Set<String> getSharedComponents() throws IntegrationException {
+    public Set<String> getSharedComponents() {
         if (needsValidation) {
             componentHelper.preProcessComponentListData(localComponentList);
             componentHelper.preProcessComponentListData(remoteComponentList);
@@ -71,7 +69,7 @@ public class ComponentComparer {
         return sharedComponents;
     }
 
-    public int getSharedComponentCount() throws IntegrationException {
+    public int getSharedComponentCount() {
         sharedComponentCount = sharedComponentCount < 0 ? getSharedComponents().size() : sharedComponentCount;
         return sharedComponentCount;
     }

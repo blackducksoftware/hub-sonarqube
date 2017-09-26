@@ -90,24 +90,21 @@ public class HubSensor implements Sensor {
             logger.info("No comparison will be performed because at least one of the lists of components had zero entries.");
         } else {
             componentComparer = new ComponentComparer(componentHelper, localComponents, hubComponents);
-            try {
-                logger.info("Comparing local components to Hub components...");
-                sharedComponents = componentComparer.getSharedComponents();
-                logger.info(String.format("--> Number of shared components: %d", componentComparer.getSharedComponentCount()));
 
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Shared Components:");
-                    for (final String sharedComponent : sharedComponents) {
-                        logger.debug(sharedComponent);
-                    }
+            logger.info("Comparing local components to Hub components...");
+            sharedComponents = componentComparer.getSharedComponents();
+            logger.info(String.format("--> Number of shared components: %d", componentComparer.getSharedComponentCount()));
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Shared Components:");
+                for (final String sharedComponent : sharedComponents) {
+                    logger.debug(sharedComponent);
                 }
-                final MetricsHelper metricsHelper = new MetricsHelper(logger, context);
-                final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
-                if (vulnerableComponentsMap != null && !vulnerableComponentsMap.isEmpty()) {
-                    metricsHelper.createMeasuresForInputFiles(vulnerableComponentsMap, componentHelper.getInputFilesFromStrings(sharedComponents));
-                }
-            } catch (final IntegrationException e) {
-                logger.error("Could not get shared components.", e);
+            }
+            final MetricsHelper metricsHelper = new MetricsHelper(logger, context);
+            final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
+            if (vulnerableComponentsMap != null && !vulnerableComponentsMap.isEmpty()) {
+                metricsHelper.createMeasuresForInputFiles(vulnerableComponentsMap, componentHelper.getInputFilesFromStrings(sharedComponents));
             }
         }
     }
@@ -119,7 +116,7 @@ public class HubSensor implements Sensor {
             restConnection.connect();
             logger.info(String.format("Successfully connected to %s", hubServerConfig.getHubUrl()));
         } catch (final IntegrationException e) {
-            logger.error(String.format("Error connecting to %s: ", hubServerConfig.getHubUrl(), e));
+            logger.error(String.format("Error connecting to %s: %s", hubServerConfig.getHubUrl(), e));
             return null;
         }
         return restConnection;

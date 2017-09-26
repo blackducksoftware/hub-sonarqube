@@ -76,7 +76,7 @@ public class SonarManagerTest {
         final SonarManager manager = new SonarManager(settings);
 
         assertNotNull(manager.getValue(EXAMPLE_KEY));
-        assertEquals(manager.getValue(EXAMPLE_KEY), "");
+        assertEquals("", manager.getValue(EXAMPLE_KEY));
     }
 
     @Test

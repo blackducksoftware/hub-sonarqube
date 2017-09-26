@@ -34,7 +34,6 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 
 public class ComponentHelper {
@@ -93,7 +92,7 @@ public class ComponentHelper {
         return null;
     }
 
-    public void preProcessComponentListData(final Collection<String> collection) throws IntegrationException {
+    public void preProcessComponentListData(final Collection<String> collection) {
         if (sonarManager != null) {
             final Collection<String> removalCandidates = new HashSet<>();
             for (final String str : collection) {
