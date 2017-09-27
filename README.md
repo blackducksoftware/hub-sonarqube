@@ -1,5 +1,5 @@
 ## Overview ##
-Hub plugin for SonarQube. In development, check back soon...
+Shows a mapping from local files to vulnerable components identified by the Hub.
 
 ## Build ##
 
@@ -9,7 +9,7 @@ Hub plugin for SonarQube. In development, check back soon...
 
 
 ## Where can I get the latest release? ##
-Check back soon...
+Released artifacts can be found on the [releases page](https://github.com/blackducksoftware/hub-sonarqube/releases).
 
 ## Documentation ##
-Check back soon...
+All documentation is located on our public [Black Duck Confluence](https://blackducksoftware.atlassian.net/wiki/spaces/INTDOCS/pages).
