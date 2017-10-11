@@ -6,6 +6,7 @@ Shows a mapping from local files to vulnerable components identified by the Hub.
 [![Build Status](https://travis-ci.org/blackducksoftware/hub-sonarqube.svg?branch=master)](https://travis-ci.org/blackducksoftware/hub-sonarqube)
 [![Coverage Status](https://coveralls.io/repos/github/blackducksoftware/hub-sonarqube/badge.svg?branch=master)](https://coveralls.io/github/blackducksoftware/hub-sonarqube?branch=master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Black Duck Security Risk](https://copilot.blackducksoftware.com/github/repos/blackducksoftware/hub-sonarqube/branches/master/badge-risk.svg)](https://copilot.blackducksoftware.com/github/repos/blackducksoftware/hub-sonarqube/branches/master)
 
 
 ## Where can I get the latest release? ##
