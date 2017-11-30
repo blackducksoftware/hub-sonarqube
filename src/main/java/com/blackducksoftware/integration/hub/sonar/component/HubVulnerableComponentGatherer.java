@@ -72,25 +72,25 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
             } catch (final IntegrationException e) {
                 logger.error(String.format("Problem getting BOM components: %s", e));
             }
-            mapMatchedFilesToComponents(components);
+            mapMatchedFilesToComponents(vulnerableComponentMap, components);
         }
         return vulnerableComponentMap;
     }
 
-    private void mapMatchedFilesToComponents(final List<VersionBomComponentModel> components) {
+    private void mapMatchedFilesToComponents(final Map<String, Set<VersionBomComponentModel>> vulnerableComponentMap, final List<VersionBomComponentModel> components) {
         if (components != null && !components.isEmpty()) {
             String prevName = "";
             for (final VersionBomComponentModel component : components) {
                 if (component.hasSecurityRisk()) {
                     prevName = logComponentName(prevName, component.getComponentName());
-                    mapMatchedFilesToComponent(component);
+                    mapMatchedFilesToComponent(vulnerableComponentMap, component);
                 }
             }
         }
 
     }
 
-    private void mapMatchedFilesToComponent(final VersionBomComponentModel component) {
+    private void mapMatchedFilesToComponent(final Map<String, Set<VersionBomComponentModel>> vulnerableComponentMap, final VersionBomComponentModel component) {
         final List<MatchedFilesModel> allMatchedFiles = component.getMatchedFiles();
         if (!allMatchedFiles.isEmpty()) {
             for (final MatchedFilesModel matchedFile : allMatchedFiles) {
