@@ -23,28 +23,40 @@
  */
 package com.blackducksoftware.integration.hub.sonar.manager;
 
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.config.Settings;
+import org.sonar.api.utils.log.Loggers;
 
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
 import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
+import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
+import com.blackducksoftware.integration.validator.AbstractValidator;
+import com.blackducksoftware.integration.validator.FieldEnum;
+import com.blackducksoftware.integration.validator.ValidationResult;
+import com.blackducksoftware.integration.validator.ValidationResults;
 
 public class SonarManager {
+    private final HubSonarLogger logger;
     private final SensorContext context;
     private final Settings settings;
 
+    @Deprecated
     public SonarManager(final Settings settings) {
         this.context = null;
         this.settings = settings;
+        logger = new HubSonarLogger(Loggers.get(getClass()));
     }
 
     public SonarManager(final SensorContext context) {
         this.context = context;
         this.settings = context.settings();
+        logger = new HubSonarLogger(Loggers.get(context.getClass()));
     }
 
     public SensorContext getSensorContext() {
@@ -65,7 +77,24 @@ public class SonarManager {
             configBuilder.setProxyUsername(getValue(HubPropertyConstants.HUB_PROXY_USERNAME));
             configBuilder.setProxyPassword(getValue(HubPropertyConstants.HUB_PROXY_PASSWORD));
         }
-        return configBuilder.build();
+        if (isConfigValid(configBuilder)) {
+            return configBuilder.build();
+        }
+        return new HubServerConfig(null, 300, null, null, false);
+    }
+
+    public boolean isConfigValid(final HubServerConfigBuilder configBuilder) {
+        final AbstractValidator validator = configBuilder.createValidator();
+        final ValidationResults validationResults = validator.assertValid();
+        if (validationResults.hasErrors()) {
+            final Map<FieldEnum, Set<ValidationResult>> resultsMap = validationResults.getResultMap();
+            for (final FieldEnum field : resultsMap.keySet()) {
+                logger.error(String.format("%s: %s", field, resultsMap.get(field)));
+            }
+            return false;
+        }
+        logger.debug("Hub config validation results: SUCCESS!");
+        return true;
     }
 
     public String[] getGlobalInclusionPatterns() {

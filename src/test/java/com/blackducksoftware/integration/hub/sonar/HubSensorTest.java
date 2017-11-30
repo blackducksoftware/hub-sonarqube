@@ -24,7 +24,6 @@
 package com.blackducksoftware.integration.hub.sonar;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
@@ -44,7 +43,7 @@ public class HubSensorTest {
     }
 
     @Test
-    public void executeAndExpectIllegalStateException() {
+    public void executeAndAvoidException() {
         final SensorContextTester context = SensorContextTester.create(new File(SonarTestUtils.TEST_DIRECTORY));
 
         Exception exception = null;
@@ -54,11 +53,11 @@ public class HubSensorTest {
             exception = e;
         }
 
-        assertTrue(exception instanceof IllegalStateException);
+        assertEquals(null, exception);
     }
 
     @Test
-    public void executeAndExpectIllegalStateExceptionWithNullSettings() {
+    public void executeAndAvoidExceptionWithNullSettings() {
         final SensorContextTester context = SensorContextTester.create(new File(SonarTestUtils.TEST_DIRECTORY));
         context.setSettings(null);
 
@@ -69,7 +68,7 @@ public class HubSensorTest {
             exception = e;
         }
 
-        assertTrue(exception instanceof IllegalStateException);
+        assertEquals(null, exception);
     }
 
     @Test

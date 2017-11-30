@@ -61,7 +61,7 @@ public class HubSensor implements Sensor {
         final HubSonarLogger logger = new HubSonarLogger(Loggers.get(context.getClass()));
         final SonarManager sonarManager = new SonarManager(context);
         final ComponentHelper componentHelper = new ComponentHelper(sonarManager);
-        final RestConnection restConnection = createRestConnection(logger, sonarManager.getHubServerConfigFromSettings());
+        final RestConnection restConnection = createRestConnection(logger, sonarManager);
         if (restConnection == null) {
             logger.warn("No connection to the Hub server could be established, skipping Black Duck Hub Sensor.");
             return;
@@ -71,7 +71,7 @@ public class HubSensor implements Sensor {
 
         final FileSystem fileSystem = context.fileSystem();
         final FilePredicates filePredicates = fileSystem.predicates();
-        final FilePredicate filePredicate = filePredicates.and(filePredicates.matchesPathPatterns(sonarManager.getGlobalInclusionPatterns()), filePredicates.doesNotMatchPathPatterns(sonarManager.getGlobalExclusionPatterns()));
+        final FilePredicate filePredicate = generateFilePredicateFromInclusionAndExclusionPatterns(sonarManager, filePredicates);
 
         logger.info("Gathering local component files...");
         final LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, sonarManager, fileSystem, filePredicate);
@@ -109,14 +109,28 @@ public class HubSensor implements Sensor {
         }
     }
 
-    private RestConnection createRestConnection(final IntLogger logger, final HubServerConfig hubServerConfig) {
+    private FilePredicate generateFilePredicateFromInclusionAndExclusionPatterns(final SonarManager sonarManager, final FilePredicates filePredicates) {
+        final String[] globalInclusionPatterns = sonarManager.getGlobalInclusionPatterns();
+        final String[] globalExclusionPatterns = sonarManager.getGlobalExclusionPatterns();
+        if (!isStringArrayEmpty(globalInclusionPatterns) && !isStringArrayEmpty(globalExclusionPatterns)) {
+            return filePredicates.and(filePredicates.matchesPathPatterns(globalInclusionPatterns), filePredicates.doesNotMatchPathPatterns(globalExclusionPatterns));
+        }
+        return filePredicates.all();
+    }
+
+    private boolean isStringArrayEmpty(final String[] array) {
+        return array != null && array.length > 0 && !"".equals(array[0]);
+    }
+
+    private RestConnection createRestConnection(final IntLogger logger, final SonarManager sonarManager) {
         RestConnection restConnection = null;
         try {
-            restConnection = hubServerConfig.createCredentialsRestConnection(logger);
+            final HubServerConfig config = sonarManager.getHubServerConfigFromSettings();
+            restConnection = config.createCredentialsRestConnection(logger);
             restConnection.connect();
-            logger.info(String.format("Successfully connected to %s", hubServerConfig.getHubUrl()));
-        } catch (final IntegrationException e) {
-            logger.error(String.format("Error connecting to %s: %s", hubServerConfig.getHubUrl(), e));
+            logger.info(String.format("Successfully connected to %s", config.getHubUrl()));
+        } catch (final IllegalStateException | NullPointerException | IntegrationException e) {
+            logger.error(String.format("Error establishing a Hub connection: %s", e.getMessage()));
             return null;
         }
         return restConnection;
