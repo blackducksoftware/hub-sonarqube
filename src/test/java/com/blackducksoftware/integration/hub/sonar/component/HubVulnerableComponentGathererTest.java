@@ -45,6 +45,7 @@ import com.blackducksoftware.integration.hub.sonar.model.MockRestConnection;
 import com.blackducksoftware.integration.hub.sonar.model.MockVersionBomComponentDataService;
 import com.blackducksoftware.integration.log.IntLogger;
 
+@SuppressWarnings("deprecation")
 public class HubVulnerableComponentGathererTest {
     private IntLogger logger;
     private ComponentHelper componentHelper;

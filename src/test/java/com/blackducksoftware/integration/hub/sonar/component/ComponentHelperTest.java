@@ -70,6 +70,7 @@ public class ComponentHelperTest {
         final Settings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, "e, o");
 
+        @SuppressWarnings("deprecation")
         final ComponentHelper compHelper = new ComponentHelper(new SonarManager(settings));
 
         final List<String> first = new ArrayList<>(Arrays.asList("one", "two", "three"));
@@ -118,6 +119,7 @@ public class ComponentHelperTest {
 
     @Test
     public void getInputFilesFromStringsWithNullContextTest() {
+        @SuppressWarnings("deprecation")
         final SonarManager manager = new SonarManager(new MapSettings());
         final ComponentHelper compHelper = new ComponentHelper(manager);
         final InputFile inputFile = compHelper.getInputFileFromString("INVALID_FILE");

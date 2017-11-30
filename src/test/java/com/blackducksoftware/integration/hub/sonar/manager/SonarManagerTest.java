@@ -34,6 +34,7 @@ import org.sonar.api.config.Settings;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 
+@SuppressWarnings("deprecation")
 public class SonarManagerTest {
     private static final String EXAMPLE_INCLUSION_OR_EXCLUSION_PATTERNS = "*.jar, *.gz";
     private static final String DELIMITER = ", ";

@@ -55,7 +55,8 @@ public class LocalComponentGathererTest {
         assertTrue(gatherer.gatherComponents().equals(expectedList));
     }
 
-    static protected LocalComponentGatherer createGatherer(final File baseDir) {
+    @SuppressWarnings("deprecation")
+    protected static LocalComponentGatherer createGatherer(final File baseDir) {
         final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
         final Settings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, ".jar,.tar");
