@@ -35,6 +35,7 @@
 
   <properties>
     <hub.common.version>15.0.0</hub.common.version>
+    <sonar.projectName>Integrations - Black Duck Hub Plugin for Sonarqube</sonar.projectName>
     <source.java.version>1.8</source.java.version>
     <target.java.version>1.8</target.java.version>
   </properties>
