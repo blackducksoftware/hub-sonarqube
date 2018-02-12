@@ -6,7 +6,7 @@ addons:
   sonarcloud:
     organization: "black-duck-software"
     token:
-      secure: "dOeTQlYdlgj6eLM0Vg72FaXnYK+a0bTpoTZ40x2xIWRAoI5HlNlKvn/2LucVMCRrIXNexvuDbcpCB5h6UvcdzYCJVVCGmRzIf1Tal/ljZI4ENO8tYDypwxlFBbBwxp21kyMjj3BbH2HKRx5MrBLAUsDBzpDmBOWB36Lc7cFtiHLI6su5QDlmEOfMCAEV8kazCRxBPIvjmb8BrA5dvPbuj7/VVUrpUjRydfhDYefi/OeCa2uGeTrC8vMnQGg/YT/naIrPR4RhFqUT86S1NCTL4m+CTrg70pFoSaKXVjiNHkTTlS8i/OgRYlZnkuf9uu72Npb7y9fXUBhEcSqBsZqbFzNIGYknHqa7XFcGKqR33qXpS7r2IDPcEnHl4L4BfNRAVrguT/aiEObJ0RaA6LRvynXUspfXlrDgipLtoA0t2AXAs5YVV3pPjqNojaQH6joxR5fd+P/UNOEle62OzYiYbTcHvj1NzxgzVOfgLd9KoesMUkyCF83dD6qArs23s/+wYD0K1R5nYtieirYJgYrF7gbcT2bhGy8S7bbdIBYolgM9gtDKj+6pY/E8dsbBwDIBKhug9WC7ODAcoUDQgPA5mkEjP0xaCW5i4Lx7QdLUtKbv2MiGweRmtyxv0u7ZnR/77feEWfOAtpFd9WyIJC2cixHzSTrumPySwEnO5WQR4wQ="
+      secure: "ashVI4k4FH90otCYmWxndgfWs4YpFsjioPc4fJgQenQg0zURi1nM5q9SJgWB/va2KwVLuNSU7AjwYjhuak8uavVckqpmqJpRLGGhYi+4PydHGIOFLwxmozl43NMsfzsKiiGkOrfHgDvk3/tdN7Kd+1L3u+kVm3pBFwOrq8IfHPkKbiZOzHbUoDfOsRPyRese5eyX3b5mDCRlT2Ob5Aa22T9FKB6yqX+nOiGQKMv9i/5GY9YAOGdnB9mZbBjK8CyrlYJNZ+6v8/J20Z5quwJFP04ol7YMTvg7HoZuTcktqnCTBY8VPrRanxRwXd2Hc7kk8KySu4+t9Z1i2fCQ/DtzJBvNSXB8aG2jWz/A4GplXnJdvBgwU9FnlXi2D2BN2sgZyOZEeFgjDlzEDOtCkeYlfk1LbF3DkrkXbGZ0+eyIsByUREmFDuwN3wPeVgvxbviCbhNhmfDhx2gOc3iM19jnl9gpCCdodtE8v+PO0/2KjWNt68jtQ7EdIluclUhGrfPLG6v6bTMXdhRQNTmHNt1F1E6mBcBGG2YQ8yNvlczzfswGzzcdzYHJpbecl9Q6RLR4zs2tsXag8I8Kpi6GzlvtKwEDXM3IkBC0vc3MafWEhZ2lHA6ydG7FYMANkJ2l+XvaYcY/LtjrDW0jZAeeAWmL4s9KCT+GBTQxtXglm0vCPSI="
 
 jdk:
 - oraclejdk8
@@ -18,7 +18,7 @@ notifications:
     - gkillough@blackducksoftware.com
 
 script:
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar jacoco:report coveralls:report
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar
 
 after_success:
   - bash <(curl -s https://copilot.blackducksoftware.com/ci/travis/scripts/upload)
