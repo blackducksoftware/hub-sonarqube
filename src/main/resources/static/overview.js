@@ -54,7 +54,7 @@ window.registerExtension('hubsonarqube/overview', function (options) {
 
     var loadingGif = document.createElement('img');
     loadingGif.setAttribute('id', 'blackduck_loading');
-    loadingGif.setAttribute('src', '/static/hubsonarqube/loading.gif');
+    loadingGif.setAttribute('src', '/static/hubsonarqube/loading-blue.gif');
     loadingGif.setAttribute('alt', 'Loading...');
     wrapper.appendChild(loadingGif);
     
@@ -81,13 +81,21 @@ function getAndDisplayData(wrapper, page = 1) {
 		} else {
 			getAndDisplayData(wrapper, page + 1);
 		}
-	});
+	}).catch(function (error) {
+			handleErrorResponse(wrapper, errorResponse);
+	});;
 }
 
 function handleResponse(wrapper) {
 	if (window.componentsArray != null && window.componentsArray.length != 0) {
 		displayMainTable(wrapper, window.componentsArray, window.isDisplayed);
 	} else {
+		displayNoDataMessage(wrapper);
+	}
+}
+
+function handleErrorResponse(wrapper, response) {
+	if (window.isDisplayed) {
 		displayNoDataMessage(wrapper);
 	}
 }

@@ -119,7 +119,10 @@ public class HubSensor implements Sensor {
     }
 
     private boolean isStringArrayEmpty(final String[] array) {
-        return array != null && array.length > 0 && !"".equals(array[0]);
+        if (array != null) {
+            return array.length == 0 || (array.length > 0 && "".equals(array[0]));
+        }
+        return true;
     }
 
     private RestConnection createRestConnection(final IntLogger logger, final SonarManager sonarManager) {
