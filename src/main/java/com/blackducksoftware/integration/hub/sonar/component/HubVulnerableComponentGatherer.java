@@ -64,6 +64,8 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         return getVulnerableComponentMap().keySet();
     }
 
+    // Returns a mapping of unqualified file names to sets of vulnerable bom components from that file.
+    // Note: The sets of bom components for each file may (and likely do) intersect with other sets of bom components from different files. If this is the case, the sets likely have a parent-child relationship.
     public Map<String, Set<VersionBomComponentModel>> getVulnerableComponentMap() {
         if (vulnerableComponentMap.isEmpty()) {
             List<VersionBomComponentModel> components = null;

@@ -26,12 +26,14 @@ package com.blackducksoftware.integration.hub.sonar;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.util.function.Predicate;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.utils.log.Loggers;
 
 public class HubSensorTest {
@@ -132,6 +134,11 @@ public class HubSensorTest {
         @Override
         public SensorDescriptor global() {
             Loggers.get(getClass()).info(String.format("Name: %s, Type: %s", name, onlyOnType));
+            return this;
+        }
+
+        @Override
+        public SensorDescriptor onlyWhenConfiguration(final Predicate<Configuration> predicate) {
             return this;
         }
     }

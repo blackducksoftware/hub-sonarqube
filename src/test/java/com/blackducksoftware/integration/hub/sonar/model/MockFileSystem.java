@@ -45,6 +45,7 @@ public class MockFileSystem extends DefaultFileSystem {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public Iterable<File> files(final FilePredicate predicate) {
         final List<File> fileList = new ArrayList<>();
         for (final InputFile inputFile : inputFiles(predicate)) {

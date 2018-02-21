@@ -50,8 +50,7 @@ public class ComponentHelper {
 
     public String getFileNameFromComposite(final String composite) {
         final String filePath = getFilePathFromComposite(composite);
-        final String[] pathTokens = filePath.split("/");
-        return pathTokens[pathTokens.length - 1];
+        return filePath.substring(filePath.lastIndexOf('/') + 1);
     }
 
     public String getFilePathFromComposite(final String composite) {
@@ -73,21 +72,21 @@ public class ComponentHelper {
             endIndex = lastIndex;
         }
 
-        return composite.substring(startIndex, endIndex);
+        return composite.substring(startIndex, endIndex).trim();
     }
 
-    public Collection<InputFile> getInputFilesFromStrings(final Collection<String> sharedComponents) {
+    public Collection<InputFile> getInputFilesFromStrings(final Collection<String> sharedComponentNames) {
         final Collection<InputFile> inputFilesFromStrings = new HashSet<>();
-        for (final String filePath : sharedComponents) {
+        for (final String filePath : sharedComponentNames) {
             inputFilesFromStrings.add(getInputFileFromString(filePath));
         }
         return inputFilesFromStrings;
     }
 
-    public InputFile getInputFileFromString(final String filePath) {
+    public InputFile getInputFileFromString(final String fileName) {
         final SensorContext context = sonarManager.getSensorContext();
         if (context != null) {
-            return getInputFiles(context.fileSystem()).get(filePath);
+            return getInputFiles(context.fileSystem()).get(fileName);
         }
         return null;
     }
@@ -126,7 +125,7 @@ public class ComponentHelper {
         if (inputFiles == null) {
             inputFiles = new HashMap<>();
             for (final InputFile inputFile : fileSystem.inputFiles(fileSystem.predicates().all())) {
-                inputFiles.put(inputFile.absolutePath(), inputFile);
+                inputFiles.put(inputFile.filename(), inputFile);
             }
         }
         return inputFiles;

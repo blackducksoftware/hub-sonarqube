@@ -23,7 +23,6 @@
  */
 package com.blackducksoftware.integration.hub.sonar.metric;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
@@ -56,9 +55,7 @@ public class MetricsHelper {
     }
 
     public void createMeasuresForInputFile(final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap, final InputFile inputFile) {
-        final File actualFile = inputFile.file();
-        final String[] fileTokens = actualFile.getName().split("/");
-        final String fileName = fileTokens[fileTokens.length - 1];
+        final String fileName = inputFile.filename();
         if (vulnerableComponentsMap.containsKey(fileName)) {
             final StringBuilder compListBuilder = new StringBuilder();
             int high = 0;

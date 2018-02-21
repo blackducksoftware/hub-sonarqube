@@ -24,10 +24,12 @@
 package com.blackducksoftware.integration.hub.sonar.model;
 
 import java.io.File;
+import java.net.URI;
 import java.util.Collection;
 
 import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
+import org.sonar.api.batch.fs.InputFile.Status;
 import org.sonar.api.batch.fs.InputFile.Type;
 
 public class MockFilePredicates implements FilePredicates {
@@ -40,27 +42,27 @@ public class MockFilePredicates implements FilePredicates {
 
     @Override
     public FilePredicate all() {
-        return null;
+        return predicate;
     }
 
     @Override
     public FilePredicate none() {
-        return null;
+        return predicate;
     }
 
     @Override
     public FilePredicate hasAbsolutePath(final String s) {
-        return null;
+        return predicate;
     }
 
     @Override
     public FilePredicate hasRelativePath(final String s) {
-        return null;
+        return predicate;
     }
 
     @Override
     public FilePredicate matchesPathPattern(final String inclusionPattern) {
-        return null;
+        return predicate;
     }
 
     @Override
@@ -82,32 +84,32 @@ public class MockFilePredicates implements FilePredicates {
 
     @Override
     public FilePredicate hasPath(final String s) {
-        return null;
+        return predicate;
     }
 
     @Override
     public FilePredicate is(final File ioFile) {
-        return null;
+        return predicate;
     }
 
     @Override
     public FilePredicate hasLanguage(final String language) {
-        return null;
+        return predicate;
     }
 
     @Override
     public FilePredicate hasLanguages(final Collection<String> languages) {
-        return null;
+        return predicate;
     }
 
     @Override
     public FilePredicate hasLanguages(final String... languages) {
-        return null;
+        return predicate;
     }
 
     @Override
     public FilePredicate hasType(final Type type) {
-        return null;
+        return predicate;
     }
 
     @Override
@@ -152,6 +154,21 @@ public class MockFilePredicates implements FilePredicates {
 
     @Override
     public FilePredicate hasFilename(final String filename) {
+        return predicate;
+    }
+
+    @Override
+    public FilePredicate hasURI(final URI uri) {
+        return predicate;
+    }
+
+    @Override
+    public FilePredicate hasStatus(final Status status) {
+        return predicate;
+    }
+
+    @Override
+    public FilePredicate hasAnyStatus() {
         return predicate;
     }
 }

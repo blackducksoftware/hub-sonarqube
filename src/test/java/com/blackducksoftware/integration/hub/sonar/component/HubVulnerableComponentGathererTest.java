@@ -30,7 +30,7 @@ import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.sonar.api.config.MapSettings;
+import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.internal.google.common.collect.Sets;
 import org.sonar.api.utils.log.Loggers;
 
@@ -54,7 +54,7 @@ public class HubVulnerableComponentGathererTest {
 
     @Before
     public void init() {
-        sonarManager = new SonarManager(new MapSettings());
+        sonarManager = new SonarManager(new MapSettings().asConfig());
         componentHelper = new ComponentHelper(sonarManager);
         logger = new HubSonarLogger(Loggers.get(getClass()));
 
@@ -66,7 +66,7 @@ public class HubVulnerableComponentGathererTest {
     public void constructorDoesNotInitializeProjectVersionFieldsTest() throws IntegrationException {
         final MapSettings mapSettings = new MapSettings();
         mapSettings.appendProperty(HubPropertyConstants.HUB_PROJECT_OVERRIDE, "projectOverride");
-        final SonarManager manager = new SonarManager(mapSettings);
+        final SonarManager manager = new SonarManager(mapSettings.asConfig());
         final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, versionBomComponentDataService);
 
         assertTrue(null != gatherer);
@@ -77,7 +77,7 @@ public class HubVulnerableComponentGathererTest {
         final MapSettings mapSettings = new MapSettings();
         mapSettings.appendProperty(HubPropertyConstants.HUB_PROJECT_OVERRIDE, "projectOverride");
         mapSettings.appendProperty(HubPropertyConstants.HUB_PROJECT_OVERRIDE, "projectVersionOverride");
-        final SonarManager manager = new SonarManager(mapSettings);
+        final SonarManager manager = new SonarManager(mapSettings.asConfig());
         final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, versionBomComponentDataService);
 
         assertTrue(null != gatherer);

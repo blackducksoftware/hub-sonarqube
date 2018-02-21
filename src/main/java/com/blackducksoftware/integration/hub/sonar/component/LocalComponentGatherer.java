@@ -23,14 +23,13 @@
  */
 package com.blackducksoftware.integration.hub.sonar.component;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FileSystem;
+import org.sonar.api.batch.fs.InputFile;
 
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.log.IntLogger;
@@ -54,15 +53,10 @@ public class LocalComponentGatherer implements ComponentGatherer {
         logger.debug(String.format("Exclusion Patterns: %s", Arrays.toString(sonarManager.getGlobalExclusionPatterns())));
         logger.debug(String.format("Base Directory: %s", fileSystem.baseDir().toString()));
 
-        final Set<String> localBinaries = new HashSet<>();
-        for (final File file : fileSystem.files(includeExcludePredicate)) {
-            try {
-                localBinaries.add(file.getCanonicalPath());
-            } catch (final IOException e) {
-                logger.warn(String.format("Problem getting canonical path for: %s", file));
-                localBinaries.add(file.getAbsolutePath());
-            }
+        final Set<String> localComponents = new HashSet<>();
+        for (final InputFile inputFile : fileSystem.inputFiles(includeExcludePredicate)) {
+            localComponents.add(inputFile.filename());
         }
-        return localBinaries;
+        return localComponents;
     }
 }

@@ -49,8 +49,7 @@ public class MockFilePredicate implements FilePredicate {
     public boolean apply(final InputFile inputFile) {
         boolean shouldApply = false;
         if (inputFile != null) {
-            final String[] pathArray = inputFile.absolutePath().split("/");
-            final String fileName = pathArray[pathArray.length - 1];
+            final String fileName = inputFile.filename();
             shouldApply = !shouldExclude(fileName) && shouldInclude(fileName);
         }
         return shouldApply;

@@ -24,12 +24,12 @@
 package com.blackducksoftware.integration.hub.sonar.manager;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.config.Settings;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.utils.log.Loggers;
 
 import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
@@ -44,18 +44,18 @@ import com.blackducksoftware.integration.validator.ValidationResults;
 public class SonarManager {
     private final HubSonarLogger logger;
     private final SensorContext context;
-    private final Settings settings;
+    private final Configuration configuration;
 
     @Deprecated
-    public SonarManager(final Settings settings) {
+    public SonarManager(final Configuration settings) {
         this.context = null;
-        this.settings = settings;
+        this.configuration = settings;
         logger = new HubSonarLogger(Loggers.get(getClass()));
     }
 
     public SonarManager(final SensorContext context) {
         this.context = context;
-        this.settings = context.settings();
+        this.configuration = context.config();
         logger = new HubSonarLogger(Loggers.get(context.getClass()));
     }
 
@@ -65,7 +65,7 @@ public class SonarManager {
 
     public HubServerConfig getHubServerConfigFromSettings() {
         final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
-        if (settings != null) {
+        if (configuration != null) {
             configBuilder.setHubUrl(getValue(HubPropertyConstants.HUB_URL));
             configBuilder.setUsername(getValue(HubPropertyConstants.HUB_USERNAME));
             configBuilder.setPassword(getValue(HubPropertyConstants.HUB_PASSWORD));
@@ -106,12 +106,12 @@ public class SonarManager {
     }
 
     public String getValue(final String key) {
-        final String value = settings.getString(key);
-        return StringUtils.isEmpty(value) ? "" : value.trim();
+        final Optional<String> value = configuration.get(key);
+        return value.isPresent() ? value.get().trim() : "";
     }
 
     public String[] getValues(final String key) {
-        return settings.getStringArray(key);
+        return configuration.getStringArray(key);
     }
 
     public String getHubPluginVersionFromFile(final String fileName) {

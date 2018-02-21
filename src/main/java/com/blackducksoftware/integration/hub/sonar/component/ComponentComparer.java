@@ -56,10 +56,10 @@ public class ComponentComparer {
             componentHelper.preProcessComponentListData(remoteComponentList);
         }
         final Set<String> sharedComponents = new HashSet<>();
-        for (final String local : localComponentList) {
-            for (final String remote : remoteComponentList) {
-                if (local.contains(remote)) {
-                    sharedComponents.add(local);
+        for (final String localComponent : localComponentList) {
+            for (final String remoteComponentName : remoteComponentList) {
+                if (localComponent.equals(remoteComponentName)) {
+                    sharedComponents.add(localComponent);
                     break;
                 }
             }
@@ -70,7 +70,6 @@ public class ComponentComparer {
     }
 
     public int getSharedComponentCount() {
-        sharedComponentCount = sharedComponentCount < 0 ? getSharedComponents().size() : sharedComponentCount;
-        return sharedComponentCount;
+        return sharedComponentCount < 0 ? getSharedComponents().size() : sharedComponentCount;
     }
 }

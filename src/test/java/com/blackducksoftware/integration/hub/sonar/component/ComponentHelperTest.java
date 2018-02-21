@@ -38,8 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.config.MapSettings;
-import org.sonar.api.config.Settings;
+import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.internal.google.common.collect.Sets;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
@@ -67,11 +66,11 @@ public class ComponentHelperTest {
 
     @Test
     public void preProcessComponentListDataTest() throws IntegrationException {
-        final Settings settings = new MapSettings();
+        final MapSettings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, "e, o");
 
         @SuppressWarnings("deprecation")
-        final ComponentHelper compHelper = new ComponentHelper(new SonarManager(settings));
+        final ComponentHelper compHelper = new ComponentHelper(new SonarManager(settings.asConfig()));
 
         final List<String> first = new ArrayList<>(Arrays.asList("one", "two", "three"));
         final List<String> second = new ArrayList<>(Arrays.asList("one", "two", "three", "three and a half"));
@@ -120,7 +119,7 @@ public class ComponentHelperTest {
     @Test
     public void getInputFilesFromStringsWithNullContextTest() {
         @SuppressWarnings("deprecation")
-        final SonarManager manager = new SonarManager(new MapSettings());
+        final SonarManager manager = new SonarManager(new MapSettings().asConfig());
         final ComponentHelper compHelper = new ComponentHelper(manager);
         final InputFile inputFile = compHelper.getInputFileFromString("INVALID_FILE");
 

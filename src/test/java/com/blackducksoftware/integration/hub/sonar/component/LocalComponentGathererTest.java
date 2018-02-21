@@ -33,8 +33,7 @@ import org.junit.Test;
 import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.internal.DefaultFileSystem;
-import org.sonar.api.config.MapSettings;
-import org.sonar.api.config.Settings;
+import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.internal.google.common.collect.Sets;
 
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
@@ -58,10 +57,10 @@ public class LocalComponentGathererTest {
     @SuppressWarnings("deprecation")
     protected static LocalComponentGatherer createGatherer(final File baseDir) {
         final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
-        final Settings settings = new MapSettings();
+        final MapSettings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, ".jar,.tar");
         settings.setProperty(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, ".png");
-        final SonarManager manager = new SonarManager(settings);
+        final SonarManager manager = new SonarManager(settings.asConfig());
 
         final DefaultFileSystem fileSystem = new MockFileSystem(baseDir);
         final FilePredicates predicates = new MockFilePredicates();
