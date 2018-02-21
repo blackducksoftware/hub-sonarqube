@@ -45,25 +45,15 @@ public class MockFileSystem extends DefaultFileSystem {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public Iterable<File> files(final FilePredicate predicate) {
-        final List<File> fileList = new ArrayList<>();
-        for (final InputFile inputFile : inputFiles(predicate)) {
-            if (predicate.apply(inputFile)) {
-                fileList.add(inputFile.file());
-            }
-        }
-        return fileList;
-    }
-
-    @Override
     public Iterable<InputFile> inputFiles(final FilePredicate predicate) {
         final List<InputFile> inputFileList = new ArrayList<>();
         for (final File file : baseDir.listFiles()) {
             InputFile inputFile;
             try {
                 inputFile = new TestInputFileBuilder(SonarTestUtils.MY_PROJECT_KEY, file.getName()).setModuleBaseDir(baseDir.toPath().toRealPath(LinkOption.NOFOLLOW_LINKS)).build();
-                inputFileList.add(inputFile);
+                if (predicate.apply(inputFile)) {
+                    inputFileList.add(inputFile);
+                }
             } catch (final IOException e) {
                 throw new MockException(e);
             }

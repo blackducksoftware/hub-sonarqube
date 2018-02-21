@@ -23,7 +23,7 @@
  */
 package com.blackducksoftware.integration.hub.sonar.component;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,9 +49,9 @@ public class LocalComponentGathererTest {
     public void gatherComponentsTest() throws IOException {
         final File baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
         final LocalComponentGatherer gatherer = createGatherer(baseDir);
-        final Set<String> expectedList = Sets.newHashSet(baseDir.getCanonicalPath() + "/test.jar", baseDir.getCanonicalPath() + "/test.tar");
+        final Set<String> expectedList = Sets.newHashSet("test.jar", "test.tar");
 
-        assertTrue(gatherer.gatherComponents().equals(expectedList));
+        assertEquals(expectedList, gatherer.gatherComponents());
     }
 
     @SuppressWarnings("deprecation")

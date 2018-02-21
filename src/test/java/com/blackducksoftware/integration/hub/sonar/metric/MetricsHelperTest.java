@@ -106,13 +106,17 @@ public class MetricsHelperTest {
     @Test
     public void createMeasuresForVulnerableComponentsTest() throws IOException {
         final String file1 = "test.jar";
+        final String longComponentName = "this_is_a_very_very_very_long_but_not_fully_qualified_file_name_that_is_contained_within_the_first_java_archive_file_so_it_will_have_a_subset_of_components.jar";
         final String componentKey1 = SonarTestUtils.MY_PROJECT_KEY + ":" + file1;
 
         final HubResponseService hubResponseService = new HubResponseService(new MockRestConnection(LOG));
         final VersionBomComponentView component0 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[0]), VersionBomComponentView.class);
         final VersionBomComponentView component1 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[1]), VersionBomComponentView.class);
+        final VersionBomComponentView component2 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[1]), VersionBomComponentView.class);
+        component2.componentName = longComponentName;
+
         final List<MatchedFilesView> matchedFiles = Collections.emptyList();
-        vulnerableComponentsMap.put(file1, Sets.newHashSet(new VersionBomComponentModel(component0, matchedFiles), (new VersionBomComponentModel(component1, matchedFiles))));
+        vulnerableComponentsMap.put(file1, Sets.newHashSet(new VersionBomComponentModel(component0, matchedFiles), new VersionBomComponentModel(component1, matchedFiles), new VersionBomComponentModel(component2, matchedFiles)));
 
         final List<InputFile> inputFiles = Arrays.asList(TestInputFileBuilder.create(SonarTestUtils.MY_PROJECT_KEY, file1).build());
 
@@ -133,6 +137,7 @@ public class MetricsHelperTest {
         assertEquals(1, high);
 
         final String compNames = componentNames.value();
-        assertTrue(compNames.contains("Test Component 0") && compNames.contains("Test Component 1"));
+        assertTrue(compNames.contains("Test Component 0"));
+        assertTrue(compNames.contains("Test Component 1"));
     }
 }

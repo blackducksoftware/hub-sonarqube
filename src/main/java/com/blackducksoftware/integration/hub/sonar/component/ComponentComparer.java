@@ -58,7 +58,7 @@ public class ComponentComparer {
         final Set<String> sharedComponents = new HashSet<>();
         for (final String localComponent : localComponentList) {
             for (final String remoteComponentName : remoteComponentList) {
-                if (localComponent.equals(remoteComponentName)) {
+                if (localComponent.endsWith(remoteComponentName)) {
                     sharedComponents.add(localComponent);
                     break;
                 }

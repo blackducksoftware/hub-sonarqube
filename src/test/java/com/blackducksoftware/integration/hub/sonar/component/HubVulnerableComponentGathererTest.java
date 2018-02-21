@@ -109,4 +109,7 @@ public class HubVulnerableComponentGathererTest {
 
         assertEquals(Sets.newHashSet(fileName), gatherer.gatherComponents());
     }
+
+    // TODO throw exception test
+
 }
