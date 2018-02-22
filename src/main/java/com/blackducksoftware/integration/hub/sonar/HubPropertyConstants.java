@@ -86,21 +86,25 @@ public class HubPropertyConstants {
                 "Hub project to map this SonarQube project to. Note: If this is not provided, the name of the SonarQube project and version will be used.", "", CATEGORY_PROJECT_OVERRIDE, 0);
         public static final PropertyDefinition HUB_PROJECT_VERSION_OVERRIED = buildProjectDef(HubPropertyConstants.HUB_PROJECT_VERSION_OVERRIED, PropertyType.STRING, "Hub Project Version Name: ",
                 "Version of Hub project to map this SonarQube project to. Note: If this is not provided, but the Hub project name is, both of these properties will be ignored.", "", CATEGORY_PROJECT_OVERRIDE, 1);
-        public static final PropertyDefinition HUB_BINARY_INCLUSION_PATTERN_OVERRIDE = buildProjectDef(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, PropertyType.STRING, "Binary Inclusion Patterns: ",
-                "File patterns used for gathering local components.", ComponentHelper.DEFAULT_INCLUSION_PATTERNS, CATEGORY_PATTERN_OVERRIDE, 2);
-        public static final PropertyDefinition HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE = buildProjectDef(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, PropertyType.STRING, "Binary Exclusion Patterns: ",
-                "File patterns used for gathering local components.", ComponentHelper.DEFAULT_EXCLUSION_PATTERNS, CATEGORY_PATTERN_OVERRIDE, 3);
+        public static final PropertyDefinition HUB_BINARY_INCLUSION_PATTERN_OVERRIDE = createPropertyDefinitionBuilder(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, PropertyType.STRING, "Binary Inclusion Patterns: ",
+                "File patterns used for gathering local components.", ComponentHelper.DEFAULT_INCLUSION_PATTERNS, CATEGORY_PATTERN_OVERRIDE, 2).onlyOnQualifiers(Arrays.asList(Qualifiers.PROJECT)).multiValues(true).build();
+        public static final PropertyDefinition HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE = createPropertyDefinitionBuilder(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, PropertyType.STRING, "Binary Exclusion Patterns: ",
+                "File patterns used for gathering local components.", ComponentHelper.DEFAULT_EXCLUSION_PATTERNS, CATEGORY_PATTERN_OVERRIDE, 3).onlyOnQualifiers(Arrays.asList(Qualifiers.PROJECT)).multiValues(true).build();
 
         private Definitions() {
             // This class should not be instantiated. Added to meet SonarQube standard.
         }
 
         private static PropertyDefinition buildGlobalDef(final String prop, final PropertyType type, final String name, final String desc, final String defaultVal, final String subCategory, final int index) {
-            return PropertyDefinition.builder(prop).type(type).name(name).description(desc).defaultValue(defaultVal).subCategory(subCategory).index(index).build();
+            return createPropertyDefinitionBuilder(prop, type, name, desc, defaultVal, subCategory, index).build();
         }
 
         private static PropertyDefinition buildProjectDef(final String prop, final PropertyType type, final String name, final String desc, final String defaultVal, final String subCategory, final int index) {
-            return PropertyDefinition.builder(prop).type(type).name(name).description(desc).defaultValue(defaultVal).subCategory(subCategory).onlyOnQualifiers(Arrays.asList(Qualifiers.PROJECT)).index(index).build();
+            return createPropertyDefinitionBuilder(prop, type, name, desc, defaultVal, subCategory, index).onlyOnQualifiers(Arrays.asList(Qualifiers.PROJECT)).build();
+        }
+
+        private static PropertyDefinition.Builder createPropertyDefinitionBuilder(final String prop, final PropertyType type, final String name, final String desc, final String defaultVal, final String subCategory, final int index) {
+            return PropertyDefinition.builder(prop).type(type).name(name).description(desc).defaultValue(defaultVal).subCategory(subCategory).index(index);
         }
     }
 }

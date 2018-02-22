@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOCase;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -116,9 +118,10 @@ public class ComponentHelper {
         return collection.stream().flatMap(Collection::stream).collect(Collectors.toSet());
     }
 
+    // returns true if str loosely matches (case insensitive) the provided pattern or if str strictly matches (case sensitive) the unqualifiedPattern
     public boolean componentMatchesInclusionPattern(final String str, final String pattern) {
-        final String suffix = trimPatternToSuffix(pattern);
-        return str.endsWith(suffix) || (str.contains(suffix) && pattern.endsWith(ANY_STRING_PATTERN));
+        final String unqualifiedPattern = pattern.substring(pattern.lastIndexOf('/') + 1);
+        return FilenameUtils.wildcardMatch(str, pattern, IOCase.INSENSITIVE) || FilenameUtils.wildcardMatch(str, unqualifiedPattern, IOCase.SENSITIVE);
     }
 
     private Map<String, InputFile> getInputFiles(final FileSystem fileSystem) {
@@ -129,18 +132,5 @@ public class ComponentHelper {
             }
         }
         return inputFiles;
-    }
-
-    private String trimPatternToSuffix(final String pattern) {
-        String suffix = pattern;
-        if (pattern.contains(ANY_STRING_PATTERN)) {
-            final int lastIndex = pattern.lastIndexOf(ANY_STRING_PATTERN);
-            if (lastIndex == pattern.length() - 1) {
-                suffix = trimPatternToSuffix(pattern.substring(0, lastIndex));
-            } else {
-                suffix = pattern.substring(lastIndex + 1, pattern.length()).trim();
-            }
-        }
-        return suffix;
     }
 }

@@ -67,12 +67,12 @@ public class ComponentHelperTest {
     @Test
     public void preProcessComponentListDataTest() throws IntegrationException {
         final MapSettings settings = new MapSettings();
-        settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, "e, o");
+        settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, "o??, *ee");
 
         @SuppressWarnings("deprecation")
         final ComponentHelper compHelper = new ComponentHelper(new SonarManager(settings.asConfig()));
 
-        final List<String> first = new ArrayList<>(Arrays.asList("one", "two", "three"));
+        final List<String> first = new ArrayList<>(Arrays.asList("one", "three"));
         final List<String> second = new ArrayList<>(Arrays.asList("one", "two", "three", "three and a half"));
 
         compHelper.preProcessComponentListData(second);
@@ -133,7 +133,7 @@ public class ComponentHelperTest {
 
     @Test
     public void componentMatchesSuffixInclusionPatternTest() {
-        assertTrue(helper.componentMatchesInclusionPattern(EXAMPLE_COMPONENT_FILE_NAME, ".jar"));
+        assertTrue(helper.componentMatchesInclusionPattern(EXAMPLE_COMPONENT_FILE_NAME, "*.jar"));
     }
 
     @Test

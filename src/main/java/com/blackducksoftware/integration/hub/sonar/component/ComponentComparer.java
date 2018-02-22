@@ -31,8 +31,9 @@ public class ComponentComparer {
     private final Collection<String> localComponentList;
     private final Collection<String> remoteComponentList;
     private final ComponentHelper componentHelper;
+
     private int sharedComponentCount;
-    private final boolean needsValidation;
+    private boolean needsValidation;
 
     public ComponentComparer(final ComponentHelper componentHelper, final ComponentGatherer localComponentGatherer, final ComponentGatherer remoteComponentGatherer) {
         this.componentHelper = componentHelper;
@@ -54,6 +55,7 @@ public class ComponentComparer {
         if (needsValidation) {
             componentHelper.preProcessComponentListData(localComponentList);
             componentHelper.preProcessComponentListData(remoteComponentList);
+            needsValidation = false;
         }
         final Set<String> sharedComponents = new HashSet<>();
         for (final String localComponent : localComponentList) {
