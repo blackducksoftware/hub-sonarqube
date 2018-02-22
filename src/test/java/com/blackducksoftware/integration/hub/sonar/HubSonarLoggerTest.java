@@ -169,7 +169,6 @@ public class HubSonarLoggerTest {
 
     @Test
     public void overloadedSetLogLevelTest() {
-
         Exception exeption = null;
         try {
             logTester.setLevel(LoggerLevel.TRACE);

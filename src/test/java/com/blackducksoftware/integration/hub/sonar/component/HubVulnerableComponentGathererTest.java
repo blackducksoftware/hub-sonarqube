@@ -27,14 +27,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.internal.google.common.collect.Sets;
 import org.sonar.api.utils.log.Loggers;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.VersionBomComponentDataService;
+import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
 import com.blackducksoftware.integration.hub.model.view.MatchedFilesView;
 import com.blackducksoftware.integration.hub.model.view.components.FilePathView;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
@@ -64,9 +69,8 @@ public class HubVulnerableComponentGathererTest {
 
     @Test
     public void constructorDoesNotInitializeProjectVersionFieldsTest() throws IntegrationException {
-        final MapSettings mapSettings = new MapSettings();
-        mapSettings.appendProperty(HubPropertyConstants.HUB_PROJECT_OVERRIDE, "projectOverride");
-        final SonarManager manager = new SonarManager(mapSettings.asConfig());
+        final SonarManager manager = Mockito.mock(SonarManager.class);
+        Mockito.when(manager.getValue(HubPropertyConstants.HUB_PROJECT_OVERRIDE)).thenReturn("projectOverride");
         final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, versionBomComponentDataService);
 
         assertTrue(null != gatherer);
@@ -74,10 +78,10 @@ public class HubVulnerableComponentGathererTest {
 
     @Test
     public void constructorInitializesProjectVersionFieldsTest() throws IntegrationException {
-        final MapSettings mapSettings = new MapSettings();
-        mapSettings.appendProperty(HubPropertyConstants.HUB_PROJECT_OVERRIDE, "projectOverride");
-        mapSettings.appendProperty(HubPropertyConstants.HUB_PROJECT_OVERRIDE, "projectVersionOverride");
-        final SonarManager manager = new SonarManager(mapSettings.asConfig());
+        final SonarManager manager = Mockito.mock(SonarManager.class);
+        Mockito.when(manager.getValue(HubPropertyConstants.HUB_PROJECT_OVERRIDE)).thenReturn("projectOverride");
+        Mockito.when(manager.getValue(HubPropertyConstants.HUB_PROJECT_VERSION_OVERRIED)).thenReturn("projectVersionOverride");
+
         final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, versionBomComponentDataService);
 
         assertTrue(null != gatherer);
@@ -110,6 +114,15 @@ public class HubVulnerableComponentGathererTest {
         assertEquals(Sets.newHashSet(fileName), gatherer.gatherComponents());
     }
 
-    // TODO throw exception test
+    @Test
+    public void getVulnerableComponentMapThrowsExceptionTest() throws IntegrationException {
+        final VersionBomComponentDataService dataService = Mockito.mock(VersionBomComponentDataService.class);
+        Mockito.when(dataService.getComponentsForProjectVersion(Mockito.any(), Mockito.any())).thenThrow(new IntegrationException());
+
+        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, dataService);
+        final Map<String, Set<VersionBomComponentModel>> map = gatherer.getVulnerableComponentMap();
+
+        assertTrue(map.isEmpty());
+    }
 
 }
