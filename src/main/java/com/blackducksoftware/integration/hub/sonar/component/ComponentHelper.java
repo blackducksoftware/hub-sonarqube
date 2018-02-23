@@ -23,6 +23,8 @@
  */
 package com.blackducksoftware.integration.hub.sonar.component;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -85,10 +87,10 @@ public class ComponentHelper {
         return inputFilesFromStrings;
     }
 
-    public InputFile getInputFileFromString(final String fileName) {
+    public InputFile getInputFileFromString(final String filePath) {
         final SensorContext context = sonarManager.getSensorContext();
         if (context != null) {
-            return getInputFiles(context.fileSystem()).get(fileName);
+            return getInputFiles(context.fileSystem()).get(filePath);
         }
         return null;
     }
@@ -128,7 +130,14 @@ public class ComponentHelper {
         if (inputFiles == null) {
             inputFiles = new HashMap<>();
             for (final InputFile inputFile : fileSystem.inputFiles(fileSystem.predicates().all())) {
-                inputFiles.put(inputFile.filename(), inputFile);
+                final File fromUri = new File(inputFile.uri());
+                String filePath;
+                try {
+                    filePath = fromUri.getCanonicalPath();
+                } catch (final IOException e) {
+                    filePath = fromUri.getAbsolutePath();
+                }
+                inputFiles.put(filePath, inputFile);
             }
         }
         return inputFiles;

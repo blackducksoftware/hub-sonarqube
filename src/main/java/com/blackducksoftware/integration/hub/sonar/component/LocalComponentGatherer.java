@@ -23,6 +23,8 @@
  */
 package com.blackducksoftware.integration.hub.sonar.component;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -55,7 +57,13 @@ public class LocalComponentGatherer implements ComponentGatherer {
 
         final Set<String> localComponents = new HashSet<>();
         for (final InputFile inputFile : fileSystem.inputFiles(includeExcludePredicate)) {
-            localComponents.add(inputFile.filename());
+            final File fromUri = new File(inputFile.uri());
+            try {
+                localComponents.add(fromUri.getCanonicalPath());
+            } catch (final IOException e) {
+                logger.error("Problem getting canonical path.", e);
+                localComponents.add(fromUri.getAbsolutePath());
+            }
         }
         return localComponents;
     }

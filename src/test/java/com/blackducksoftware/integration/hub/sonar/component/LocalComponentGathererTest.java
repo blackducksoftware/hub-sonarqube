@@ -48,8 +48,9 @@ public class LocalComponentGathererTest {
     @Test
     public void gatherComponentsTest() throws IOException {
         final File baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
+        final String canonicalPath = baseDir.getCanonicalPath() + "/";
         final LocalComponentGatherer gatherer = createGatherer(baseDir);
-        final Set<String> expectedList = Sets.newHashSet("test.jar", "test.tar");
+        final Set<String> expectedList = Sets.newHashSet(canonicalPath + "test.jar", canonicalPath + "test.tar");
 
         assertEquals(expectedList, gatherer.gatherComponents());
     }
