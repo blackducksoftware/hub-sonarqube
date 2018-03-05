@@ -82,7 +82,10 @@ public class ComponentHelper {
     public Collection<InputFile> getInputFilesFromStrings(final Collection<String> sharedComponentNames) {
         final Collection<InputFile> inputFilesFromStrings = new HashSet<>();
         for (final String filePath : sharedComponentNames) {
-            inputFilesFromStrings.add(getInputFileFromString(filePath));
+            final InputFile inputFileFromString = getInputFileFromString(filePath);
+            if (inputFileFromString != null) {
+                inputFilesFromStrings.add(inputFileFromString);
+            }
         }
         return inputFilesFromStrings;
     }
