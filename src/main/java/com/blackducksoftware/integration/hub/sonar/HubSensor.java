@@ -36,10 +36,10 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.utils.log.Loggers;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
-import com.blackducksoftware.integration.hub.global.HubServerConfig;
+import com.blackducksoftware.integration.hub.configuration.HubServerConfig;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.service.HubServicesFactory;
+import com.blackducksoftware.integration.hub.service.model.VersionBomComponentModel;
 import com.blackducksoftware.integration.hub.sonar.component.ComponentComparer;
 import com.blackducksoftware.integration.hub.sonar.component.ComponentHelper;
 import com.blackducksoftware.integration.hub.sonar.component.HubVulnerableComponentGatherer;
@@ -47,7 +47,6 @@ import com.blackducksoftware.integration.hub.sonar.component.LocalComponentGathe
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.hub.sonar.metric.MetricsHelper;
 import com.blackducksoftware.integration.log.IntLogger;
-import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
 
 public class HubSensor implements Sensor {
     @Override
@@ -67,7 +66,7 @@ public class HubSensor implements Sensor {
             return;
         }
         final HubServicesFactory hubServicesFactory = new HubServicesFactory(restConnection);
-        hubServicesFactory.createPhoneHomeDataService().phoneHome(ThirdPartyName.SONARQUBE, context.getSonarQubeVersion().toString(), sonarManager.getHubPluginVersionFromFile("/plugin.properties"));
+        hubServicesFactory.createPhoneHomeService().phoneHome("hub-sonarqube", sonarManager.getHubPluginVersion());
 
         final FileSystem fileSystem = context.fileSystem();
         final FilePredicates filePredicates = fileSystem.predicates();
@@ -78,7 +77,7 @@ public class HubSensor implements Sensor {
         final Set<String> localComponents = localComponentGatherer.gatherComponents();
 
         logger.info("Gathering Hub component files...");
-        final HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, hubServicesFactory.createVersionBomComponentDataservice());
+        final HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, hubServicesFactory.createProjectService());
         final Set<String> hubComponents = hubComponentGatherer.gatherComponents();
 
         logger.info(String.format("--> Number of local files matching inclusion/exclusion patterns: %d", localComponents.size()));

@@ -31,6 +31,8 @@ import java.util.List;
 
 import org.sonar.api.internal.apachecommons.io.IOUtils;
 
+import com.google.gson.Gson;
+
 public class SonarTestUtils {
     public static final String MY_PROJECT_KEY = "myProjectKey";
     public static final String TEST_DIRECTORY = "./src/test/resources/baseDir";
@@ -38,6 +40,8 @@ public class SonarTestUtils {
     public static final String PATH_DELIM = "/";
 
     private static final String[] JSON_COMPONENT_FILE_NAMES = { "component0.txt", "component1.txt" };
+
+    public static final Gson GSON = new Gson();
 
     private SonarTestUtils() {
         // This class should not be instantiated.

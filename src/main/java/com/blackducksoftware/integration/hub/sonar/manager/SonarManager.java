@@ -32,8 +32,10 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.utils.log.Loggers;
 
-import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
-import com.blackducksoftware.integration.hub.global.HubServerConfig;
+import com.blackducksoftware.integration.hub.Credentials;
+import com.blackducksoftware.integration.hub.configuration.HubServerConfig;
+import com.blackducksoftware.integration.hub.configuration.HubServerConfigBuilder;
+import com.blackducksoftware.integration.hub.rest.UriCombiner;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 import com.blackducksoftware.integration.validator.AbstractValidator;
@@ -80,7 +82,7 @@ public class SonarManager {
         if (isConfigValid(configBuilder)) {
             return configBuilder.build();
         }
-        return new HubServerConfig(null, 300, null, null, false);
+        return new HubServerConfig(null, 300, (Credentials) null, null, false, new UriCombiner());
     }
 
     public boolean isConfigValid(final HubServerConfigBuilder configBuilder) {
@@ -112,6 +114,10 @@ public class SonarManager {
 
     public String[] getValues(final String key) {
         return configuration.getStringArray(key);
+    }
+
+    public String getHubPluginVersion() {
+        return getHubPluginVersionFromFile("/plugin.properties");
     }
 
     public String getHubPluginVersionFromFile(final String fileName) {

@@ -26,7 +26,10 @@ package com.blackducksoftware.integration.hub.sonar.component;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,40 +41,41 @@ import org.sonar.api.internal.google.common.collect.Sets;
 import org.sonar.api.utils.log.Loggers;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.VersionBomComponentDataService;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
-import com.blackducksoftware.integration.hub.model.view.MatchedFilesView;
-import com.blackducksoftware.integration.hub.model.view.components.FilePathView;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.hub.api.generated.component.CompositePathWithArchiveContext;
+import com.blackducksoftware.integration.hub.api.generated.view.MatchedFileView;
+import com.blackducksoftware.integration.hub.api.generated.view.VersionBomComponentView;
+import com.blackducksoftware.integration.hub.service.ProjectService;
+import com.blackducksoftware.integration.hub.service.model.VersionBomComponentModel;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
+import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
-import com.blackducksoftware.integration.hub.sonar.model.MockRestConnection;
-import com.blackducksoftware.integration.hub.sonar.model.MockVersionBomComponentDataService;
 import com.blackducksoftware.integration.log.IntLogger;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 @SuppressWarnings("deprecation")
 public class HubVulnerableComponentGathererTest {
-    private IntLogger logger;
+    private final IntLogger logger = new HubSonarLogger(Loggers.get(getClass()));
+    private final Gson gson = new Gson();
+
     private ComponentHelper componentHelper;
     private SonarManager sonarManager;
-    private MockVersionBomComponentDataService versionBomComponentDataService;
+    private ProjectService mockProjectService;
 
     @Before
     public void init() {
         sonarManager = new SonarManager(new MapSettings().asConfig());
         componentHelper = new ComponentHelper(sonarManager);
-        logger = new HubSonarLogger(Loggers.get(getClass()));
 
-        final RestConnection restConnection = new MockRestConnection(logger);
-        versionBomComponentDataService = new MockVersionBomComponentDataService(restConnection);
+        mockProjectService = Mockito.mock(ProjectService.class);
     }
 
     @Test
     public void constructorDoesNotInitializeProjectVersionFieldsTest() throws IntegrationException {
         final SonarManager manager = Mockito.mock(SonarManager.class);
         Mockito.when(manager.getValue(HubPropertyConstants.HUB_PROJECT_OVERRIDE)).thenReturn("projectOverride");
-        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, versionBomComponentDataService);
+        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, mockProjectService);
 
         assertTrue(null != gatherer);
     }
@@ -82,44 +86,49 @@ public class HubVulnerableComponentGathererTest {
         Mockito.when(manager.getValue(HubPropertyConstants.HUB_PROJECT_OVERRIDE)).thenReturn("projectOverride");
         Mockito.when(manager.getValue(HubPropertyConstants.HUB_PROJECT_VERSION_OVERRIED)).thenReturn("projectVersionOverride");
 
-        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, versionBomComponentDataService);
+        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, mockProjectService);
 
         assertTrue(null != gatherer);
     }
 
     @Test
     public void gatherComponentsEmptyTest() throws IntegrationException {
-        versionBomComponentDataService.setEmpty(true);
-        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, versionBomComponentDataService);
+        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, mockProjectService);
 
         assertTrue(gatherer.gatherComponents().isEmpty());
     }
 
     @Test
-    public void gatherComponentsWithMatchesTest() throws IntegrationException {
-        final MatchedFilesView matchedFiles0 = new MatchedFilesView();
-        final FilePathView filePath0 = new FilePathView();
+    public void gatherComponentsWithMatchesTest() throws IntegrationException, JsonSyntaxException, IOException {
+        final MatchedFileView matchedFiles0 = new MatchedFileView();
+        final CompositePathWithArchiveContext filePath0 = new CompositePathWithArchiveContext();
         final String fileName = "test.jar";
         filePath0.compositePathContext = fileName + "!";
         matchedFiles0.filePath = filePath0;
+        matchedFiles0.usages = Collections.emptyList();
 
-        final MatchedFilesView matchedFiles1 = new MatchedFilesView();
-        final FilePathView filePath1 = new FilePathView();
+        final MatchedFileView matchedFiles1 = new MatchedFileView();
+        final CompositePathWithArchiveContext filePath1 = new CompositePathWithArchiveContext();
         filePath1.compositePathContext = "test.tar!";
         matchedFiles1.filePath = filePath1;
+        matchedFiles1.usages = Collections.emptyList();
 
-        versionBomComponentDataService.setMatchedFiles(Arrays.asList(matchedFiles0), Arrays.asList(matchedFiles1));
-        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, versionBomComponentDataService);
+        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, mockProjectService);
+
+        final VersionBomComponentView component0 = gson.fromJson(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[0]), VersionBomComponentView.class);
+        final VersionBomComponentView component1 = gson.fromJson(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[1]), VersionBomComponentView.class);
+        final List<VersionBomComponentModel> components = Arrays.asList(new VersionBomComponentModel(component0, Arrays.asList(matchedFiles0)), new VersionBomComponentModel(component1, Arrays.asList(matchedFiles1)));
+        Mockito.when(mockProjectService.getComponentsWithMatchedFilesForProjectVersion(Mockito.anyString(), Mockito.anyString())).thenReturn(components);
 
         assertEquals(Sets.newHashSet(fileName), gatherer.gatherComponents());
     }
 
     @Test
     public void getVulnerableComponentMapThrowsExceptionTest() throws IntegrationException {
-        final VersionBomComponentDataService dataService = Mockito.mock(VersionBomComponentDataService.class);
-        Mockito.when(dataService.getComponentsForProjectVersion(Mockito.any(), Mockito.any())).thenThrow(new IntegrationException());
+        final ProjectService projectServiceMock = Mockito.mock(ProjectService.class);
+        Mockito.when(projectServiceMock.getComponentsForProjectVersion(Mockito.any(), Mockito.any())).thenThrow(new IntegrationException());
 
-        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, dataService);
+        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, projectServiceMock);
         final Map<String, Set<VersionBomComponentModel>> map = gatherer.getVulnerableComponentMap();
 
         assertTrue(map.isEmpty());

@@ -32,9 +32,9 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.measures.Metric;
 
-import com.blackducksoftware.integration.hub.dataservice.model.RiskProfileCounts;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
-import com.blackducksoftware.integration.hub.model.enumeration.RiskCountEnum;
+import com.blackducksoftware.integration.hub.api.generated.enumeration.RiskCountType;
+import com.blackducksoftware.integration.hub.service.model.RiskProfileCounts;
+import com.blackducksoftware.integration.hub.service.model.VersionBomComponentModel;
 import com.blackducksoftware.integration.log.IntLogger;
 
 public class MetricsHelper {
@@ -73,9 +73,9 @@ public class MetricsHelper {
                 compListBuilder.append(compVersionUrl + ",");
 
                 final RiskProfileCounts riskProfile = component.getSecurityRiskProfile();
-                high += riskProfile.getCount(RiskCountEnum.HIGH);
-                med += riskProfile.getCount(RiskCountEnum.MEDIUM);
-                low += riskProfile.getCount(RiskCountEnum.LOW);
+                high += riskProfile.getCount(RiskCountType.HIGH);
+                med += riskProfile.getCount(RiskCountType.MEDIUM);
+                low += riskProfile.getCount(RiskCountType.LOW);
             }
             createMeasure(HubSonarMetrics.NUM_VULN_LOW, inputFile, low);
             createMeasure(HubSonarMetrics.NUM_VULN_MED, inputFile, med);

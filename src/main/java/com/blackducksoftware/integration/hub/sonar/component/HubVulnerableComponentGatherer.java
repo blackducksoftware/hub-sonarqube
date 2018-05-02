@@ -32,9 +32,9 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.VersionBomComponentDataService;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.MatchedFilesModel;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
+import com.blackducksoftware.integration.hub.service.ProjectService;
+import com.blackducksoftware.integration.hub.service.model.MatchedFilesModel;
+import com.blackducksoftware.integration.hub.service.model.VersionBomComponentModel;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.log.IntLogger;
@@ -43,17 +43,17 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
     private final IntLogger logger;
     private final ComponentHelper componentHelper;
     private final SonarManager sonarManager;
-    private final VersionBomComponentDataService versionBomComponentDataService;
+    private final ProjectService projectService;
 
     private final Map<String, Set<VersionBomComponentModel>> vulnerableComponentMap;
     private String hubProjectName;
     private String hubProjectVersionName;
 
-    public HubVulnerableComponentGatherer(final IntLogger logger, final ComponentHelper componentHelper, final SonarManager sonarManager, final VersionBomComponentDataService versionBomComponentDataService) {
+    public HubVulnerableComponentGatherer(final IntLogger logger, final ComponentHelper componentHelper, final SonarManager sonarManager, final ProjectService projectService) {
         this.logger = logger;
         this.componentHelper = componentHelper;
         this.sonarManager = sonarManager;
-        this.versionBomComponentDataService = versionBomComponentDataService;
+        this.projectService = projectService;
 
         this.vulnerableComponentMap = new HashMap<>();
         setProjectAndVersion();
@@ -70,7 +70,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         if (vulnerableComponentMap.isEmpty()) {
             List<VersionBomComponentModel> components = null;
             try {
-                components = versionBomComponentDataService.getComponentsForProjectVersion(hubProjectName, hubProjectVersionName);
+                components = projectService.getComponentsWithMatchedFilesForProjectVersion(hubProjectName, hubProjectVersionName);
             } catch (final IntegrationException e) {
                 logger.error(String.format("Problem getting BOM components: %s", e));
             }
