@@ -50,13 +50,10 @@ import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.log.LogLevel;
 import com.blackducksoftware.integration.log.PrintStreamIntLogger;
-import com.google.gson.Gson;
 
 public class MetricsHelperTest {
     private static final File BASE_DIR = new File(SonarTestUtils.TEST_DIRECTORY);
     private static final IntLogger LOG = new PrintStreamIntLogger(System.out, LogLevel.INFO);
-
-    private final Gson gson = new Gson();
 
     private SensorContextTester context;
     private Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap;
@@ -110,9 +107,9 @@ public class MetricsHelperTest {
         final String longComponentName = "this_is_a_very_very_very_long_but_not_fully_qualified_file_name_that_is_contained_within_the_first_java_archive_file_so_it_will_have_a_subset_of_components.jar";
         final String componentKey1 = SonarTestUtils.MY_PROJECT_KEY + ":" + file1;
 
-        final VersionBomComponentView component0 = gson.fromJson(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[0]), VersionBomComponentView.class);
-        final VersionBomComponentView component1 = gson.fromJson(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[1]), VersionBomComponentView.class);
-        final VersionBomComponentView component2 = gson.fromJson(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[1]), VersionBomComponentView.class);
+        final VersionBomComponentView component0 = SonarTestUtils.getObjectFromJsonFile(SonarTestUtils.JSON_COMPONENT_FILE_NAMES[0], VersionBomComponentView.class);
+        final VersionBomComponentView component1 = SonarTestUtils.getObjectFromJsonFile(SonarTestUtils.JSON_COMPONENT_FILE_NAMES[1], VersionBomComponentView.class);
+        final VersionBomComponentView component2 = SonarTestUtils.getObjectFromJsonFile(SonarTestUtils.JSON_COMPONENT_FILE_NAMES[1], VersionBomComponentView.class);
         component2.componentName = longComponentName;
 
         final List<MatchedFileView> matchedFiles = Collections.emptyList();

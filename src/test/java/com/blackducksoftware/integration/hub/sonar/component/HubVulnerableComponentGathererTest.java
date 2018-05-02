@@ -51,13 +51,11 @@ import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
 import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.log.IntLogger;
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 @SuppressWarnings("deprecation")
 public class HubVulnerableComponentGathererTest {
     private final IntLogger logger = new HubSonarLogger(Loggers.get(getClass()));
-    private final Gson gson = new Gson();
 
     private ComponentHelper componentHelper;
     private SonarManager sonarManager;
@@ -115,8 +113,8 @@ public class HubVulnerableComponentGathererTest {
 
         final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, mockProjectService);
 
-        final VersionBomComponentView component0 = gson.fromJson(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[0]), VersionBomComponentView.class);
-        final VersionBomComponentView component1 = gson.fromJson(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[1]), VersionBomComponentView.class);
+        final VersionBomComponentView component0 = SonarTestUtils.getObjectFromJsonFile(SonarTestUtils.JSON_COMPONENT_FILE_NAMES[0], VersionBomComponentView.class);
+        final VersionBomComponentView component1 = SonarTestUtils.getObjectFromJsonFile(SonarTestUtils.JSON_COMPONENT_FILE_NAMES[1], VersionBomComponentView.class);
         final List<VersionBomComponentModel> components = Arrays.asList(new VersionBomComponentModel(component0, Arrays.asList(matchedFiles0)), new VersionBomComponentModel(component1, Arrays.asList(matchedFiles1)));
         Mockito.when(mockProjectService.getComponentsWithMatchedFilesForProjectVersion(Mockito.anyString(), Mockito.anyString())).thenReturn(components);
 

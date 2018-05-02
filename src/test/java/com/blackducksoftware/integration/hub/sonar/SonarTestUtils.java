@@ -38,10 +38,9 @@ public class SonarTestUtils {
     public static final String TEST_DIRECTORY = "./src/test/resources/baseDir";
     public static final String JSON_DIRECTORY = TEST_DIRECTORY + "/json";
     public static final String PATH_DELIM = "/";
+    public static final String[] JSON_COMPONENT_FILE_NAMES = { "component0.txt", "component1.txt" };
 
-    private static final String[] JSON_COMPONENT_FILE_NAMES = { "component0.txt", "component1.txt" };
-
-    public static final Gson GSON = new Gson();
+    private static final Gson gson = new Gson();
 
     private SonarTestUtils() {
         // This class should not be instantiated.
@@ -53,6 +52,11 @@ public class SonarTestUtils {
         return first.equals(second);
     }
 
+    public static <T> T getObjectFromJsonFile(final String fileName, final Class<T> clazz) throws IOException {
+        final String json = getJsonFromFile(fileName);
+        return gson.fromJson(json, clazz);
+    }
+
     @SuppressWarnings("resource")
     public static String getJsonFromFile(final String fileName) throws IOException {
         final File file = new File(JSON_DIRECTORY + PATH_DELIM + fileName);
@@ -62,7 +66,4 @@ public class SonarTestUtils {
         return json;
     }
 
-    public static String[] getJsonComponentFileNames() {
-        return JSON_COMPONENT_FILE_NAMES;
-    }
 }
