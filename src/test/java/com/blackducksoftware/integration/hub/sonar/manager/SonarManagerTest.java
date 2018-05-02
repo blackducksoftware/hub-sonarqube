@@ -26,12 +26,18 @@ package com.blackducksoftware.integration.hub.sonar.manager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.config.internal.MapSettings;
 
+import com.blackducksoftware.integration.hub.configuration.HubServerConfigBuilder;
+import com.blackducksoftware.integration.hub.configuration.HubServerConfigValidator;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
+import com.blackducksoftware.integration.validator.ValidationResults;
 
 @SuppressWarnings("deprecation")
 public class SonarManagerTest {
@@ -39,6 +45,35 @@ public class SonarManagerTest {
     private static final String DELIMITER = ", ";
 
     private static final String EXAMPLE_KEY = "key";
+
+    @Test
+    public void getHubServerConfigFromSettingsWithMissingFieldsTest() {
+        SonarManager manager = new SonarManager((Configuration) null);
+        manager = Mockito.spy(manager);
+        Mockito.doReturn(Boolean.TRUE).when(manager).isConfigValid(Mockito.any());
+
+        try {
+            manager.getHubServerConfigFromSettings();
+            fail();
+        } catch (final Exception e) {
+            // The builder should throw an exception because nothing is configured.
+        }
+    }
+
+    @Test
+    public void isConfigValidTest() {
+        final SonarManager manager = new SonarManager(new MapSettings().asConfig());
+
+        final HubServerConfigBuilder configBuilderMock = Mockito.mock(HubServerConfigBuilder.class);
+        final HubServerConfigValidator validatorMock = Mockito.mock(HubServerConfigValidator.class);
+        final ValidationResults validationResults = Mockito.mock(ValidationResults.class);
+
+        Mockito.when(configBuilderMock.createValidator()).thenReturn(validatorMock);
+        Mockito.when(validatorMock.assertValid()).thenReturn(validationResults);
+        Mockito.when(validationResults.hasErrors()).thenReturn(Boolean.FALSE);
+
+        assertTrue(manager.isConfigValid(configBuilderMock));
+    }
 
     @Test
     public void getGlobalInclusionPatternsTest() {
@@ -94,11 +129,18 @@ public class SonarManagerTest {
     public void getHubPluginVersionTest() {
         final SonarManager manager = new SonarManager(new MapSettings().asConfig());
 
+        assertTrue("<unknown>" != manager.getHubPluginVersion());
+    }
+
+    @Test
+    public void getHubPluginVersionFromFileTest() {
+        final SonarManager manager = new SonarManager(new MapSettings().asConfig());
+
         assertTrue("<unknown>" != manager.getHubPluginVersionFromFile("/plugin.properties"));
     }
 
     @Test
-    public void getHubPluginVersionUnknownTest() {
+    public void getHubPluginVersionFromFileUnknownTest() {
         final SonarManager manager = new SonarManager(new MapSettings().asConfig());
 
         assertEquals("<unknown>", manager.getHubPluginVersionFromFile("/NULL"));
