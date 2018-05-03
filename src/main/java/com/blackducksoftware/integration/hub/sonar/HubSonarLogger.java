@@ -104,28 +104,19 @@ public class HubSonarLogger extends IntLogger {
 
     @Override
     public void setLogLevel(final LogLevel logLevel) {
-        final LoggerLevel level;
-        switch (logLevel) {
-        case OFF:
+        LoggerLevel level = LoggerLevel.INFO;
+        if (LogLevel.OFF.equals(logLevel)) {
             level = LoggerLevel.ERROR;
-            break;
-        case TRACE:
+        } else if (LogLevel.TRACE.equals(logLevel)) {
             level = LoggerLevel.TRACE;
-            break;
-        case DEBUG:
+        } else if (LogLevel.DEBUG.equals(logLevel)) {
             level = LoggerLevel.DEBUG;
-            break;
-        case INFO:
+        } else if (LogLevel.INFO.equals(logLevel)) {
             level = LoggerLevel.INFO;
-            break;
-        case WARN:
+        } else if (LogLevel.WARN.equals(logLevel)) {
             level = LoggerLevel.WARN;
-            break;
-        case ERROR:
+        } else if (LogLevel.ERROR.equals(logLevel)) {
             level = LoggerLevel.ERROR;
-            break;
-        default:
-            level = LoggerLevel.INFO;
         }
         logger.setLevel(level);
     }
@@ -133,19 +124,17 @@ public class HubSonarLogger extends IntLogger {
     @Override
     public LogLevel getLogLevel() {
         final LoggerLevel level = logger.getLevel();
-        switch (level) {
-        case TRACE:
+        if (LoggerLevel.TRACE.equals(level)) {
             return LogLevel.TRACE;
-        case DEBUG:
+        } else if (LoggerLevel.DEBUG.equals(level)) {
             return LogLevel.DEBUG;
-        case INFO:
+        } else if (LoggerLevel.INFO.equals(level)) {
             return LogLevel.INFO;
-        case WARN:
+        } else if (LoggerLevel.WARN.equals(level)) {
             return LogLevel.WARN;
-        case ERROR:
+        } else if (LoggerLevel.ERROR.equals(level)) {
             return LogLevel.ERROR;
-        default:
-            return LogLevel.INFO;
         }
+        return LogLevel.INFO;
     }
 }

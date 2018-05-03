@@ -29,7 +29,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.sonar.api.utils.log.LogTester;
+import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.LoggerLevel;
 import org.sonar.api.utils.log.Loggers;
 
@@ -168,28 +170,58 @@ public class HubSonarLoggerTest {
     }
 
     @Test
-    public void overloadedSetLogLevelTest() {
-        Exception exeption = null;
-        try {
-            logTester.setLevel(LoggerLevel.TRACE);
-            logger_class.setLogLevel(LogLevel.TRACE);
+    public void setLogLevelTest() {
+        logger_class.setLogLevel((LogLevel) null);
+        logTester.setLevel(LoggerLevel.INFO);
+        assertEquals(LogLevel.INFO, logger_class.getLogLevel());
 
-            logTester.setLevel(LoggerLevel.INFO);
-            logger_class.setLogLevel(LogLevel.INFO);
+        logger_class.setLogLevel(LogLevel.OFF);
+        logTester.setLevel(LoggerLevel.ERROR);
+        assertEquals(LogLevel.ERROR, logger_class.getLogLevel());
 
-            logTester.setLevel(LoggerLevel.WARN);
-            logger_class.setLogLevel(LogLevel.WARN);
+        logger_class.setLogLevel(LogLevel.TRACE);
+        logTester.setLevel(LoggerLevel.TRACE);
+        assertEquals(LogLevel.TRACE, logger_class.getLogLevel());
 
-            logTester.setLevel(LoggerLevel.ERROR);
-            logger_class.setLogLevel(LogLevel.ERROR);
+        logger_class.setLogLevel(LogLevel.DEBUG);
+        logTester.setLevel(LoggerLevel.DEBUG);
+        assertEquals(LogLevel.DEBUG, logger_class.getLogLevel());
 
-            logTester.setLevel(LoggerLevel.TRACE);
-            logger_class.setLogLevel(LogLevel.OFF);
-            logger_class.setLogLevel(LogLevel.fromString("Invalid string to trigger the default case"));
-        } catch (final Exception e) {
-            exeption = e;
-        }
-        assertEquals(null, exeption);
+        logger_class.setLogLevel(LogLevel.INFO);
+        logTester.setLevel(LoggerLevel.INFO);
+        assertEquals(LogLevel.INFO, logger_class.getLogLevel());
+
+        logger_class.setLogLevel(LogLevel.WARN);
+        logTester.setLevel(LoggerLevel.WARN);
+        assertEquals(LogLevel.WARN, logger_class.getLogLevel());
+
+        logger_class.setLogLevel(LogLevel.ERROR);
+        logTester.setLevel(LoggerLevel.ERROR);
+        assertEquals(LogLevel.ERROR, logger_class.getLogLevel());
+    }
+
+    @Test
+    public void getLogLevelTest() {
+        final Logger loggerMock = Mockito.mock(Logger.class);
+        final HubSonarLogger hubSonarLoggerMock = new HubSonarLogger(loggerMock);
+
+        Mockito.when(loggerMock.getLevel()).thenReturn(LoggerLevel.TRACE);
+        assertEquals(LogLevel.TRACE, hubSonarLoggerMock.getLogLevel());
+
+        Mockito.when(loggerMock.getLevel()).thenReturn(LoggerLevel.DEBUG);
+        assertEquals(LogLevel.DEBUG, hubSonarLoggerMock.getLogLevel());
+
+        Mockito.when(loggerMock.getLevel()).thenReturn(LoggerLevel.INFO);
+        assertEquals(LogLevel.INFO, hubSonarLoggerMock.getLogLevel());
+
+        Mockito.when(loggerMock.getLevel()).thenReturn(LoggerLevel.WARN);
+        assertEquals(LogLevel.WARN, hubSonarLoggerMock.getLogLevel());
+
+        Mockito.when(loggerMock.getLevel()).thenReturn(LoggerLevel.ERROR);
+        assertEquals(LogLevel.ERROR, hubSonarLoggerMock.getLogLevel());
+
+        Mockito.when(loggerMock.getLevel()).thenReturn(null);
+        assertEquals(LogLevel.INFO, hubSonarLoggerMock.getLogLevel());
     }
 
     private void assertContains(final LoggerLevel level, @SuppressWarnings("unused") final String txt) {
@@ -205,7 +237,7 @@ public class HubSonarLoggerTest {
     protected static class LoggerTestClass {
         private final HubSonarLogger logger;
 
-        public LoggerTestClass() {
+        private LoggerTestClass() {
             logger = new HubSonarLogger(Loggers.get("hubSonarLogger"));
         }
 
@@ -256,6 +288,10 @@ public class HubSonarLoggerTest {
 
         public void setLogLevel(final LogLevel level) {
             logger.setLogLevel(level);
+        }
+
+        public LogLevel getLogLevel() {
+            return logger.getLogLevel();
         }
     }
 }
