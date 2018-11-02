@@ -13,4 +13,4 @@ Shows a mapping from local files to vulnerable components identified by the Hub.
 Released artifacts can be found on the [releases page](https://github.com/blackducksoftware/hub-sonarqube/releases).
 
 ## Documentation ##
-All documentation is located on our public [Black Duck Confluence](https://blackducksoftware.atlassian.net/wiki/spaces/INTDOCS/pages/49843511/Hub+SonarQube).
+All documentation is located on our public [Confluence](https://synopsys.atlassian.net/wiki/spaces/INTDOCS/pages/622990/Black+Duck+SonarQube).
