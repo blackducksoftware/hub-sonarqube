@@ -1,0 +1,34 @@
+buildscript {
+    apply from: 'https://raw.githubusercontent.com/blackducksoftware/integration-resources/master/gradle_common/buildscript-repositories.gradle', to: buildscript
+    apply from: 'https://raw.githubusercontent.com/blackducksoftware/integration-resources/master/gradle_common/buildscript-dependencies.gradle', to: buildscript
+}
+
+plugins {
+    id "com.iadams.sonar-packaging" version "0.1.4"
+}
+
+project.ext.javaSourceCompatibility = JavaVersion.VERSION_8
+project.ext.javaTargetCompatibility = JavaVersion.VERSION_8
+
+group = 'com.synopsys.integration'
+version = '2.0.0-SNAPSHOT'
+description = 'Maps Black Duck Hub projects to SonarQube projects, identifying vulnerable components and their locations.'
+
+sonarPackaging {
+    pluginKey = 'hubsonarqube'
+    pluginClass = 'com.blackducksoftware.integration.hub.sonar.HubPlugin'
+}
+
+processResources {
+    filesMatching('**/plugin.properties') {
+        expand('pom.version': project.version)
+    }
+}
+
+dependencies {
+    implementation 'com.synopsys.integration:blackduck-common:47.0.1'
+    compileOnly 'org.sonarsource.sonarqube:sonar-plugin-api:6.7.1'
+
+}
+
+
