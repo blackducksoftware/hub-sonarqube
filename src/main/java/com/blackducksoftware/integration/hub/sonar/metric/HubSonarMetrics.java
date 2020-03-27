@@ -34,19 +34,22 @@ public class HubSonarMetrics implements Metrics {
     public static final String DOMAIN_HUB = "Black Duck Hub Security";
 
     public static final Metric<String> COMPONENT_NAMES = new Metric.Builder("hub_component_names", "Component Names", ValueType.STRING).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_NONE).setHidden(true)
-            .setDeleteHistoricalData(true).create();
+                                                             .setDeleteHistoricalData(true).create();
+    public static final Metric<Integer> NUM_VULN_CRITICAL = new Metric.Builder("num_vuln_critical", "Critical Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST)
+                                                                .setHidden(true)
+                                                                .create();
     public static final Metric<Integer> NUM_VULN_HIGH = new Metric.Builder("num_vuln_high", "High Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).setHidden(true)
-            .create();
+                                                            .create();
     public static final Metric<Integer> NUM_VULN_MED = new Metric.Builder("num_vuln_med", "Medium Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).setHidden(true)
-            .create();
+                                                           .create();
     public static final Metric<Integer> NUM_VULN_LOW = new Metric.Builder("num_vuln_low", "Low Security Vulnerabilities", ValueType.INT).setQualitative(false).setDomain(DOMAIN_HUB).setDirection(Metric.DIRECTION_WORST).setHidden(true)
-            .create();
+                                                           .create();
 
     public static final Metric<Integer> COMPONENT_RATING = new Metric.Builder("num_components_rating", "Component Ratings", ValueType.RATING).setQualitative(true).setDomain(DOMAIN_HUB).setHidden(true).create();
 
     @SuppressWarnings("rawtypes")
     @Override
     public List<Metric> getMetrics() {
-        return Arrays.asList(COMPONENT_NAMES, COMPONENT_RATING, NUM_VULN_HIGH, NUM_VULN_MED, NUM_VULN_LOW);
+        return Arrays.asList(COMPONENT_NAMES, COMPONENT_RATING, NUM_VULN_CRITICAL, NUM_VULN_HIGH, NUM_VULN_MED, NUM_VULN_LOW);
     }
 }

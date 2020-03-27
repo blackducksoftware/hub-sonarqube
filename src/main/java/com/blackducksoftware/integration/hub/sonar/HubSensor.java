@@ -24,7 +24,10 @@
 package com.blackducksoftware.integration.hub.sonar;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
@@ -35,51 +38,59 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.utils.log.Loggers;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
-import com.blackducksoftware.integration.hub.global.HubServerConfig;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
-import com.blackducksoftware.integration.hub.service.HubServicesFactory;
 import com.blackducksoftware.integration.hub.sonar.component.ComponentComparer;
 import com.blackducksoftware.integration.hub.sonar.component.ComponentHelper;
 import com.blackducksoftware.integration.hub.sonar.component.HubVulnerableComponentGatherer;
 import com.blackducksoftware.integration.hub.sonar.component.LocalComponentGatherer;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.hub.sonar.metric.MetricsHelper;
-import com.blackducksoftware.integration.log.IntLogger;
-import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
+import com.synopsys.integration.blackduck.api.generated.view.ProjectVersionComponentView;
+import com.synopsys.integration.blackduck.configuration.BlackDuckServerConfig;
+import com.synopsys.integration.blackduck.phonehome.BlackDuckPhoneHomeHelper;
+import com.synopsys.integration.blackduck.service.BlackDuckServicesFactory;
+import com.synopsys.integration.log.IntLogger;
 
 public class HubSensor implements Sensor {
+    public static final String ARTIFACT_ID = "blackduck-sonarqube";
+
     @Override
-    public void describe(final SensorDescriptor descriptor) {
+    public void describe(SensorDescriptor descriptor) {
         descriptor.name(HubPlugin.PLUGIN_NAME);
         descriptor.onlyOnFileType(InputFile.Type.MAIN);
     }
 
     @Override
-    public void execute(final SensorContext context) {
-        final HubSonarLogger logger = new HubSonarLogger(Loggers.get(context.getClass()));
-        final SonarManager sonarManager = new SonarManager(context);
-        final ComponentHelper componentHelper = new ComponentHelper(sonarManager);
-        final RestConnection restConnection = createRestConnection(logger, sonarManager);
-        if (restConnection == null) {
+    public void execute(SensorContext context) {
+        HubSonarLogger logger = new HubSonarLogger(Loggers.get(context.getClass()));
+        SonarManager sonarManager = new SonarManager(context);
+        ComponentHelper componentHelper = new ComponentHelper(sonarManager);
+        Optional<BlackDuckServicesFactory> servicesFactoryOptional = createServiceFactory(logger, sonarManager);
+        if (!servicesFactoryOptional.isPresent()) {
             logger.warn("No connection to the Hub server could be established, skipping Black Duck Hub Sensor.");
             return;
         }
-        final HubServicesFactory hubServicesFactory = new HubServicesFactory(restConnection);
-        hubServicesFactory.createPhoneHomeDataService().phoneHome(ThirdPartyName.SONARQUBE, context.getSonarQubeVersion().toString(), sonarManager.getHubPluginVersionFromFile("/plugin.properties"));
+        BlackDuckServicesFactory blackDuckServicesFactory = servicesFactoryOptional.get();
 
-        final FileSystem fileSystem = context.fileSystem();
-        final FilePredicates filePredicates = fileSystem.predicates();
-        final FilePredicate filePredicate = generateFilePredicateFromInclusionAndExclusionPatterns(sonarManager, filePredicates);
+        try {
+            ExecutorService phoneHomeExecutor = Executors.newSingleThreadExecutor();
+            BlackDuckPhoneHomeHelper blackDuckPhoneHomeHelper = BlackDuckPhoneHomeHelper.createAsynchronousPhoneHomeHelper(blackDuckServicesFactory, phoneHomeExecutor);
+            blackDuckPhoneHomeHelper.handlePhoneHome(ARTIFACT_ID, sonarManager.getHubPluginVersionFromFile("/plugin.properties"));
+        } catch (Exception e) {
+            logger.debug(String.format("Could not send the phone home data. Error: %s", e.getMessage()));
+            logger.trace(e.getMessage(), e);
+        }
+
+        FileSystem fileSystem = context.fileSystem();
+        FilePredicates filePredicates = fileSystem.predicates();
+        FilePredicate filePredicate = generateFilePredicateFromInclusionAndExclusionPatterns(sonarManager, filePredicates);
 
         logger.info("Gathering local component files...");
-        final LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, sonarManager, fileSystem, filePredicate);
-        final Set<String> localComponents = localComponentGatherer.gatherComponents();
+        LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, sonarManager, fileSystem, filePredicate);
+        Set<String> localComponents = localComponentGatherer.gatherComponents();
 
         logger.info("Gathering Hub component files...");
-        final HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, hubServicesFactory.createVersionBomComponentDataservice());
-        final Set<String> hubComponents = hubComponentGatherer.gatherComponents();
+        HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, blackDuckServicesFactory.createProjectService(), blackDuckServicesFactory.createBlackDuckService());
+        Set<String> hubComponents = hubComponentGatherer.gatherComponents();
 
         logger.info(String.format("--> Number of local files matching inclusion/exclusion patterns: %d", localComponents.size()));
         logger.info(String.format("--> Number of vulnerable Hub component files matched: %d", hubComponents.size()));
@@ -97,45 +108,47 @@ public class HubSensor implements Sensor {
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Shared Components:");
-                for (final String sharedComponent : sharedComponents) {
+                for (String sharedComponent : sharedComponents) {
                     logger.debug(sharedComponent);
                 }
             }
-            final MetricsHelper metricsHelper = new MetricsHelper(logger, context);
-            final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
+            MetricsHelper metricsHelper = new MetricsHelper(logger, context);
+            Map<String, Set<ProjectVersionComponentView>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
             if (vulnerableComponentsMap != null && !vulnerableComponentsMap.isEmpty()) {
                 metricsHelper.createMeasuresForInputFiles(vulnerableComponentsMap, componentHelper.getInputFilesFromStrings(sharedComponents));
             }
         }
     }
 
-    private FilePredicate generateFilePredicateFromInclusionAndExclusionPatterns(final SonarManager sonarManager, final FilePredicates filePredicates) {
-        final String[] globalInclusionPatterns = sonarManager.getGlobalInclusionPatterns();
-        final String[] globalExclusionPatterns = sonarManager.getGlobalExclusionPatterns();
+    private FilePredicate generateFilePredicateFromInclusionAndExclusionPatterns(SonarManager sonarManager, FilePredicates filePredicates) {
+        String[] globalInclusionPatterns = sonarManager.getGlobalInclusionPatterns();
+        String[] globalExclusionPatterns = sonarManager.getGlobalExclusionPatterns();
         if (!isStringArrayEmpty(globalInclusionPatterns) && !isStringArrayEmpty(globalExclusionPatterns)) {
             return filePredicates.and(filePredicates.matchesPathPatterns(globalInclusionPatterns), filePredicates.doesNotMatchPathPatterns(globalExclusionPatterns));
         }
         return filePredicates.all();
     }
 
-    private boolean isStringArrayEmpty(final String[] array) {
+    private boolean isStringArrayEmpty(String[] array) {
         if (array != null) {
             return array.length == 0 || (array.length > 0 && "".equals(array[0]));
         }
         return true;
     }
 
-    private RestConnection createRestConnection(final IntLogger logger, final SonarManager sonarManager) {
-        RestConnection restConnection = null;
+    private Optional<BlackDuckServicesFactory> createServiceFactory(IntLogger logger, SonarManager sonarManager) {
         try {
-            final HubServerConfig config = sonarManager.getHubServerConfigFromSettings();
-            restConnection = config.createCredentialsRestConnection(logger);
-            restConnection.connect();
-            logger.info(String.format("Successfully connected to %s", config.getHubUrl()));
-        } catch (final IllegalStateException | NullPointerException | IntegrationException e) {
-            logger.error(String.format("Error establishing a Hub connection: %s", e.getMessage()));
-            return null;
+            Optional<BlackDuckServerConfig> config = sonarManager.getBlackDuckServerConfigFromSettings();
+            if (config.isPresent()) {
+                BlackDuckServerConfig blackDuckServerConfig = config.get();
+                blackDuckServerConfig.attemptConnection(logger);
+                logger.info(String.format("Successfully connected to %s", blackDuckServerConfig.getBlackDuckUrl()));
+                BlackDuckServicesFactory blackDuckServicesFactory = blackDuckServerConfig.createBlackDuckServicesFactory(logger);
+                return Optional.of(blackDuckServicesFactory);
+            }
+        } catch (Exception e) {
+            logger.error(String.format("Error establishing a Hub connection: %s", e.getMessage()), e);
         }
-        return restConnection;
+        return Optional.empty();
     }
 }

@@ -24,6 +24,7 @@
 package com.blackducksoftware.integration.hub.sonar.metric;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,10 +33,10 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.measures.Metric;
 
-import com.blackducksoftware.integration.hub.dataservice.model.RiskProfileCounts;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
-import com.blackducksoftware.integration.hub.model.enumeration.RiskCountEnum;
-import com.blackducksoftware.integration.log.IntLogger;
+import com.synopsys.integration.blackduck.api.generated.component.ComponentVersionRiskProfileRiskDataCountsView;
+import com.synopsys.integration.blackduck.api.generated.view.ProjectVersionComponentView;
+import com.synopsys.integration.blackduck.api.generated.view.RiskProfileView;
+import com.synopsys.integration.log.IntLogger;
 
 public class MetricsHelper {
     private static final int MAX_COMPONENT_NAME_LENGTH = 100;
@@ -43,28 +44,29 @@ public class MetricsHelper {
     private final SensorContext context;
     private final IntLogger logger;
 
-    public MetricsHelper(final IntLogger logger, final SensorContext context) {
+    public MetricsHelper(IntLogger logger, SensorContext context) {
         this.logger = logger;
         this.context = context;
     }
 
-    public void createMeasuresForInputFiles(final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap, final Iterable<InputFile> inputFiles) {
-        for (final InputFile inputFile : inputFiles) {
+    public void createMeasuresForInputFiles(Map<String, Set<ProjectVersionComponentView>> vulnerableComponentsMap, Iterable<InputFile> inputFiles) {
+        for (InputFile inputFile : inputFiles) {
             createMeasuresForInputFile(vulnerableComponentsMap, inputFile);
         }
     }
 
-    public void createMeasuresForInputFile(final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap, final InputFile inputFile) {
-        final String fileName = inputFile.filename();
+    public void createMeasuresForInputFile(Map<String, Set<ProjectVersionComponentView>> vulnerableComponentsMap, InputFile inputFile) {
+        String fileName = inputFile.filename();
         if (vulnerableComponentsMap.containsKey(fileName)) {
-            final StringBuilder compListBuilder = new StringBuilder();
-            int high = 0;
-            int med = 0;
-            int low = 0;
-            for (final VersionBomComponentModel component : vulnerableComponentsMap.get(fileName)) {
+            StringBuilder compListBuilder = new StringBuilder();
+            BigDecimal critical = new BigDecimal(0);
+            BigDecimal high = new BigDecimal(0);
+            BigDecimal med = new BigDecimal(0);
+            BigDecimal low = new BigDecimal(0);
+            for (ProjectVersionComponentView component : vulnerableComponentsMap.get(fileName)) {
                 String compName = component.getComponentName();
-                final String compVersion = component.getComponentVersionName();
-                final String compVersionUrl = component.getComponentVersion();
+                String compVersion = component.getComponentVersionName();
+                String compVersionUrl = component.getComponentVersion();
                 if (compName.length() > MAX_COMPONENT_NAME_LENGTH) {
                     compName = compName.substring(0, MAX_COMPONENT_NAME_LENGTH) + "...";
                 }
@@ -72,15 +74,34 @@ public class MetricsHelper {
                 compListBuilder.append(compVersion + ",");
                 compListBuilder.append(compVersionUrl + ",");
 
-                final RiskProfileCounts riskProfile = component.getSecurityRiskProfile();
-                high += riskProfile.getCount(RiskCountEnum.HIGH);
-                med += riskProfile.getCount(RiskCountEnum.MEDIUM);
-                low += riskProfile.getCount(RiskCountEnum.LOW);
+                RiskProfileView riskProfile = component.getSecurityRiskProfile();
+                for (ComponentVersionRiskProfileRiskDataCountsView countView : riskProfile.getCounts()) {
+                    switch (countView.getCountType()) {
+                        case CRITICAL:
+                            critical.add(countView.getCount());
+                            break;
+                        case HIGH:
+                            high.add(countView.getCount());
+                            break;
+                        case MEDIUM:
+                            med.add(countView.getCount());
+                            break;
+                        case LOW:
+                            low.add(countView.getCount());
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+
             }
             createMeasure(HubSonarMetrics.NUM_VULN_LOW, inputFile, low);
             createMeasure(HubSonarMetrics.NUM_VULN_MED, inputFile, med);
             createMeasure(HubSonarMetrics.NUM_VULN_HIGH, inputFile, high);
-            if ((low + med + high) > 0) {
+            createMeasure(HubSonarMetrics.NUM_VULN_CRITICAL, inputFile, critical);
+
+            if (low.compareTo(BigDecimal.ZERO) > 0 || med.compareTo(BigDecimal.ZERO) > 0 || high.compareTo(BigDecimal.ZERO) > 0) {
                 String compList = compListBuilder.toString();
                 compListBuilder.deleteCharAt(compList.lastIndexOf(','));
                 compList = compListBuilder.toString();
@@ -89,7 +110,7 @@ public class MetricsHelper {
         }
     }
 
-    public void createMeasure(@SuppressWarnings("rawtypes") final Metric metric, final InputComponent inputComponent, final Serializable value) {
+    public void createMeasure(@SuppressWarnings("rawtypes") Metric metric, InputComponent inputComponent, Serializable value) {
         logger.debug(String.format("Creating measure: Metric='%s', Component='%s', Value='%s'", metric.getName(), inputComponent, value));
         context.newMeasure().forMetric(metric).on(inputComponent).withValue(value).save();
     }

@@ -37,7 +37,6 @@ import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.internal.google.common.collect.Sets;
 import org.sonar.api.utils.log.Loggers;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.VersionBomComponentDataService;
 import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
 import com.blackducksoftware.integration.hub.model.view.MatchedFilesView;
@@ -49,6 +48,7 @@ import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.hub.sonar.model.MockRestConnection;
 import com.blackducksoftware.integration.hub.sonar.model.MockVersionBomComponentDataService;
 import com.blackducksoftware.integration.log.IntLogger;
+import com.synopsys.integration.exception.IntegrationException;
 
 @SuppressWarnings("deprecation")
 public class HubVulnerableComponentGathererTest {
@@ -63,26 +63,26 @@ public class HubVulnerableComponentGathererTest {
         componentHelper = new ComponentHelper(sonarManager);
         logger = new HubSonarLogger(Loggers.get(getClass()));
 
-        final RestConnection restConnection = new MockRestConnection(logger);
+        RestConnection restConnection = new MockRestConnection(logger);
         versionBomComponentDataService = new MockVersionBomComponentDataService(restConnection);
     }
 
     @Test
     public void constructorDoesNotInitializeProjectVersionFieldsTest() throws IntegrationException {
-        final SonarManager manager = Mockito.mock(SonarManager.class);
+        SonarManager manager = Mockito.mock(SonarManager.class);
         Mockito.when(manager.getValue(HubPropertyConstants.HUB_PROJECT_OVERRIDE)).thenReturn("projectOverride");
-        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, versionBomComponentDataService);
+        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, versionBomComponentDataService);
 
         assertTrue(null != gatherer);
     }
 
     @Test
     public void constructorInitializesProjectVersionFieldsTest() throws IntegrationException {
-        final SonarManager manager = Mockito.mock(SonarManager.class);
+        SonarManager manager = Mockito.mock(SonarManager.class);
         Mockito.when(manager.getValue(HubPropertyConstants.HUB_PROJECT_OVERRIDE)).thenReturn("projectOverride");
         Mockito.when(manager.getValue(HubPropertyConstants.HUB_PROJECT_VERSION_OVERRIED)).thenReturn("projectVersionOverride");
 
-        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, versionBomComponentDataService);
+        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, versionBomComponentDataService);
 
         assertTrue(null != gatherer);
     }
@@ -90,37 +90,37 @@ public class HubVulnerableComponentGathererTest {
     @Test
     public void gatherComponentsEmptyTest() throws IntegrationException {
         versionBomComponentDataService.setEmpty(true);
-        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, versionBomComponentDataService);
+        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, versionBomComponentDataService);
 
         assertTrue(gatherer.gatherComponents().isEmpty());
     }
 
     @Test
     public void gatherComponentsWithMatchesTest() throws IntegrationException {
-        final MatchedFilesView matchedFiles0 = new MatchedFilesView();
-        final FilePathView filePath0 = new FilePathView();
+        MatchedFilesView matchedFiles0 = new MatchedFilesView();
+        FilePathView filePath0 = new FilePathView();
         final String fileName = "test.jar";
         filePath0.compositePathContext = fileName + "!";
         matchedFiles0.filePath = filePath0;
 
-        final MatchedFilesView matchedFiles1 = new MatchedFilesView();
-        final FilePathView filePath1 = new FilePathView();
+        MatchedFilesView matchedFiles1 = new MatchedFilesView();
+        FilePathView filePath1 = new FilePathView();
         filePath1.compositePathContext = "test.tar!";
         matchedFiles1.filePath = filePath1;
 
         versionBomComponentDataService.setMatchedFiles(Arrays.asList(matchedFiles0), Arrays.asList(matchedFiles1));
-        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, versionBomComponentDataService);
+        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, versionBomComponentDataService);
 
         assertEquals(Sets.newHashSet(fileName), gatherer.gatherComponents());
     }
 
     @Test
     public void getVulnerableComponentMapThrowsExceptionTest() throws IntegrationException {
-        final VersionBomComponentDataService dataService = Mockito.mock(VersionBomComponentDataService.class);
+        VersionBomComponentDataService dataService = Mockito.mock(VersionBomComponentDataService.class);
         Mockito.when(dataService.getComponentsForProjectVersion(Mockito.any(), Mockito.any())).thenThrow(new IntegrationException());
 
-        final HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, dataService);
-        final Map<String, Set<VersionBomComponentModel>> map = gatherer.getVulnerableComponentMap();
+        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, dataService);
+        Map<String, Set<VersionBomComponentModel>> map = gatherer.getVulnerableComponentMap();
 
         assertTrue(map.isEmpty());
     }

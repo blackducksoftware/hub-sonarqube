@@ -41,31 +41,31 @@ import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.hub.sonar.model.MockFilePredicates;
 import com.blackducksoftware.integration.hub.sonar.model.MockFileSystem;
-import com.blackducksoftware.integration.log.LogLevel;
-import com.blackducksoftware.integration.log.PrintStreamIntLogger;
+import com.synopsys.integration.log.LogLevel;
+import com.synopsys.integration.log.PrintStreamIntLogger;
 
 public class LocalComponentGathererTest {
     @Test
     public void gatherComponentsTest() throws IOException {
-        final File baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
-        final String canonicalPath = baseDir.getCanonicalPath() + "/";
-        final LocalComponentGatherer gatherer = createGatherer(baseDir);
-        final Set<String> expectedList = Sets.newHashSet(canonicalPath + "test.jar", canonicalPath + "test.tar");
+        File baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
+        String canonicalPath = baseDir.getCanonicalPath() + "/";
+        LocalComponentGatherer gatherer = createGatherer(baseDir);
+        Set<String> expectedList = Sets.newHashSet(canonicalPath + "test.jar", canonicalPath + "test.tar");
 
         assertEquals(expectedList, gatherer.gatherComponents());
     }
 
     @SuppressWarnings("deprecation")
-    protected static LocalComponentGatherer createGatherer(final File baseDir) {
-        final PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
-        final MapSettings settings = new MapSettings();
+    protected static LocalComponentGatherer createGatherer(File baseDir) {
+        PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
+        MapSettings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, ".jar,.tar");
         settings.setProperty(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, ".png");
-        final SonarManager manager = new SonarManager(settings.asConfig());
+        SonarManager manager = new SonarManager(settings.asConfig());
 
-        final DefaultFileSystem fileSystem = new MockFileSystem(baseDir);
-        final FilePredicates predicates = new MockFilePredicates();
-        final FilePredicate predicate = predicates.and(predicates.matchesPathPatterns(manager.getGlobalInclusionPatterns()), predicates.doesNotMatchPathPatterns(manager.getGlobalExclusionPatterns()));
+        DefaultFileSystem fileSystem = new MockFileSystem(baseDir);
+        FilePredicates predicates = new MockFilePredicates();
+        FilePredicate predicate = predicates.and(predicates.matchesPathPatterns(manager.getGlobalInclusionPatterns()), predicates.doesNotMatchPathPatterns(manager.getGlobalExclusionPatterns()));
 
         return new LocalComponentGatherer(logger, manager, fileSystem, predicate);
     }
