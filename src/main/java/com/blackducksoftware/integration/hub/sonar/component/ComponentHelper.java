@@ -1,7 +1,7 @@
 /**
  * Black Duck Hub Plugin for SonarQube
  *
- * Copyright (C) 2018 Black Duck Software, Inc.
+ * Copyright (C) 2020 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -45,33 +45,36 @@ public class ComponentHelper {
     private final SonarManager sonarManager;
     private Map<String, InputFile> inputFiles;
 
-    public ComponentHelper(final SonarManager sonarManager) {
+    public ComponentHelper(SonarManager sonarManager) {
         this.sonarManager = sonarManager;
     }
 
     public static final String DEFAULT_INCLUSION_PATTERNS = "**/*.jar, **/*.war, **/*.zip, **/*.tar*, ";
     public static final String DEFAULT_EXCLUSION_PATTERNS = "";
 
-    public String getFileNameFromComposite(final String composite) {
-        final String filePath = getFilePathFromComposite(composite);
+    public String getFileNameFromComposite(String composite) {
+        String filePath = getFilePathFromComposite(composite);
         return filePath.substring(filePath.lastIndexOf('/') + 1);
     }
 
-    public String getFilePathFromComposite(final String composite) {
-        final int lastIndex = composite.length() - 1;
-        final int archiveMarkIndex = composite.indexOf('!');
-        final int otherMarkIndex = composite.indexOf('#');
+    public String getFilePathFromComposite(String composite) {
+        int lastIndex = composite.length();
+        int archiveMarkIndex = composite.indexOf('!');
+        int otherMarkIndex = composite.indexOf('#');
+        boolean otherMarkIsLastCharacter = otherMarkIndex == lastIndex - 1;
 
-        final int startIndex;
-        if (otherMarkIndex >= 0 && otherMarkIndex < lastIndex) {
+        int startIndex;
+        if (otherMarkIndex >= 0 && !otherMarkIsLastCharacter) {
             startIndex = otherMarkIndex + 1;
         } else {
             startIndex = 0;
         }
 
-        final int endIndex;
+        int endIndex;
         if (archiveMarkIndex > startIndex) {
             endIndex = archiveMarkIndex;
+        } else if (otherMarkIsLastCharacter) {
+            endIndex = otherMarkIndex;
         } else {
             endIndex = lastIndex;
         }
@@ -79,10 +82,10 @@ public class ComponentHelper {
         return composite.substring(startIndex, endIndex).trim();
     }
 
-    public Collection<InputFile> getInputFilesFromStrings(final Collection<String> sharedComponentNames) {
-        final Collection<InputFile> inputFilesFromStrings = new HashSet<>();
-        for (final String filePath : sharedComponentNames) {
-            final InputFile inputFileFromString = getInputFileFromString(filePath);
+    public Collection<InputFile> getInputFilesFromStrings(Collection<String> sharedComponentNames) {
+        Collection<InputFile> inputFilesFromStrings = new HashSet<>();
+        for (String filePath : sharedComponentNames) {
+            InputFile inputFileFromString = getInputFileFromString(filePath);
             if (inputFileFromString != null) {
                 inputFilesFromStrings.add(inputFileFromString);
             }
@@ -90,18 +93,18 @@ public class ComponentHelper {
         return inputFilesFromStrings;
     }
 
-    public InputFile getInputFileFromString(final String filePath) {
-        final SensorContext context = sonarManager.getSensorContext();
+    public InputFile getInputFileFromString(String filePath) {
+        SensorContext context = sonarManager.getSensorContext();
         if (context != null) {
             return getInputFiles(context.fileSystem()).get(filePath);
         }
         return null;
     }
 
-    public void preProcessComponentListData(final Collection<String> collection) {
+    public void preProcessComponentListData(Collection<String> collection) {
         if (sonarManager != null) {
-            final Collection<String> removalCandidates = new HashSet<>();
-            for (final String str : collection) {
+            Collection<String> removalCandidates = new HashSet<>();
+            for (String str : collection) {
                 if (!componentMatchesInclusionPatterns(str)) {
                     removalCandidates.add(str);
                 }
@@ -110,8 +113,8 @@ public class ComponentHelper {
         }
     }
 
-    public boolean componentMatchesInclusionPatterns(final String str) {
-        for (final String include : sonarManager.getGlobalInclusionPatterns()) {
+    public boolean componentMatchesInclusionPatterns(String str) {
+        for (String include : sonarManager.getGlobalInclusionPatterns()) {
             if (componentMatchesInclusionPattern(str, include)) {
                 return true;
             }
@@ -119,25 +122,25 @@ public class ComponentHelper {
         return false;
     }
 
-    public Set<String> flattenCollectionOfCollections(final Collection<Collection<String>> collection) {
+    public Set<String> flattenCollectionOfCollections(Collection<Collection<String>> collection) {
         return collection.stream().flatMap(Collection::stream).collect(Collectors.toSet());
     }
 
     // returns true if str loosely matches (case insensitive) the provided pattern or if str strictly matches (case sensitive) the unqualifiedPattern
-    public boolean componentMatchesInclusionPattern(final String str, final String pattern) {
-        final String unqualifiedPattern = pattern.substring(pattern.lastIndexOf('/') + 1);
+    public boolean componentMatchesInclusionPattern(String str, String pattern) {
+        String unqualifiedPattern = pattern.substring(pattern.lastIndexOf('/') + 1);
         return FilenameUtils.wildcardMatch(str, pattern, IOCase.INSENSITIVE) || FilenameUtils.wildcardMatch(str, unqualifiedPattern, IOCase.SENSITIVE);
     }
 
-    private Map<String, InputFile> getInputFiles(final FileSystem fileSystem) {
+    private Map<String, InputFile> getInputFiles(FileSystem fileSystem) {
         if (inputFiles == null) {
             inputFiles = new HashMap<>();
-            for (final InputFile inputFile : fileSystem.inputFiles(fileSystem.predicates().all())) {
-                final File fromUri = new File(inputFile.uri());
+            for (InputFile inputFile : fileSystem.inputFiles(fileSystem.predicates().all())) {
+                File fromUri = new File(inputFile.uri());
                 String filePath;
                 try {
                     filePath = fromUri.getCanonicalPath();
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     filePath = fromUri.getAbsolutePath();
                 }
                 inputFiles.put(filePath, inputFile);
