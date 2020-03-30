@@ -271,6 +271,9 @@ function getToolTip(rating) {
         case 'D':
             fix = 'high';
             break;
+        case 'E':
+            fix = 'critical';
+            break;
         default:
             return '';
     }
