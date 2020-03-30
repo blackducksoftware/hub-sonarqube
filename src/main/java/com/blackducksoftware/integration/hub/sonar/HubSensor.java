@@ -1,7 +1,7 @@
 /**
  * Black Duck Hub Plugin for SonarQube
  *
- * Copyright (C) 2018 Black Duck Software, Inc.
+ * Copyright (C) 2020 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -51,35 +51,35 @@ import com.blackducksoftware.integration.phonehome.enums.ThirdPartyName;
 
 public class HubSensor implements Sensor {
     @Override
-    public void describe(final SensorDescriptor descriptor) {
+    public void describe(SensorDescriptor descriptor) {
         descriptor.name(HubPlugin.PLUGIN_NAME);
         descriptor.onlyOnFileType(InputFile.Type.MAIN);
     }
 
     @Override
-    public void execute(final SensorContext context) {
-        final HubSonarLogger logger = new HubSonarLogger(Loggers.get(context.getClass()));
-        final SonarManager sonarManager = new SonarManager(context);
-        final ComponentHelper componentHelper = new ComponentHelper(sonarManager);
-        final RestConnection restConnection = createRestConnection(logger, sonarManager);
+    public void execute(SensorContext context) {
+        HubSonarLogger logger = new HubSonarLogger(Loggers.get(context.getClass()));
+        SonarManager sonarManager = new SonarManager(context);
+        ComponentHelper componentHelper = new ComponentHelper(sonarManager);
+        RestConnection restConnection = createRestConnection(logger, sonarManager);
         if (restConnection == null) {
             logger.warn("No connection to the Hub server could be established, skipping Black Duck Hub Sensor.");
             return;
         }
-        final HubServicesFactory hubServicesFactory = new HubServicesFactory(restConnection);
+        HubServicesFactory hubServicesFactory = new HubServicesFactory(restConnection);
         hubServicesFactory.createPhoneHomeDataService().phoneHome(ThirdPartyName.SONARQUBE, context.getSonarQubeVersion().toString(), sonarManager.getHubPluginVersionFromFile("/plugin.properties"));
 
-        final FileSystem fileSystem = context.fileSystem();
-        final FilePredicates filePredicates = fileSystem.predicates();
-        final FilePredicate filePredicate = generateFilePredicateFromInclusionAndExclusionPatterns(sonarManager, filePredicates);
+        FileSystem fileSystem = context.fileSystem();
+        FilePredicates filePredicates = fileSystem.predicates();
+        FilePredicate filePredicate = generateFilePredicateFromInclusionAndExclusionPatterns(sonarManager, filePredicates);
 
         logger.info("Gathering local component files...");
-        final LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, sonarManager, fileSystem, filePredicate);
-        final Set<String> localComponents = localComponentGatherer.gatherComponents();
+        LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, sonarManager, fileSystem, filePredicate);
+        Set<String> localComponents = localComponentGatherer.gatherComponents();
 
         logger.info("Gathering Hub component files...");
-        final HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, hubServicesFactory.createVersionBomComponentDataservice());
-        final Set<String> hubComponents = hubComponentGatherer.gatherComponents();
+        HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, hubServicesFactory.createVersionBomComponentDataservice());
+        Set<String> hubComponents = hubComponentGatherer.gatherComponents();
 
         logger.info(String.format("--> Number of local files matching inclusion/exclusion patterns: %d", localComponents.size()));
         logger.info(String.format("--> Number of vulnerable Hub component files matched: %d", hubComponents.size()));
@@ -97,42 +97,42 @@ public class HubSensor implements Sensor {
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Shared Components:");
-                for (final String sharedComponent : sharedComponents) {
+                for (String sharedComponent : sharedComponents) {
                     logger.debug(sharedComponent);
                 }
             }
-            final MetricsHelper metricsHelper = new MetricsHelper(logger, context);
-            final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
+            MetricsHelper metricsHelper = new MetricsHelper(logger, context);
+            Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
             if (vulnerableComponentsMap != null && !vulnerableComponentsMap.isEmpty()) {
                 metricsHelper.createMeasuresForInputFiles(vulnerableComponentsMap, componentHelper.getInputFilesFromStrings(sharedComponents));
             }
         }
     }
 
-    private FilePredicate generateFilePredicateFromInclusionAndExclusionPatterns(final SonarManager sonarManager, final FilePredicates filePredicates) {
-        final String[] globalInclusionPatterns = sonarManager.getGlobalInclusionPatterns();
-        final String[] globalExclusionPatterns = sonarManager.getGlobalExclusionPatterns();
+    private FilePredicate generateFilePredicateFromInclusionAndExclusionPatterns(SonarManager sonarManager, FilePredicates filePredicates) {
+        String[] globalInclusionPatterns = sonarManager.getGlobalInclusionPatterns();
+        String[] globalExclusionPatterns = sonarManager.getGlobalExclusionPatterns();
         if (!isStringArrayEmpty(globalInclusionPatterns) && !isStringArrayEmpty(globalExclusionPatterns)) {
             return filePredicates.and(filePredicates.matchesPathPatterns(globalInclusionPatterns), filePredicates.doesNotMatchPathPatterns(globalExclusionPatterns));
         }
         return filePredicates.all();
     }
 
-    private boolean isStringArrayEmpty(final String[] array) {
+    private boolean isStringArrayEmpty(String[] array) {
         if (array != null) {
             return array.length == 0 || (array.length > 0 && "".equals(array[0]));
         }
         return true;
     }
 
-    private RestConnection createRestConnection(final IntLogger logger, final SonarManager sonarManager) {
+    private RestConnection createRestConnection(IntLogger logger, SonarManager sonarManager) {
         RestConnection restConnection = null;
         try {
-            final HubServerConfig config = sonarManager.getHubServerConfigFromSettings();
+            HubServerConfig config = sonarManager.getHubServerConfigFromSettings();
             restConnection = config.createCredentialsRestConnection(logger);
             restConnection.connect();
             logger.info(String.format("Successfully connected to %s", config.getHubUrl()));
-        } catch (final IllegalStateException | NullPointerException | IntegrationException e) {
+        } catch (IllegalStateException | NullPointerException | IntegrationException e) {
             logger.error(String.format("Error establishing a Hub connection: %s", e.getMessage()));
             return null;
         }

@@ -1,7 +1,7 @@
 /**
  * Black Duck Hub Plugin for SonarQube
  *
- * Copyright (C) 2018 Black Duck Software, Inc.
+ * Copyright (C) 2020 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -32,7 +32,7 @@ import com.blackducksoftware.integration.log.LogLevel;
 public class HubSonarLogger extends IntLogger {
     private final Logger logger;
 
-    public HubSonarLogger(final Logger logger) {
+    public HubSonarLogger(Logger logger) {
         this.logger = logger;
     }
 
@@ -41,58 +41,58 @@ public class HubSonarLogger extends IntLogger {
      */
     @Override
     @Deprecated
-    public void alwaysLog(final String txt) {
+    public void alwaysLog(String txt) {
         logger.info(txt);
     }
 
     @Override
-    public void info(final String txt) {
+    public void info(String txt) {
         logger.info(txt);
     }
 
     @Override
-    public void error(final Throwable t) {
+    public void error(Throwable t) {
         logger.error(t.getMessage());
     }
 
     @Override
-    public void error(final String txt, final Throwable t) {
+    public void error(String txt, Throwable t) {
         logger.error(txt, t);
     }
 
     @Override
-    public void error(final String txt) {
+    public void error(String txt) {
         logger.error(txt);
     }
 
     @Override
-    public void warn(final String txt) {
+    public void warn(String txt) {
         logger.warn(txt);
     }
 
     @Override
-    public void trace(final String txt) {
+    public void trace(String txt) {
         if (logger.isTraceEnabled()) {
             logger.trace(txt);
         }
     }
 
     @Override
-    public void trace(final String txt, final Throwable t) {
+    public void trace(String txt, Throwable t) {
         if (logger.isTraceEnabled()) {
             logger.trace(txt, t);
         }
     }
 
     @Override
-    public void debug(final String txt) {
+    public void debug(String txt) {
         if (logger.isDebugEnabled()) {
             logger.debug(txt);
         }
     }
 
     @Override
-    public void debug(final String txt, final Throwable t) {
+    public void debug(String txt, Throwable t) {
         if (isDebugEnabled()) {
             logger.debug(txt, t);
         }
@@ -103,49 +103,49 @@ public class HubSonarLogger extends IntLogger {
     }
 
     @Override
-    public void setLogLevel(final LogLevel logLevel) {
-        final LoggerLevel level;
+    public void setLogLevel(LogLevel logLevel) {
+        LoggerLevel level;
         switch (logLevel) {
-        case OFF:
-            level = LoggerLevel.ERROR;
-            break;
-        case TRACE:
-            level = LoggerLevel.TRACE;
-            break;
-        case DEBUG:
-            level = LoggerLevel.DEBUG;
-            break;
-        case INFO:
-            level = LoggerLevel.INFO;
-            break;
-        case WARN:
-            level = LoggerLevel.WARN;
-            break;
-        case ERROR:
-            level = LoggerLevel.ERROR;
-            break;
-        default:
-            level = LoggerLevel.INFO;
+            case OFF:
+                level = LoggerLevel.ERROR;
+                break;
+            case TRACE:
+                level = LoggerLevel.TRACE;
+                break;
+            case DEBUG:
+                level = LoggerLevel.DEBUG;
+                break;
+            case INFO:
+                level = LoggerLevel.INFO;
+                break;
+            case WARN:
+                level = LoggerLevel.WARN;
+                break;
+            case ERROR:
+                level = LoggerLevel.ERROR;
+                break;
+            default:
+                level = LoggerLevel.INFO;
         }
         logger.setLevel(level);
     }
 
     @Override
     public LogLevel getLogLevel() {
-        final LoggerLevel level = logger.getLevel();
+        LoggerLevel level = logger.getLevel();
         switch (level) {
-        case TRACE:
-            return LogLevel.TRACE;
-        case DEBUG:
-            return LogLevel.DEBUG;
-        case INFO:
-            return LogLevel.INFO;
-        case WARN:
-            return LogLevel.WARN;
-        case ERROR:
-            return LogLevel.ERROR;
-        default:
-            return LogLevel.INFO;
+            case TRACE:
+                return LogLevel.TRACE;
+            case DEBUG:
+                return LogLevel.DEBUG;
+            case INFO:
+                return LogLevel.INFO;
+            case WARN:
+                return LogLevel.WARN;
+            case ERROR:
+                return LogLevel.ERROR;
+            default:
+                return LogLevel.INFO;
         }
     }
 }

@@ -1,7 +1,7 @@
 /**
  * Black Duck Hub Plugin for SonarQube
  *
- * Copyright (C) 2018 Black Duck Software, Inc.
+ * Copyright (C) 2020 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -66,44 +66,44 @@ public class HubPropertyConstants {
         private static final String CATEGORY_PATTERN_OVERRIDE = "Inclusion/Excludion Pattern Override Properties";
 
         public static final PropertyDefinition HUB_URL = buildGlobalDef(HubPropertyConstants.HUB_URL, PropertyType.STRING, "Hub URL: ", "Specify the URL of your Hub installation, for example: http://hub.blackducksoftware.com", "",
-                CATEGORY_GENERAL, 0);
+            CATEGORY_GENERAL, 0);
         public static final PropertyDefinition HUB_USERNAME = buildGlobalDef(HubPropertyConstants.HUB_USERNAME, PropertyType.STRING, "Username: ", "The Hub username.", "", CATEGORY_GENERAL, 1);
         public static final PropertyDefinition HUB_PASSWORD = buildGlobalDef(HubPropertyConstants.HUB_PASSWORD, PropertyType.PASSWORD, "Password: ", "The password for the specified Hub user.", "", CATEGORY_GENERAL, 2);
         public static final PropertyDefinition HUB_TIMEOUT = buildGlobalDef(HubPropertyConstants.HUB_TIMEOUT, PropertyType.INTEGER, "Timeout (secs): ", "Hub connection timeout.", "120", CATEGORY_GENERAL, 3);
         public static final PropertyDefinition HUB_TRUST_SSL_CERT = buildGlobalDef(HubPropertyConstants.HUB_TRUST_SSL_CERT, PropertyType.BOOLEAN, "Trust Hub SSL Certificate: ",
-                "This will trust the SSL certificate of the specified HTTPS Hub server.", "false", CATEGORY_GENERAL, 4);
+            "This will trust the SSL certificate of the specified HTTPS Hub server.", "false", CATEGORY_GENERAL, 4);
         public static final PropertyDefinition HUB_PROXY_HOST = buildGlobalDef(HubPropertyConstants.HUB_PROXY_HOST, PropertyType.STRING, "Proxy Host: ",
-                "If the server is behind a firewall and does not have direct access to the internet, you may want to specify a proxy server. This will send any requests from the Hub Plugin to this server first.", "", CATEGORY_PROXY, 5);
+            "If the server is behind a firewall and does not have direct access to the internet, you may want to specify a proxy server. This will send any requests from the Hub Plugin to this server first.", "", CATEGORY_PROXY, 5);
         public static final PropertyDefinition HUB_PROXY_PORT = buildGlobalDef(HubPropertyConstants.HUB_PROXY_PORT, PropertyType.INTEGER, "Proxy Port: ", "The port to be used to connect to the Proxy Server.", "", CATEGORY_PROXY, 6);
         public static final PropertyDefinition HUB_NO_PROXY_HOSTS = buildGlobalDef(HubPropertyConstants.HUB_NO_PROXY_HOSTS, PropertyType.STRING, "No Proxy Host Names: ",
-                "Specify host name regular expression patterns that shouldn't go through the proxy, in a comma separated list. Ex. .*blackducksoftware.com.*", "", CATEGORY_PROXY, 7);
+            "Specify host name regular expression patterns that shouldn't go through the proxy, in a comma separated list. Ex. .*blackducksoftware.com.*", "", CATEGORY_PROXY, 7);
         public static final PropertyDefinition HUB_PROXY_USERNAME = buildGlobalDef(HubPropertyConstants.HUB_PROXY_USERNAME, PropertyType.STRING, "Proxy Username: ",
-                "The username to use in the Proxy authentication. We currently only support proxies with Basic authenticaiton or no authentication.", "", CATEGORY_PROXY, 8);
+            "The username to use in the Proxy authentication. We currently only support proxies with Basic authenticaiton or no authentication.", "", CATEGORY_PROXY, 8);
         public static final PropertyDefinition HUB_PROXY_PASSWORD = buildGlobalDef(HubPropertyConstants.HUB_PROXY_PASSWORD, PropertyType.PASSWORD, "Proxy Password: ",
-                "The password to use in the Proxy authentication. We currently only support proxies with Basic authenticaiton or no authentication.", "", CATEGORY_PROXY, 9);
+            "The password to use in the Proxy authentication. We currently only support proxies with Basic authenticaiton or no authentication.", "", CATEGORY_PROXY, 9);
 
         public static final PropertyDefinition HUB_PROJECT_OVERRIDE = buildProjectDef(HubPropertyConstants.HUB_PROJECT_OVERRIDE, PropertyType.STRING, "Hub Project Name: ",
-                "Hub project to map this SonarQube project to. Note: If this is not provided, the name of the SonarQube project and version will be used.", "", CATEGORY_PROJECT_OVERRIDE, 0);
+            "Hub project to map this SonarQube project to. Note: If this is not provided, the name of the SonarQube project and version will be used.", "", CATEGORY_PROJECT_OVERRIDE, 0);
         public static final PropertyDefinition HUB_PROJECT_VERSION_OVERRIED = buildProjectDef(HubPropertyConstants.HUB_PROJECT_VERSION_OVERRIED, PropertyType.STRING, "Hub Project Version Name: ",
-                "Version of Hub project to map this SonarQube project to. Note: If this is not provided, but the Hub project name is, both of these properties will be ignored.", "", CATEGORY_PROJECT_OVERRIDE, 1);
+            "Version of Hub project to map this SonarQube project to. Note: If this is not provided, but the Hub project name is, both of these properties will be ignored.", "", CATEGORY_PROJECT_OVERRIDE, 1);
         public static final PropertyDefinition HUB_BINARY_INCLUSION_PATTERN_OVERRIDE = createPropertyDefinitionBuilder(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, PropertyType.STRING, "Binary Inclusion Patterns: ",
-                "File patterns used for gathering local components.", ComponentHelper.DEFAULT_INCLUSION_PATTERNS, CATEGORY_PATTERN_OVERRIDE, 2).onlyOnQualifiers(Arrays.asList(Qualifiers.PROJECT)).multiValues(true).build();
+            "File patterns used for gathering local components.", ComponentHelper.DEFAULT_INCLUSION_PATTERNS, CATEGORY_PATTERN_OVERRIDE, 2).onlyOnQualifiers(Arrays.asList(Qualifiers.PROJECT)).multiValues(true).build();
         public static final PropertyDefinition HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE = createPropertyDefinitionBuilder(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, PropertyType.STRING, "Binary Exclusion Patterns: ",
-                "File patterns used for gathering local components.", ComponentHelper.DEFAULT_EXCLUSION_PATTERNS, CATEGORY_PATTERN_OVERRIDE, 3).onlyOnQualifiers(Arrays.asList(Qualifiers.PROJECT)).multiValues(true).build();
+            "File patterns used for gathering local components.", ComponentHelper.DEFAULT_EXCLUSION_PATTERNS, CATEGORY_PATTERN_OVERRIDE, 3).onlyOnQualifiers(Arrays.asList(Qualifiers.PROJECT)).multiValues(true).build();
 
         private Definitions() {
             // This class should not be instantiated. Added to meet SonarQube standard.
         }
 
-        private static PropertyDefinition buildGlobalDef(final String prop, final PropertyType type, final String name, final String desc, final String defaultVal, final String subCategory, final int index) {
+        private static PropertyDefinition buildGlobalDef(String prop, PropertyType type, String name, String desc, String defaultVal, String subCategory, int index) {
             return createPropertyDefinitionBuilder(prop, type, name, desc, defaultVal, subCategory, index).build();
         }
 
-        private static PropertyDefinition buildProjectDef(final String prop, final PropertyType type, final String name, final String desc, final String defaultVal, final String subCategory, final int index) {
+        private static PropertyDefinition buildProjectDef(String prop, PropertyType type, String name, String desc, String defaultVal, String subCategory, int index) {
             return createPropertyDefinitionBuilder(prop, type, name, desc, defaultVal, subCategory, index).onlyOnQualifiers(Arrays.asList(Qualifiers.PROJECT)).build();
         }
 
-        private static PropertyDefinition.Builder createPropertyDefinitionBuilder(final String prop, final PropertyType type, final String name, final String desc, final String defaultVal, final String subCategory, final int index) {
+        private static PropertyDefinition.Builder createPropertyDefinitionBuilder(String prop, PropertyType type, String name, String desc, String defaultVal, String subCategory, int index) {
             return PropertyDefinition.builder(prop).type(type).name(name).description(desc).defaultValue(defaultVal).subCategory(subCategory).index(index);
         }
     }

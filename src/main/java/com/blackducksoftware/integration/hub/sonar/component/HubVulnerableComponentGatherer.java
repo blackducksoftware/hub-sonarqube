@@ -1,7 +1,7 @@
 /**
  * Black Duck Hub Plugin for SonarQube
  *
- * Copyright (C) 2018 Black Duck Software, Inc.
+ * Copyright (C) 2020 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -49,7 +49,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
     private String hubProjectName;
     private String hubProjectVersionName;
 
-    public HubVulnerableComponentGatherer(final IntLogger logger, final ComponentHelper componentHelper, final SonarManager sonarManager, final VersionBomComponentDataService versionBomComponentDataService) {
+    public HubVulnerableComponentGatherer(IntLogger logger, ComponentHelper componentHelper, SonarManager sonarManager, VersionBomComponentDataService versionBomComponentDataService) {
         this.logger = logger;
         this.componentHelper = componentHelper;
         this.sonarManager = sonarManager;
@@ -71,7 +71,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
             List<VersionBomComponentModel> components = null;
             try {
                 components = versionBomComponentDataService.getComponentsForProjectVersion(hubProjectName, hubProjectVersionName);
-            } catch (final IntegrationException e) {
+            } catch (IntegrationException e) {
                 logger.error(String.format("Problem getting BOM components: %s", e));
             }
             mapMatchedFilesToComponents(vulnerableComponentMap, components);
@@ -79,10 +79,10 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         return vulnerableComponentMap;
     }
 
-    private void mapMatchedFilesToComponents(final Map<String, Set<VersionBomComponentModel>> vulnerableComponentMap, final List<VersionBomComponentModel> components) {
+    private void mapMatchedFilesToComponents(Map<String, Set<VersionBomComponentModel>> vulnerableComponentMap, List<VersionBomComponentModel> components) {
         if (components != null && !components.isEmpty()) {
             String prevName = "";
-            for (final VersionBomComponentModel component : components) {
+            for (VersionBomComponentModel component : components) {
                 if (component.hasSecurityRisk()) {
                     prevName = logComponentName(prevName, component.getComponentName());
                     mapMatchedFilesToComponent(vulnerableComponentMap, component);
@@ -92,11 +92,11 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
 
     }
 
-    private void mapMatchedFilesToComponent(final Map<String, Set<VersionBomComponentModel>> vulnerableComponentMap, final VersionBomComponentModel component) {
-        final List<MatchedFilesModel> allMatchedFiles = component.getMatchedFiles();
+    private void mapMatchedFilesToComponent(Map<String, Set<VersionBomComponentModel>> vulnerableComponentMap, VersionBomComponentModel component) {
+        List<MatchedFilesModel> allMatchedFiles = component.getMatchedFiles();
         logger.debug(String.format("Found %d files.", allMatchedFiles.size()));
-        for (final MatchedFilesModel matchedFile : allMatchedFiles) {
-            final String fileName = componentHelper.getFileNameFromComposite(matchedFile.getCompositePathContext());
+        for (MatchedFilesModel matchedFile : allMatchedFiles) {
+            String fileName = componentHelper.getFileNameFromComposite(matchedFile.getCompositePathContext());
             if (!vulnerableComponentMap.containsKey(fileName)) {
                 vulnerableComponentMap.put(fileName, new HashSet<VersionBomComponentModel>());
             }
@@ -104,7 +104,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         }
     }
 
-    private String logComponentName(final String prevName, final String curName) {
+    private String logComponentName(String prevName, String curName) {
         if (!prevName.equals(curName)) {
             logger.info(String.format("Getting matched files for %s...", curName));
             return curName;
@@ -119,8 +119,8 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         logger.debug(String.format("Default Hub Project-Version to look for: %s", hubProjectVersionName));
 
         // Only override if the user provides a project AND project version
-        final String hubProjectNameOverride = sonarManager.getValue(HubPropertyConstants.HUB_PROJECT_OVERRIDE);
-        final String hubProjectVersionNameOverride = sonarManager.getValue(HubPropertyConstants.HUB_PROJECT_VERSION_OVERRIED);
+        String hubProjectNameOverride = sonarManager.getValue(HubPropertyConstants.HUB_PROJECT_OVERRIDE);
+        String hubProjectVersionNameOverride = sonarManager.getValue(HubPropertyConstants.HUB_PROJECT_VERSION_OVERRIED);
         if (StringUtils.isNotEmpty(hubProjectNameOverride) && StringUtils.isNotEmpty(hubProjectVersionNameOverride)) {
             hubProjectName = hubProjectNameOverride;
             logger.debug(String.format("Overriden Hub Project to look for: %s", hubProjectName));

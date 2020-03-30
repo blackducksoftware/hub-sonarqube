@@ -1,7 +1,7 @@
 /**
  * Black Duck Hub Plugin for SonarQube
  *
- * Copyright (C) 2018 Black Duck Software, Inc.
+ * Copyright (C) 2020 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -42,7 +42,7 @@ public class LocalComponentGatherer implements ComponentGatherer {
     private final FileSystem fileSystem;
     private final FilePredicate includeExcludePredicate;
 
-    public LocalComponentGatherer(final IntLogger logger, final SonarManager sonarManager, final FileSystem fileSystem, final FilePredicate includeExcludePredicate) {
+    public LocalComponentGatherer(IntLogger logger, SonarManager sonarManager, FileSystem fileSystem, FilePredicate includeExcludePredicate) {
         this.logger = logger;
         this.sonarManager = sonarManager;
         this.fileSystem = fileSystem;
@@ -55,12 +55,12 @@ public class LocalComponentGatherer implements ComponentGatherer {
         logger.debug(String.format("Exclusion Patterns: %s", Arrays.toString(sonarManager.getGlobalExclusionPatterns())));
         logger.debug(String.format("Base Directory: %s", fileSystem.baseDir().toString()));
 
-        final Set<String> localComponents = new HashSet<>();
-        for (final InputFile inputFile : fileSystem.inputFiles(includeExcludePredicate)) {
-            final File fromUri = new File(inputFile.uri());
+        Set<String> localComponents = new HashSet<>();
+        for (InputFile inputFile : fileSystem.inputFiles(includeExcludePredicate)) {
+            File fromUri = new File(inputFile.uri());
             try {
                 localComponents.add(fromUri.getCanonicalPath());
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 logger.error("Problem getting canonical path.", e);
                 localComponents.add(fromUri.getAbsolutePath());
             }

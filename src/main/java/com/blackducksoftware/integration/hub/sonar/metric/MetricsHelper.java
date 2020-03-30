@@ -1,7 +1,7 @@
 /**
  * Black Duck Hub Plugin for SonarQube
  *
- * Copyright (C) 2018 Black Duck Software, Inc.
+ * Copyright (C) 2020 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -43,28 +43,28 @@ public class MetricsHelper {
     private final SensorContext context;
     private final IntLogger logger;
 
-    public MetricsHelper(final IntLogger logger, final SensorContext context) {
+    public MetricsHelper(IntLogger logger, SensorContext context) {
         this.logger = logger;
         this.context = context;
     }
 
-    public void createMeasuresForInputFiles(final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap, final Iterable<InputFile> inputFiles) {
-        for (final InputFile inputFile : inputFiles) {
+    public void createMeasuresForInputFiles(Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap, Iterable<InputFile> inputFiles) {
+        for (InputFile inputFile : inputFiles) {
             createMeasuresForInputFile(vulnerableComponentsMap, inputFile);
         }
     }
 
-    public void createMeasuresForInputFile(final Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap, final InputFile inputFile) {
-        final String fileName = inputFile.filename();
+    public void createMeasuresForInputFile(Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap, InputFile inputFile) {
+        String fileName = inputFile.filename();
         if (vulnerableComponentsMap.containsKey(fileName)) {
-            final StringBuilder compListBuilder = new StringBuilder();
+            StringBuilder compListBuilder = new StringBuilder();
             int high = 0;
             int med = 0;
             int low = 0;
-            for (final VersionBomComponentModel component : vulnerableComponentsMap.get(fileName)) {
+            for (VersionBomComponentModel component : vulnerableComponentsMap.get(fileName)) {
                 String compName = component.getComponentName();
-                final String compVersion = component.getComponentVersionName();
-                final String compVersionUrl = component.getComponentVersion();
+                String compVersion = component.getComponentVersionName();
+                String compVersionUrl = component.getComponentVersion();
                 if (compName.length() > MAX_COMPONENT_NAME_LENGTH) {
                     compName = compName.substring(0, MAX_COMPONENT_NAME_LENGTH) + "...";
                 }
@@ -72,7 +72,7 @@ public class MetricsHelper {
                 compListBuilder.append(compVersion + ",");
                 compListBuilder.append(compVersionUrl + ",");
 
-                final RiskProfileCounts riskProfile = component.getSecurityRiskProfile();
+                RiskProfileCounts riskProfile = component.getSecurityRiskProfile();
                 high += riskProfile.getCount(RiskCountEnum.HIGH);
                 med += riskProfile.getCount(RiskCountEnum.MEDIUM);
                 low += riskProfile.getCount(RiskCountEnum.LOW);
@@ -89,7 +89,7 @@ public class MetricsHelper {
         }
     }
 
-    public void createMeasure(@SuppressWarnings("rawtypes") final Metric metric, final InputComponent inputComponent, final Serializable value) {
+    public void createMeasure(@SuppressWarnings("rawtypes") Metric metric, InputComponent inputComponent, Serializable value) {
         logger.debug(String.format("Creating measure: Metric='%s', Component='%s', Value='%s'", metric.getName(), inputComponent, value));
         context.newMeasure().forMetric(metric).on(inputComponent).withValue(value).save();
     }
