@@ -42,38 +42,38 @@ public class SonarManagerTest {
 
     @Test
     public void getGlobalInclusionPatternsTest() {
-        final MapSettings settings = new MapSettings();
+        MapSettings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, EXAMPLE_INCLUSION_OR_EXCLUSION_PATTERNS);
-        final SonarManager manager = new SonarManager(settings.asConfig());
+        SonarManager manager = new SonarManager(settings.asConfig());
 
         assertTrue(SonarTestUtils.stringArrayEquals(manager.getGlobalInclusionPatterns(), EXAMPLE_INCLUSION_OR_EXCLUSION_PATTERNS.split(DELIMITER)));
     }
 
     @Test
     public void getGlobalExclusionPatternsTest() {
-        final MapSettings settings = new MapSettings();
+        MapSettings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, EXAMPLE_INCLUSION_OR_EXCLUSION_PATTERNS);
-        final SonarManager manager = new SonarManager(settings.asConfig());
+        SonarManager manager = new SonarManager(settings.asConfig());
 
         assertTrue(SonarTestUtils.stringArrayEquals(manager.getGlobalExclusionPatterns(), EXAMPLE_INCLUSION_OR_EXCLUSION_PATTERNS.split(DELIMITER)));
     }
 
     @Test
     public void getValueTest() {
-        final MapSettings settings = new MapSettings();
+        MapSettings settings = new MapSettings();
         final String value = "value";
         settings.setProperty(EXAMPLE_KEY, value);
-        final SonarManager manager = new SonarManager(settings.asConfig());
+        SonarManager manager = new SonarManager(settings.asConfig());
 
         assertEquals(manager.getValue(EXAMPLE_KEY), value);
     }
 
     @Test
     public void getNullValueTest() {
-        final MapSettings settings = new MapSettings();
-        final String value = null;
+        MapSettings settings = new MapSettings();
+        String value = null;
         settings.setProperty(EXAMPLE_KEY, value);
-        final SonarManager manager = new SonarManager(settings.asConfig());
+        SonarManager manager = new SonarManager(settings.asConfig());
 
         assertNotNull(manager.getValue(EXAMPLE_KEY));
         assertEquals("", manager.getValue(EXAMPLE_KEY));
@@ -81,25 +81,25 @@ public class SonarManagerTest {
 
     @Test
     public void getValuesTest() {
-        final MapSettings settings = new MapSettings();
+        MapSettings settings = new MapSettings();
         final String value = " one, two,three, four             ";
-        final String[] values = { "one", "two", "three", "four" };
+        String[] values = { "one", "two", "three", "four" };
         settings.setProperty(EXAMPLE_KEY, value);
-        final SonarManager manager = new SonarManager(settings.asConfig());
+        SonarManager manager = new SonarManager(settings.asConfig());
 
         assertTrue(SonarTestUtils.stringArrayEquals(manager.getValues(EXAMPLE_KEY), values));
     }
 
     @Test
     public void getHubPluginVersionTest() {
-        final SonarManager manager = new SonarManager(new MapSettings().asConfig());
+        SonarManager manager = new SonarManager(new MapSettings().asConfig());
 
         assertTrue("<unknown>" != manager.getHubPluginVersionFromFile("/plugin.properties"));
     }
 
     @Test
     public void getHubPluginVersionUnknownTest() {
-        final SonarManager manager = new SonarManager(new MapSettings().asConfig());
+        SonarManager manager = new SonarManager(new MapSettings().asConfig());
 
         assertEquals("<unknown>", manager.getHubPluginVersionFromFile("/NULL"));
     }

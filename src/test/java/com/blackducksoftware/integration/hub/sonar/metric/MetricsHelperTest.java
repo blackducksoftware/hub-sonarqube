@@ -71,7 +71,7 @@ public class MetricsHelperTest {
     @Test
     public void createMeasuresForInputFileWhenMapDoesNotContainFileTest() {
         final String componentKey1 = SonarTestUtils.MY_PROJECT_KEY + ":INVALID_FILE";
-        final InputFile inputFile = TestInputFileBuilder.create(SonarTestUtils.MY_PROJECT_KEY, "INVALID_FILE").build();
+        InputFile inputFile = TestInputFileBuilder.create(SonarTestUtils.MY_PROJECT_KEY, "INVALID_FILE").build();
         metricsHelper.createMeasuresForInputFile(vulnerableComponentsMap, inputFile);
 
         assertEquals(null, context.measure(componentKey1, HubSonarMetrics.NUM_VULN_LOW));
@@ -88,14 +88,14 @@ public class MetricsHelperTest {
         vulnerableComponentsMap.put(file1, Sets.newHashSet());
         metricsHelper.createMeasuresForInputFile(vulnerableComponentsMap, TestInputFileBuilder.create(SonarTestUtils.MY_PROJECT_KEY, file1).build());
 
-        final Measure<Integer> numVulnLow = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_LOW);
-        final Measure<Integer> numVulnMed = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_MED);
-        final Measure<Integer> numVulnHigh = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_HIGH);
-        final Measure<String> componentNames = context.measure(componentKey1, HubSonarMetrics.COMPONENT_NAMES);
+        Measure<Integer> numVulnLow = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_LOW);
+        Measure<Integer> numVulnMed = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_MED);
+        Measure<Integer> numVulnHigh = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_HIGH);
+        Measure<String> componentNames = context.measure(componentKey1, HubSonarMetrics.COMPONENT_NAMES);
 
-        final int low = numVulnLow.value().intValue();
-        final int med = numVulnMed.value().intValue();
-        final int high = numVulnHigh.value().intValue();
+        int low = numVulnLow.value().intValue();
+        int med = numVulnMed.value().intValue();
+        int high = numVulnHigh.value().intValue();
 
         assertEquals(0, low);
         assertEquals(0, med);
@@ -109,34 +109,34 @@ public class MetricsHelperTest {
         final String longComponentName = "this_is_a_very_very_very_long_but_not_fully_qualified_file_name_that_is_contained_within_the_first_java_archive_file_so_it_will_have_a_subset_of_components.jar";
         final String componentKey1 = SonarTestUtils.MY_PROJECT_KEY + ":" + file1;
 
-        final HubResponseService hubResponseService = new HubResponseService(new MockRestConnection(LOG));
-        final VersionBomComponentView component0 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[0]), VersionBomComponentView.class);
-        final VersionBomComponentView component1 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[1]), VersionBomComponentView.class);
-        final VersionBomComponentView component2 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[1]), VersionBomComponentView.class);
+        HubResponseService hubResponseService = new HubResponseService(new MockRestConnection(LOG));
+        VersionBomComponentView component0 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[0]), VersionBomComponentView.class);
+        VersionBomComponentView component1 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[1]), VersionBomComponentView.class);
+        VersionBomComponentView component2 = hubResponseService.getItemAs(SonarTestUtils.getJsonFromFile(SonarTestUtils.getJsonComponentFileNames()[1]), VersionBomComponentView.class);
         component2.componentName = longComponentName;
 
-        final List<MatchedFilesView> matchedFiles = Collections.emptyList();
+        List<MatchedFilesView> matchedFiles = Collections.emptyList();
         vulnerableComponentsMap.put(file1, Sets.newHashSet(new VersionBomComponentModel(component0, matchedFiles), new VersionBomComponentModel(component1, matchedFiles), new VersionBomComponentModel(component2, matchedFiles)));
 
-        final List<InputFile> inputFiles = Arrays.asList(TestInputFileBuilder.create(SonarTestUtils.MY_PROJECT_KEY, file1).build());
+        List<InputFile> inputFiles = Arrays.asList(TestInputFileBuilder.create(SonarTestUtils.MY_PROJECT_KEY, file1).build());
 
         metricsHelper.createMeasuresForInputFiles(vulnerableComponentsMap, inputFiles);
 
-        final Measure<Integer> numVulnLow = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_LOW);
-        final Measure<Integer> numVulnMed = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_MED);
-        final Measure<Integer> numVulnHigh = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_HIGH);
-        final Measure<String> componentNames = context.measure(componentKey1, HubSonarMetrics.COMPONENT_NAMES);
+        Measure<Integer> numVulnLow = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_LOW);
+        Measure<Integer> numVulnMed = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_MED);
+        Measure<Integer> numVulnHigh = context.measure(componentKey1, HubSonarMetrics.NUM_VULN_HIGH);
+        Measure<String> componentNames = context.measure(componentKey1, HubSonarMetrics.COMPONENT_NAMES);
 
-        final int low = numVulnLow.value().intValue();
-        final int med = numVulnMed.value().intValue();
-        final int high = numVulnHigh.value().intValue();
+        int low = numVulnLow.value().intValue();
+        int med = numVulnMed.value().intValue();
+        int high = numVulnHigh.value().intValue();
 
         assertTrue((low + med + high) > 0);
         assertEquals(1, low);
         assertEquals(1, med);
         assertEquals(1, high);
 
-        final String compNames = componentNames.value();
+        String compNames = componentNames.value();
         assertTrue(compNames.contains("Test Component 0"));
         assertTrue(compNames.contains("Test Component 1"));
     }

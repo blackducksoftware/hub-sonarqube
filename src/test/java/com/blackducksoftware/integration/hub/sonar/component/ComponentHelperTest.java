@@ -66,14 +66,13 @@ public class ComponentHelperTest {
 
     @Test
     public void preProcessComponentListDataTest() throws IntegrationException {
-        final MapSettings settings = new MapSettings();
+        MapSettings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, "o??, *ee");
 
-        @SuppressWarnings("deprecation")
-        final ComponentHelper compHelper = new ComponentHelper(new SonarManager(settings.asConfig()));
+        @SuppressWarnings("deprecation") ComponentHelper compHelper = new ComponentHelper(new SonarManager(settings.asConfig()));
 
-        final List<String> first = new ArrayList<>(Arrays.asList("one", "three"));
-        final List<String> second = new ArrayList<>(Arrays.asList("one", "two", "three", "three and a half"));
+        List<String> first = new ArrayList<>(Arrays.asList("one", "three"));
+        List<String> second = new ArrayList<>(Arrays.asList("one", "two", "three", "three and a half"));
 
         compHelper.preProcessComponentListData(second);
 
@@ -102,15 +101,15 @@ public class ComponentHelperTest {
 
     @Test
     public void getInputFilesFromStringsTest() {
-        final File baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
-        final Set<String> inputFiles = LocalComponentGathererTest.createGatherer(baseDir).gatherComponents();
+        File baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
+        Set<String> inputFiles = LocalComponentGathererTest.createGatherer(baseDir).gatherComponents();
 
-        final SensorContextTester context = SensorContextTester.create(baseDir);
+        SensorContextTester context = SensorContextTester.create(baseDir);
         context.setFileSystem(new MockFileSystem(baseDir));
 
-        final SonarManager manager = new SonarManager(context);
-        final ComponentHelper compHelper = new ComponentHelper(manager);
-        final Collection<InputFile> collection = compHelper.getInputFilesFromStrings(inputFiles);
+        SonarManager manager = new SonarManager(context);
+        ComponentHelper compHelper = new ComponentHelper(manager);
+        Collection<InputFile> collection = compHelper.getInputFilesFromStrings(inputFiles);
 
         assertTrue(collection != null && !collection.isEmpty());
         assertEquals(2, collection.size());
@@ -118,10 +117,9 @@ public class ComponentHelperTest {
 
     @Test
     public void getInputFilesFromStringsWithNullContextTest() {
-        @SuppressWarnings("deprecation")
-        final SonarManager manager = new SonarManager(new MapSettings().asConfig());
-        final ComponentHelper compHelper = new ComponentHelper(manager);
-        final InputFile inputFile = compHelper.getInputFileFromString("INVALID_FILE");
+        @SuppressWarnings("deprecation") SonarManager manager = new SonarManager(new MapSettings().asConfig());
+        ComponentHelper compHelper = new ComponentHelper(manager);
+        InputFile inputFile = compHelper.getInputFileFromString("INVALID_FILE");
 
         assertEquals(null, inputFile);
     }
@@ -148,8 +146,8 @@ public class ComponentHelperTest {
 
     @Test
     public void flattenCollectionOfCollectionsTest() {
-        final Collection<Collection<String>> collectionOfCollections = Arrays.asList(Arrays.asList("element 1", "element 2"), Arrays.asList("element 3"));
-        final Set<String> flattenedSet = helper.flattenCollectionOfCollections(collectionOfCollections);
+        Collection<Collection<String>> collectionOfCollections = Arrays.asList(Arrays.asList("element 1", "element 2"), Arrays.asList("element 3"));
+        Set<String> flattenedSet = helper.flattenCollectionOfCollections(collectionOfCollections);
         assertEquals(Sets.newHashSet("element 1", "element 2", "element 3"), flattenedSet);
     }
 }
