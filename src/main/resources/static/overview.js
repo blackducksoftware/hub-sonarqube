@@ -1,7 +1,7 @@
 /*
  * Black Duck Hub Plugin for SonarQube
  *
- * Copyright (C) 2018 Black Duck Software, Inc.
+ * Copyright (C) 2020 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * Licensed to the Apache Software Foundation (ASF) under one

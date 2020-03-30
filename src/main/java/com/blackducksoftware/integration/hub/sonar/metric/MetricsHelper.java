@@ -1,7 +1,7 @@
 /**
  * Black Duck Hub Plugin for SonarQube
  *
- * Copyright (C) 2018 Black Duck Software, Inc.
+ * Copyright (C) 2020 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -24,7 +24,6 @@
 package com.blackducksoftware.integration.hub.sonar.metric;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Set;
 
@@ -59,10 +58,10 @@ public class MetricsHelper {
         String fileName = inputFile.filename();
         if (vulnerableComponentsMap.containsKey(fileName)) {
             StringBuilder compListBuilder = new StringBuilder();
-            BigDecimal critical = new BigDecimal(0);
-            BigDecimal high = new BigDecimal(0);
-            BigDecimal med = new BigDecimal(0);
-            BigDecimal low = new BigDecimal(0);
+            int critical = 0;
+            int high = 0;
+            int med = 0;
+            int low = 0;
             for (ProjectVersionComponentView component : vulnerableComponentsMap.get(fileName)) {
                 String compName = component.getComponentName();
                 String compVersion = component.getComponentVersionName();
@@ -78,30 +77,28 @@ public class MetricsHelper {
                 for (ComponentVersionRiskProfileRiskDataCountsView countView : riskProfile.getCounts()) {
                     switch (countView.getCountType()) {
                         case CRITICAL:
-                            critical.add(countView.getCount());
+                            critical += countView.getCount().intValue();
                             break;
                         case HIGH:
-                            high.add(countView.getCount());
+                            high += countView.getCount().intValue();
                             break;
                         case MEDIUM:
-                            med.add(countView.getCount());
+                            med += countView.getCount().intValue();
                             break;
                         case LOW:
-                            low.add(countView.getCount());
+                            low += countView.getCount().intValue();
                             break;
                         default:
                             break;
                     }
-
                 }
-
             }
             createMeasure(HubSonarMetrics.NUM_VULN_LOW, inputFile, low);
             createMeasure(HubSonarMetrics.NUM_VULN_MED, inputFile, med);
             createMeasure(HubSonarMetrics.NUM_VULN_HIGH, inputFile, high);
             createMeasure(HubSonarMetrics.NUM_VULN_CRITICAL, inputFile, critical);
 
-            if (low.compareTo(BigDecimal.ZERO) > 0 || med.compareTo(BigDecimal.ZERO) > 0 || high.compareTo(BigDecimal.ZERO) > 0) {
+            if ((low + med + high + critical) > 0) {
                 String compList = compListBuilder.toString();
                 compListBuilder.deleteCharAt(compList.lastIndexOf(','));
                 compList = compListBuilder.toString();

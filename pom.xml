@@ -49,14 +49,19 @@
       <url>https://sig-repo.synopsys.com/bds-integrations-release</url>
     </repository>
     <repository>
-         <snapshots>
+      <snapshots>
         <updatePolicy>always</updatePolicy>
       </snapshots>
       <id>ha-bds-artifactory</id>
       <url>https://sig-repo.synopsys.com/bds-integrations-snapshot</url>
     </repository>
   </repositories>
-
+  <pluginRepositories>
+    <pluginRepository>
+      <id>maven-central</id>
+      <url>https://repo.maven.apache.org/maven2/</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <dependencies>
     <dependency>
