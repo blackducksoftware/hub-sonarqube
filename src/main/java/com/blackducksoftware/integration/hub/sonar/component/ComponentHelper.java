@@ -58,10 +58,10 @@ public class ComponentHelper {
     }
 
     public String getFilePathFromComposite(String composite) {
-        int lastIndex = composite.length();
+        int length = composite.length();
         int archiveMarkIndex = composite.indexOf('!');
         int otherMarkIndex = composite.indexOf('#');
-        boolean otherMarkIsLastCharacter = otherMarkIndex == lastIndex - 1;
+        boolean otherMarkIsLastCharacter = otherMarkIndex == length - 1;
 
         int startIndex;
         if (otherMarkIndex >= 0 && !otherMarkIsLastCharacter) {
@@ -76,7 +76,7 @@ public class ComponentHelper {
         } else if (otherMarkIsLastCharacter) {
             endIndex = otherMarkIndex;
         } else {
-            endIndex = lastIndex;
+            endIndex = length;
         }
 
         return composite.substring(startIndex, endIndex).trim();

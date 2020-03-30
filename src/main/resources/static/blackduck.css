@@ -1,21 +1,21 @@
 div#blackduck_wrapper {
-	max-width: 1300px;
+    max-width: 1300px;
     margin-left: auto;
-	margin-right: auto;
-	padding-left: 20px;
+    margin-right: auto;
+    padding-left: 20px;
 }
 
 table#blackduck_table {
-	width: 100%;
-	min-width: 720px;
-	padding-right: 10px;
-	padding-left: 10px;
-	padding-top: 5px;
-	padding-bottom: 5px;
+    width: 100%;
+    min-width: 720px;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 table#blackduck_table th {
-	width: auto;
+    width: auto;
     border-bottom: 1px solid #DCDCDC;
     padding-right: 10px;
     padding-left: 10px;
@@ -24,11 +24,11 @@ table#blackduck_table th {
 }
 
 table#blackduck_table th a {
-	text-decoration: none;
+    text-decoration: none;
 }
 
 table#blackduck_table td {
-	border-bottom: 1px solid #DCDCDC;
+    border-bottom: 1px solid #DCDCDC;
     width: auto;
     text-align: left;
     padding-right: 10px;
@@ -37,14 +37,25 @@ table#blackduck_table td {
     padding-bottom: 5px;
 }
 
+#criticalRisk {
+    color: white;
+    font-size: 9pt;
+    background-color: #3F0F0D;
+    border: 1px solid #3F0F0D;
+    border-radius: 15%;
+    padding: 1px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
 #highRisk {
-	color: white;
-	font-size: 9pt;
-	background-color: #9C251F;
-	border: 1px solid #9C251F;
-	border-radius: 15%;
-	padding: 1px;
-	padding-left: 5px;
+    color: white;
+    font-size: 9pt;
+    background-color: #9C251F;
+    border: 1px solid #9C251F;
+    border-radius: 15%;
+    padding: 1px;
+    padding-left: 5px;
     padding-right: 5px;
 }
 
@@ -71,32 +82,32 @@ table#blackduck_table td {
 }
 
 #blackduck_link_span {
-	display: block;
-	text-size: large;
+    display: block;
+    text-size: large;
 }
 
 #blackduck_link {
-	text-decoration: none;
+    text-decoration: none;
 }
 
 #blackduck_loading {
-	max-width: 100%;
+    max-width: 100%;
     height: auto;
 }
 
 #blackduck_version {
-	font-size: 8.5pt;
-	text-decoration: none;
-	border: 1px solid #DCDCDC;
-	border-radius: 12%;
-	padding-left: 1px;
-	padding-right: 1px;
+    font-size: 8.5pt;
+    text-decoration: none;
+    border: 1px solid #DCDCDC;
+    border-radius: 12%;
+    padding-left: 1px;
+    padding-right: 1px;
 }
 
 .large_header {
-	font-size: large;
-	font-weight: none;
-	margin-bottom: 10px;
+    font-size: large;
+    font-weight: none;
+    margin-bottom: 10px;
 }
 
 .expandableTableRow {

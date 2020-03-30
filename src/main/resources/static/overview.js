@@ -23,7 +23,7 @@
  */
 var HEADER_CONTENT = 'Black Duck Hub Security Analysis';
 var PAGE_SIZE = 100;
-var METRIC_KEYS = 'num_vuln_low, num_vuln_med, num_vuln_high,num_vuln_critical, hub_component_names, num_components_rating';
+var METRIC_KEYS = 'num_vuln_low, num_vuln_med, num_vuln_high, num_vuln_critical, hub_component_names, num_components_rating';
 var MAX_COMPONENTS_PER_ROW = 5;
 
 window.registerExtension('hubsonarqube/overview', function (options) {
@@ -219,7 +219,7 @@ function getTableRowsAsString(componentHelperArray) {
         if ((curComp.low + curComp.med + curComp.high + curComp.critical) > 0 && curComp.comps != '') {
             tableRows += '<tr><td><i class="icon-qualifier-fil"></i> '
                 + curComp.name + '</td><td style="text-align:center;">' + '<span title="Critical" id="criticalRisk">'
-                + curComp.critical + '<span title="High" id="highRisk">'
+                + curComp.critical + '</span> <span title="High" id="highRisk">'
                 + curComp.high + '</span> <span title="Medium" id="medRisk">'
                 + curComp.med + '</span> <span title="Low" id="lowRisk">'
                 + curComp.low + '</span></td><td>'

@@ -70,15 +70,7 @@ public class HubSensor implements Sensor {
             return;
         }
         BlackDuckServicesFactory blackDuckServicesFactory = servicesFactoryOptional.get();
-
-        try {
-            ExecutorService phoneHomeExecutor = Executors.newSingleThreadExecutor();
-            BlackDuckPhoneHomeHelper blackDuckPhoneHomeHelper = BlackDuckPhoneHomeHelper.createAsynchronousPhoneHomeHelper(blackDuckServicesFactory, phoneHomeExecutor);
-            blackDuckPhoneHomeHelper.handlePhoneHome(ARTIFACT_ID, sonarManager.getHubPluginVersionFromFile("/plugin.properties"));
-        } catch (Exception e) {
-            logger.debug(String.format("Could not send the phone home data. Error: %s", e.getMessage()));
-            logger.trace(e.getMessage(), e);
-        }
+        phoneHome(logger, blackDuckServicesFactory, sonarManager);
 
         FileSystem fileSystem = context.fileSystem();
         FilePredicates filePredicates = fileSystem.predicates();
@@ -150,5 +142,16 @@ public class HubSensor implements Sensor {
             logger.error(String.format("Error establishing a Hub connection: %s", e.getMessage()), e);
         }
         return Optional.empty();
+    }
+
+    private void phoneHome(IntLogger logger, BlackDuckServicesFactory blackDuckServicesFactory, SonarManager sonarManager) {
+        try {
+            ExecutorService phoneHomeExecutor = Executors.newSingleThreadExecutor();
+            BlackDuckPhoneHomeHelper blackDuckPhoneHomeHelper = BlackDuckPhoneHomeHelper.createAsynchronousPhoneHomeHelper(blackDuckServicesFactory, phoneHomeExecutor);
+            blackDuckPhoneHomeHelper.handlePhoneHome(ARTIFACT_ID, sonarManager.getHubPluginVersionFromFile("/plugin.properties"));
+        } catch (Exception e) {
+            logger.debug(String.format("Could not send the phone home data. Error: %s", e.getMessage()));
+            logger.trace(e.getMessage(), e);
+        }
     }
 }
