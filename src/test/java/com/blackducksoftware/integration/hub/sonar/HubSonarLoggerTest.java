@@ -186,18 +186,18 @@ public class HubSonarLoggerTest {
             logTester.setLevel(LoggerLevel.TRACE);
             logger_class.setLogLevel(LogLevel.OFF);
             logger_class.setLogLevel(LogLevel.fromString("Invalid string to trigger the default case"));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             exeption = e;
         }
         assertEquals(null, exeption);
     }
 
-    private void assertContains(final LoggerLevel level, @SuppressWarnings("unused") final String txt) {
+    private void assertContains(LoggerLevel level, @SuppressWarnings("unused") String txt) {
         assertTrue(null != logTester.logs(level));
         // TODO - ignore until we can get LogTester to work correctly: assertTrue(logTester.logs(level).stream().anyMatch(log -> log.contains(txt)));
     }
 
-    private void assertDoesNotContain(final LoggerLevel level, @SuppressWarnings("unused") final String txt) {
+    private void assertDoesNotContain(LoggerLevel level, @SuppressWarnings("unused") String txt) {
         assertTrue(null != logTester.logs(level));
         // TODO - ignore until we can get LogTester to work correctly: assertTrue(!logTester.logs(level).stream().anyMatch(log -> log.contains(txt)));
     }
@@ -226,7 +226,7 @@ public class HubSonarLoggerTest {
             logger.error(new Exception(TEST_STRING));
         }
 
-        public void error(final String txt, final boolean exception) {
+        public void error(String txt, boolean exception) {
             if (exception) {
                 logger.error(txt, new Exception(TEST_STRING));
             } else {
@@ -238,7 +238,7 @@ public class HubSonarLoggerTest {
             logger.warn(TEST_STRING);
         }
 
-        public void trace(final boolean exception) {
+        public void trace(boolean exception) {
             if (exception) {
                 logger.trace(PREFIX_ERROR, new Exception(TEST_STRING));
             } else {
@@ -246,7 +246,7 @@ public class HubSonarLoggerTest {
             }
         }
 
-        public void debug(final boolean exception) {
+        public void debug(boolean exception) {
             if (exception) {
                 logger.debug(PREFIX_ERROR, new Exception(TEST_STRING));
             } else {
@@ -254,7 +254,7 @@ public class HubSonarLoggerTest {
             }
         }
 
-        public void setLogLevel(final LogLevel level) {
+        public void setLogLevel(LogLevel level) {
             logger.setLogLevel(level);
         }
     }
