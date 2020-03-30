@@ -35,7 +35,7 @@ public class ComponentComparer {
     private int sharedComponentCount;
     private boolean needsValidation;
 
-    public ComponentComparer(final ComponentHelper componentHelper, final ComponentGatherer localComponentGatherer, final ComponentGatherer remoteComponentGatherer) {
+    public ComponentComparer(ComponentHelper componentHelper, ComponentGatherer localComponentGatherer, ComponentGatherer remoteComponentGatherer) {
         this.componentHelper = componentHelper;
         this.localComponentList = localComponentGatherer.gatherComponents();
         this.remoteComponentList = remoteComponentGatherer.gatherComponents();
@@ -43,7 +43,7 @@ public class ComponentComparer {
         this.needsValidation = false;
     }
 
-    public ComponentComparer(final ComponentHelper componentHelper, final Collection<String> localComponentList, final Collection<String> remoteComponentList) {
+    public ComponentComparer(ComponentHelper componentHelper, Collection<String> localComponentList, Collection<String> remoteComponentList) {
         this.componentHelper = componentHelper;
         this.localComponentList = localComponentList;
         this.remoteComponentList = remoteComponentList;
@@ -57,9 +57,9 @@ public class ComponentComparer {
             componentHelper.preProcessComponentListData(remoteComponentList);
             needsValidation = false;
         }
-        final Set<String> sharedComponents = new HashSet<>();
-        for (final String localComponent : localComponentList) {
-            for (final String remoteComponentName : remoteComponentList) {
+        Set<String> sharedComponents = new HashSet<>();
+        for (String localComponent : localComponentList) {
+            for (String remoteComponentName : remoteComponentList) {
                 if (localComponent.endsWith(remoteComponentName)) {
                     sharedComponents.add(localComponent);
                     break;
