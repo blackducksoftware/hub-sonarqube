@@ -43,17 +43,17 @@ public class SonarTestUtils {
         // This class should not be instantiated.
     }
 
-    public static boolean stringArrayEquals(final String[] firstArray, final String[] secondArray) {
-        final List<String> first = Arrays.asList(firstArray);
-        final List<String> second = Arrays.asList(secondArray);
+    public static boolean stringArrayEquals(String[] firstArray, String[] secondArray) {
+        List<String> first = Arrays.asList(firstArray);
+        List<String> second = Arrays.asList(secondArray);
         return first.equals(second);
     }
 
     @SuppressWarnings("resource")
-    public static String getJsonFromFile(final String fileName) throws IOException {
-        final File file = new File(JSON_DIRECTORY + PATH_DELIM + fileName);
-        final FileInputStream input = new FileInputStream(file);
-        final String json = IOUtils.toString(input);
+    public static String getJsonFromFile(String fileName) throws IOException {
+        File file = new File(JSON_DIRECTORY + PATH_DELIM + fileName);
+        FileInputStream input = new FileInputStream(file);
+        String json = IOUtils.toString(input);
         input.close();
         return json;
     }
