@@ -42,13 +42,6 @@ public class SonarManager {
     private final SensorContext context;
     private final Configuration configuration;
 
-    @Deprecated
-    public SonarManager(Configuration settings) {
-        this.context = null;
-        this.configuration = settings;
-        logger = new HubSonarLogger(Loggers.get(getClass()));
-    }
-
     public SonarManager(SensorContext context) {
         this.context = context;
         this.configuration = context.config();

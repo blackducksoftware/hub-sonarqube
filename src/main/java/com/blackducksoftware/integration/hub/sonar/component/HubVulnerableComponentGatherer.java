@@ -101,7 +101,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
             String prevName = "";
             for (ProjectVersionComponentView component : components) {
                 RiskProfileView securityRiskProfile = component.getSecurityRiskProfile();
-                if (null != securityRiskProfile && null != securityRiskProfile.getCounts() && securityRiskProfile.getCounts().size() > 0) {
+                if (null != securityRiskProfile && null != securityRiskProfile.getCounts() && !securityRiskProfile.getCounts().isEmpty()) {
                     prevName = logComponentName(prevName, component.getComponentName());
                     mapMatchedFilesToComponent(vulnerableComponentMap, component);
                 }

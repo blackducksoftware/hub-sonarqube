@@ -26,6 +26,7 @@ package com.blackducksoftware.integration.hub.sonar.component;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -40,7 +41,10 @@ import org.sonar.api.utils.log.Loggers;
 
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
+import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
+import com.blackducksoftware.integration.hub.sonar.model.MockFileSystem;
+import com.blackducksoftware.integration.hub.sonar.model.MockSensorContext;
 import com.synopsys.integration.blackduck.api.generated.component.ComponentMatchedFilesItemsFilePathView;
 import com.synopsys.integration.blackduck.api.generated.component.ComponentVersionRiskProfileRiskDataCountsView;
 import com.synopsys.integration.blackduck.api.generated.view.ComponentMatchedFilesView;
@@ -63,7 +67,10 @@ public class HubVulnerableComponentGathererTest {
 
     @Before
     public void init() {
-        sonarManager = new SonarManager(new MapSettings().asConfig());
+        File baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
+        MockSensorContext sensorContext = new MockSensorContext(new MapSettings().asConfig(), new MockFileSystem(baseDir));
+
+        sonarManager = new SonarManager(sensorContext);
         componentHelper = new ComponentHelper(sonarManager);
         logger = new HubSonarLogger(Loggers.get(getClass()));
 
