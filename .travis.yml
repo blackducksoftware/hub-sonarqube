@@ -18,7 +18,7 @@ notifications:
       - gkillough@blackducksoftware.com
 
 script:
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar -Dsonar.projectKey=blackducksoftware_hub-sonarqube
 
 env:
   - DETECT_MAVEN_INCLUDED_SCOPES="compile" JAVA_OPTS="-Xmx2048m"
