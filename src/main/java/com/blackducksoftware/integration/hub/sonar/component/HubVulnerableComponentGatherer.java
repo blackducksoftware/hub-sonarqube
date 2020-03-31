@@ -24,6 +24,7 @@
 package com.blackducksoftware.integration.hub.sonar.component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -50,6 +51,8 @@ import com.synopsys.integration.log.IntLogger;
 import com.synopsys.integration.rest.request.Request;
 
 public class HubVulnerableComponentGatherer implements ComponentGatherer {
+    private static final String FILTER = "filter";
+    private static final String SECURITY_RISK = "securityRisk";
     private final IntLogger logger;
     private final ComponentHelper componentHelper;
     private final SonarManager sonarManager;
@@ -88,22 +91,8 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
                 logger.error(String.format("Couldn't find the BlackDuck project '%s' and version '%s'. Error: %s", hubProjectName, hubProjectVersionName, e.getMessage()), e);
             }
             if (projectVersionWrapper.isPresent()) {
-                ProjectVersionView versionView = projectVersionWrapper.get().getProjectVersionView();
-                try {
-                    Optional<String> optionalComponentsLink = versionView.getFirstLink(ProjectVersionView.COMPONENTS_LINK);
-                    if (optionalComponentsLink.isPresent()) {
-                        String componentsLink = optionalComponentsLink.get();
-                        Request.Builder requestBuilder = RequestFactory.createCommonGetRequestBuilder();
-                        requestBuilder.uri(componentsLink);
-                        requestBuilder.addQueryParameter("filter", "securityRisk:" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.CRITICAL.toString().toLowerCase());
-                        requestBuilder.addQueryParameter("filter", "securityRisk:" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.HIGH.toString().toLowerCase());
-                        requestBuilder.addQueryParameter("filter", "securityRisk:" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.MEDIUM.toString().toLowerCase());
-                        requestBuilder.addQueryParameter("filter", "securityRisk:" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.LOW.toString().toLowerCase());
-                        components = blackDuckService.getAllResponses(versionView, ProjectVersionView.COMPONENTS_LINK_RESPONSE, requestBuilder);
-                    }
-                } catch (IntegrationException e) {
-                    logger.error(String.format("Problem getting BOM components. Error: %s", e.getMessage()), e);
-                }
+                ProjectVersionView projectVersionView = projectVersionWrapper.get().getProjectVersionView();
+                components = getProjectVersionComponents(projectVersionView);
             }
             mapMatchedFilesToComponents(vulnerableComponentMap, components);
         }
@@ -164,6 +153,28 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
             hubProjectVersionName = hubProjectVersionNameOverride;
             logger.debug(String.format("Overriden Hub Project-Version to look for: %s", hubProjectVersionName));
         }
+    }
+
+    private List<ProjectVersionComponentView> getProjectVersionComponents(ProjectVersionView projectVersionView) {
+        if (null == projectVersionView) {
+            return Collections.emptyList();
+        }
+        try {
+            Optional<String> optionalComponentsLink = projectVersionView.getFirstLink(ProjectVersionView.COMPONENTS_LINK);
+            if (optionalComponentsLink.isPresent()) {
+                String componentsLink = optionalComponentsLink.get();
+                Request.Builder requestBuilder = RequestFactory.createCommonGetRequestBuilder();
+                requestBuilder.uri(componentsLink);
+                requestBuilder.addQueryParameter(FILTER, SECURITY_RISK + ":" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.CRITICAL.toString().toLowerCase());
+                requestBuilder.addQueryParameter(FILTER, SECURITY_RISK + ":" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.HIGH.toString().toLowerCase());
+                requestBuilder.addQueryParameter(FILTER, SECURITY_RISK + ":" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.MEDIUM.toString().toLowerCase());
+                requestBuilder.addQueryParameter(FILTER, SECURITY_RISK + ":" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.LOW.toString().toLowerCase());
+                return blackDuckService.getAllResponses(projectVersionView, ProjectVersionView.COMPONENTS_LINK_RESPONSE, requestBuilder);
+            }
+        } catch (IntegrationException e) {
+            logger.error(String.format("Problem getting BOM components. Error: %s", e.getMessage()), e);
+        }
+        return Collections.emptyList();
     }
 
     private boolean hasSecurityRisk(ProjectVersionComponentView componentView) {
