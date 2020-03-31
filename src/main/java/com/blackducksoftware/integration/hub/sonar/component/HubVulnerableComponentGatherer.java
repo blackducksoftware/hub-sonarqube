@@ -36,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.synopsys.integration.blackduck.api.generated.component.ComponentVersionRiskProfileRiskDataCountsView;
+import com.synopsys.integration.blackduck.api.generated.enumeration.ComponentVersionRiskProfileRiskDataCountsCountTypeType;
 import com.synopsys.integration.blackduck.api.generated.view.ComponentMatchedFilesView;
 import com.synopsys.integration.blackduck.api.generated.view.ProjectVersionComponentView;
 import com.synopsys.integration.blackduck.api.generated.view.ProjectVersionView;
@@ -43,8 +44,10 @@ import com.synopsys.integration.blackduck.api.generated.view.RiskProfileView;
 import com.synopsys.integration.blackduck.service.BlackDuckService;
 import com.synopsys.integration.blackduck.service.ProjectService;
 import com.synopsys.integration.blackduck.service.model.ProjectVersionWrapper;
+import com.synopsys.integration.blackduck.service.model.RequestFactory;
 import com.synopsys.integration.exception.IntegrationException;
 import com.synopsys.integration.log.IntLogger;
+import com.synopsys.integration.rest.request.Request;
 
 public class HubVulnerableComponentGatherer implements ComponentGatherer {
     private final IntLogger logger;
@@ -87,7 +90,17 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
             if (projectVersion.isPresent()) {
                 ProjectVersionView versionView = projectVersion.get().getProjectVersionView();
                 try {
-                    components = blackDuckService.getAllResponses(versionView, ProjectVersionView.COMPONENTS_LINK_RESPONSE);
+                    Optional<String> optionalComponentsLink = versionView.getFirstLink(ProjectVersionView.COMPONENTS_LINK);
+                    if (optionalComponentsLink.isPresent()) {
+                        String componentsLink = optionalComponentsLink.get();
+                        Request.Builder requestBuilder = RequestFactory.createCommonGetRequestBuilder();
+                        requestBuilder.uri(componentsLink);
+                        requestBuilder.addQueryParameter("filter", "securityRisk:" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.CRITICAL.toString().toLowerCase());
+                        requestBuilder.addQueryParameter("filter", "securityRisk:" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.HIGH.toString().toLowerCase());
+                        requestBuilder.addQueryParameter("filter", "securityRisk:" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.MEDIUM.toString().toLowerCase());
+                        requestBuilder.addQueryParameter("filter", "securityRisk:" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.LOW.toString().toLowerCase());
+                        components = blackDuckService.getAllResponses(versionView, ProjectVersionView.COMPONENTS_LINK_RESPONSE, requestBuilder);
+                    }
                 } catch (IntegrationException e) {
                     logger.error(String.format("Problem getting BOM components. Error: %s", e.getMessage()), e);
                 }
