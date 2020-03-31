@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
+import com.synopsys.integration.blackduck.api.generated.component.ComponentVersionRiskProfileRiskDataCountsView;
 import com.synopsys.integration.blackduck.api.generated.view.ComponentMatchedFilesView;
 import com.synopsys.integration.blackduck.api.generated.view.ProjectVersionComponentView;
 import com.synopsys.integration.blackduck.api.generated.view.ProjectVersionView;
@@ -100,14 +101,12 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         if (components != null && !components.isEmpty()) {
             String prevName = "";
             for (ProjectVersionComponentView component : components) {
-                RiskProfileView securityRiskProfile = component.getSecurityRiskProfile();
-                if (null != securityRiskProfile && null != securityRiskProfile.getCounts() && !securityRiskProfile.getCounts().isEmpty()) {
+                if (hasSecurityRisk(component)) {
                     prevName = logComponentName(prevName, component.getComponentName());
                     mapMatchedFilesToComponent(vulnerableComponentMap, component);
                 }
             }
         }
-
     }
 
     private void mapMatchedFilesToComponent(Map<String, Set<ProjectVersionComponentView>> vulnerableComponentMap, ProjectVersionComponentView component) {
@@ -152,5 +151,26 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
             hubProjectVersionName = hubProjectVersionNameOverride;
             logger.debug(String.format("Overriden Hub Project-Version to look for: %s", hubProjectVersionName));
         }
+    }
+
+    private boolean hasSecurityRisk(ProjectVersionComponentView componentView) {
+        RiskProfileView securityRiskProfile = componentView.getSecurityRiskProfile();
+        if (null != securityRiskProfile && null != securityRiskProfile.getCounts() && !securityRiskProfile.getCounts().isEmpty()) {
+            for (ComponentVersionRiskProfileRiskDataCountsView countView : securityRiskProfile.getCounts()) {
+                switch (countView.getCountType()) {
+                    case CRITICAL:
+                    case HIGH:
+                    case MEDIUM:
+                    case LOW:
+                        if (countView.getCount().intValue() > 0) {
+                            return true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        return false;
     }
 }
