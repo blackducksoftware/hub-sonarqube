@@ -27,6 +27,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -47,10 +48,13 @@ import com.blackducksoftware.integration.hub.sonar.model.MockFileSystem;
 import com.blackducksoftware.integration.hub.sonar.model.MockSensorContext;
 import com.synopsys.integration.blackduck.api.generated.component.ComponentMatchedFilesItemsFilePathView;
 import com.synopsys.integration.blackduck.api.generated.component.ComponentVersionRiskProfileRiskDataCountsView;
+import com.synopsys.integration.blackduck.api.generated.enumeration.ComponentVersionRiskProfileRiskDataCountsCountTypeType;
 import com.synopsys.integration.blackduck.api.generated.view.ComponentMatchedFilesView;
 import com.synopsys.integration.blackduck.api.generated.view.ProjectVersionComponentView;
 import com.synopsys.integration.blackduck.api.generated.view.ProjectVersionView;
 import com.synopsys.integration.blackduck.api.generated.view.RiskProfileView;
+import com.synopsys.integration.blackduck.api.manual.component.ResourceLink;
+import com.synopsys.integration.blackduck.api.manual.component.ResourceMetadata;
 import com.synopsys.integration.blackduck.service.BlackDuckService;
 import com.synopsys.integration.blackduck.service.ProjectService;
 import com.synopsys.integration.blackduck.service.model.ProjectVersionWrapper;
@@ -121,15 +125,27 @@ public class HubVulnerableComponentGathererTest {
         filePath1.setCompositePathContext(fileName1);
         matchedFile1.setFilePath(filePath1);
 
+        ProjectVersionView projectVersionView = new ProjectVersionView();
+        ResourceMetadata resourceMetadata = new ResourceMetadata();
+        ResourceLink resourceLink = new ResourceLink();
+        resourceLink.setRel("components");
+        resourceLink.setName("components");
+        resourceLink.setHref("components");
+        resourceMetadata.setLinks(Arrays.asList(resourceLink));
+        projectVersionView.setMeta(resourceMetadata);
         ProjectVersionWrapper projectVersionWrapper = new ProjectVersionWrapper();
+        projectVersionWrapper.setProjectVersionView(projectVersionView);
+
         Mockito.when(projectService.getProjectVersion(Mockito.anyString(), Mockito.anyString())).thenReturn(Optional.of(projectVersionWrapper));
 
         ProjectVersionComponentView projectVersionComponentView = new ProjectVersionComponentView();
         RiskProfileView securityRiskProfile = new RiskProfileView();
         ComponentVersionRiskProfileRiskDataCountsView componentVersionRiskProfileRiskDataCountsView = new ComponentVersionRiskProfileRiskDataCountsView();
+        componentVersionRiskProfileRiskDataCountsView.setCountType(ComponentVersionRiskProfileRiskDataCountsCountTypeType.CRITICAL);
+        componentVersionRiskProfileRiskDataCountsView.setCount(new BigDecimal(34));
         securityRiskProfile.setCounts(Arrays.asList(componentVersionRiskProfileRiskDataCountsView));
         projectVersionComponentView.setSecurityRiskProfile(securityRiskProfile);
-        Mockito.when(blackDuckService.getAllResponses(Mockito.any(), Mockito.eq(ProjectVersionView.COMPONENTS_LINK_RESPONSE))).thenReturn(Arrays.asList(projectVersionComponentView));
+        Mockito.when(blackDuckService.getAllResponses(Mockito.any(), Mockito.eq(ProjectVersionView.COMPONENTS_LINK_RESPONSE), Mockito.any())).thenReturn(Arrays.asList(projectVersionComponentView));
 
         Mockito.when(blackDuckService.getAllResponses(Mockito.any(), Mockito.eq(ProjectVersionComponentView.MATCHED_FILES_LINK_RESPONSE))).thenReturn(Arrays.asList(matchedFile0, matchedFile1));
 
@@ -161,9 +177,13 @@ public class HubVulnerableComponentGathererTest {
 
     @Test
     public void getVulnerableComponentMapThrowsComponentsExceptionTest() throws IntegrationException {
+        ProjectVersionView projectVersionView = new ProjectVersionView();
+
         ProjectVersionWrapper projectVersionWrapper = new ProjectVersionWrapper();
+        projectVersionWrapper.setProjectVersionView(projectVersionView);
+
         Mockito.when(projectService.getProjectVersion(Mockito.anyString(), Mockito.anyString())).thenReturn(Optional.of(projectVersionWrapper));
-        Mockito.when(blackDuckService.getAllResponses(Mockito.any(), Mockito.eq(ProjectVersionView.COMPONENTS_LINK_RESPONSE))).thenThrow(new IntegrationException("Expected Exception"));
+        Mockito.when(blackDuckService.getAllResponses(Mockito.any(), Mockito.eq(ProjectVersionView.COMPONENTS_LINK_RESPONSE), Mockito.any())).thenThrow(new IntegrationException("Expected Exception"));
 
         HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, projectService, blackDuckService);
         Map<String, Set<ProjectVersionComponentView>> map = gatherer.getVulnerableComponentMap();

@@ -81,14 +81,14 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
     public Map<String, Set<ProjectVersionComponentView>> getVulnerableComponentMap() {
         if (vulnerableComponentMap.isEmpty()) {
             List<ProjectVersionComponentView> components = new ArrayList<>();
-            Optional<ProjectVersionWrapper> projectVersion = Optional.empty();
+            Optional<ProjectVersionWrapper> projectVersionWrapper = Optional.empty();
             try {
-                projectVersion = projectService.getProjectVersion(hubProjectName, hubProjectVersionName);
+                projectVersionWrapper = projectService.getProjectVersion(hubProjectName, hubProjectVersionName);
             } catch (IntegrationException e) {
                 logger.error(String.format("Couldn't find the BlackDuck project '%s' and version '%s'. Error: %s", hubProjectName, hubProjectVersionName, e.getMessage()), e);
             }
-            if (projectVersion.isPresent()) {
-                ProjectVersionView versionView = projectVersion.get().getProjectVersionView();
+            if (projectVersionWrapper.isPresent()) {
+                ProjectVersionView versionView = projectVersionWrapper.get().getProjectVersionView();
                 try {
                     Optional<String> optionalComponentsLink = versionView.getFirstLink(ProjectVersionView.COMPONENTS_LINK);
                     if (optionalComponentsLink.isPresent()) {
