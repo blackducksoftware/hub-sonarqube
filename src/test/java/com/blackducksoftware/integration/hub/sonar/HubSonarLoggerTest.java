@@ -34,7 +34,7 @@ import org.sonar.api.utils.log.LoggerLevel;
 import org.sonar.api.utils.log.Loggers;
 
 import com.blackducksoftware.integration.hub.sonar.model.HubSonarLogTester;
-import com.blackducksoftware.integration.log.LogLevel;
+import com.synopsys.integration.log.LogLevel;
 
 public class HubSonarLoggerTest {
     private static final String PREFIX_ERROR = "error";

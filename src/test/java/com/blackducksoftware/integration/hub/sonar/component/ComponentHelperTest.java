@@ -37,15 +37,16 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.internal.google.common.collect.Sets;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.hub.sonar.model.MockFileSystem;
+import com.blackducksoftware.integration.hub.sonar.model.MockSensorContext;
+import com.synopsys.integration.exception.IntegrationException;
 
 public class ComponentHelperTest {
     private static final String EXAMPLE_COMPOSITE_PATH_LONG = "/windows-service/jenkins.exe.config#bin/target/jenkins-for-test/WEB-INF/lib/jenkins-core-1.580.3.jar!/";
@@ -58,18 +59,24 @@ public class ComponentHelperTest {
     private static final String EXAMPLE_COMPONENT_FILE_NAME = "something.jar";
 
     private ComponentHelper helper;
+    private File baseDir;
+    private SensorContext sensorContext;
 
     @Before
     public void init() {
         helper = new ComponentHelper(null);
+        baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
+        MapSettings settings = new MapSettings();
+        sensorContext = new MockSensorContext(settings.asConfig(), new MockFileSystem(baseDir));
     }
 
     @Test
     public void preProcessComponentListDataTest() throws IntegrationException {
         MapSettings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, "o??, *ee");
+        sensorContext = new MockSensorContext(settings.asConfig(), new MockFileSystem(baseDir));
 
-        @SuppressWarnings("deprecation") ComponentHelper compHelper = new ComponentHelper(new SonarManager(settings.asConfig()));
+        @SuppressWarnings("deprecation") ComponentHelper compHelper = new ComponentHelper(new SonarManager(sensorContext));
 
         List<String> first = new ArrayList<>(Arrays.asList("one", "three"));
         List<String> second = new ArrayList<>(Arrays.asList("one", "two", "three", "three and a half"));
@@ -101,13 +108,9 @@ public class ComponentHelperTest {
 
     @Test
     public void getInputFilesFromStringsTest() {
-        File baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
         Set<String> inputFiles = LocalComponentGathererTest.createGatherer(baseDir).gatherComponents();
 
-        SensorContextTester context = SensorContextTester.create(baseDir);
-        context.setFileSystem(new MockFileSystem(baseDir));
-
-        SonarManager manager = new SonarManager(context);
+        SonarManager manager = new SonarManager(sensorContext);
         ComponentHelper compHelper = new ComponentHelper(manager);
         Collection<InputFile> collection = compHelper.getInputFilesFromStrings(inputFiles);
 
@@ -117,7 +120,8 @@ public class ComponentHelperTest {
 
     @Test
     public void getInputFilesFromStringsWithNullContextTest() {
-        @SuppressWarnings("deprecation") SonarManager manager = new SonarManager(new MapSettings().asConfig());
+
+        @SuppressWarnings("deprecation") SonarManager manager = new SonarManager(sensorContext);
         ComponentHelper compHelper = new ComponentHelper(manager);
         InputFile inputFile = compHelper.getInputFileFromString("INVALID_FILE");
 

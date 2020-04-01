@@ -27,11 +27,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+
+import org.junit.Before;
 import org.junit.Test;
+import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.config.internal.MapSettings;
 
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
+import com.blackducksoftware.integration.hub.sonar.model.MockFileSystem;
+import com.blackducksoftware.integration.hub.sonar.model.MockSensorContext;
 
 @SuppressWarnings("deprecation")
 public class SonarManagerTest {
@@ -40,11 +46,22 @@ public class SonarManagerTest {
 
     private static final String EXAMPLE_KEY = "key";
 
+    private File baseDir;
+    private SensorContext sensorContext;
+
+    @Before
+    public void init() {
+        baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
+        sensorContext = new MockSensorContext(new MapSettings().asConfig(), new MockFileSystem(baseDir));
+    }
+
     @Test
     public void getGlobalInclusionPatternsTest() {
         MapSettings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, EXAMPLE_INCLUSION_OR_EXCLUSION_PATTERNS);
-        SonarManager manager = new SonarManager(settings.asConfig());
+        sensorContext = new MockSensorContext(settings.asConfig(), new MockFileSystem(baseDir));
+
+        SonarManager manager = new SonarManager(sensorContext);
 
         assertTrue(SonarTestUtils.stringArrayEquals(manager.getGlobalInclusionPatterns(), EXAMPLE_INCLUSION_OR_EXCLUSION_PATTERNS.split(DELIMITER)));
     }
@@ -53,7 +70,9 @@ public class SonarManagerTest {
     public void getGlobalExclusionPatternsTest() {
         MapSettings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, EXAMPLE_INCLUSION_OR_EXCLUSION_PATTERNS);
-        SonarManager manager = new SonarManager(settings.asConfig());
+        sensorContext = new MockSensorContext(settings.asConfig(), new MockFileSystem(baseDir));
+
+        SonarManager manager = new SonarManager(sensorContext);
 
         assertTrue(SonarTestUtils.stringArrayEquals(manager.getGlobalExclusionPatterns(), EXAMPLE_INCLUSION_OR_EXCLUSION_PATTERNS.split(DELIMITER)));
     }
@@ -63,7 +82,9 @@ public class SonarManagerTest {
         MapSettings settings = new MapSettings();
         final String value = "value";
         settings.setProperty(EXAMPLE_KEY, value);
-        SonarManager manager = new SonarManager(settings.asConfig());
+        sensorContext = new MockSensorContext(settings.asConfig(), new MockFileSystem(baseDir));
+
+        SonarManager manager = new SonarManager(sensorContext);
 
         assertEquals(manager.getValue(EXAMPLE_KEY), value);
     }
@@ -73,7 +94,9 @@ public class SonarManagerTest {
         MapSettings settings = new MapSettings();
         String value = null;
         settings.setProperty(EXAMPLE_KEY, value);
-        SonarManager manager = new SonarManager(settings.asConfig());
+        sensorContext = new MockSensorContext(settings.asConfig(), new MockFileSystem(baseDir));
+
+        SonarManager manager = new SonarManager(sensorContext);
 
         assertNotNull(manager.getValue(EXAMPLE_KEY));
         assertEquals("", manager.getValue(EXAMPLE_KEY));
@@ -85,21 +108,23 @@ public class SonarManagerTest {
         final String value = " one, two,three, four             ";
         String[] values = { "one", "two", "three", "four" };
         settings.setProperty(EXAMPLE_KEY, value);
-        SonarManager manager = new SonarManager(settings.asConfig());
+        sensorContext = new MockSensorContext(settings.asConfig(), new MockFileSystem(baseDir));
+
+        SonarManager manager = new SonarManager(sensorContext);
 
         assertTrue(SonarTestUtils.stringArrayEquals(manager.getValues(EXAMPLE_KEY), values));
     }
 
     @Test
     public void getHubPluginVersionTest() {
-        SonarManager manager = new SonarManager(new MapSettings().asConfig());
+        SonarManager manager = new SonarManager(sensorContext);
 
         assertTrue("<unknown>" != manager.getHubPluginVersionFromFile("/plugin.properties"));
     }
 
     @Test
     public void getHubPluginVersionUnknownTest() {
-        SonarManager manager = new SonarManager(new MapSettings().asConfig());
+        SonarManager manager = new SonarManager(sensorContext);
 
         assertEquals("<unknown>", manager.getHubPluginVersionFromFile("/NULL"));
     }

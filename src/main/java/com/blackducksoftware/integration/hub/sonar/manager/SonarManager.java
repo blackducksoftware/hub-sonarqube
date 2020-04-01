@@ -23,37 +23,26 @@
  */
 package com.blackducksoftware.integration.hub.sonar.manager;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.Set;
 
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.utils.log.Loggers;
 
-import com.blackducksoftware.integration.hub.builder.HubServerConfigBuilder;
-import com.blackducksoftware.integration.hub.global.HubServerConfig;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
-import com.blackducksoftware.integration.validator.AbstractValidator;
-import com.blackducksoftware.integration.validator.FieldEnum;
-import com.blackducksoftware.integration.validator.ValidationResult;
-import com.blackducksoftware.integration.validator.ValidationResults;
+import com.synopsys.integration.blackduck.configuration.BlackDuckServerConfig;
+import com.synopsys.integration.blackduck.configuration.BlackDuckServerConfigBuilder;
+import com.synopsys.integration.builder.BuilderStatus;
 
 public class SonarManager {
     private final HubSonarLogger logger;
     private final SensorContext context;
     private final Configuration configuration;
 
-    @Deprecated
-    public SonarManager(final Configuration settings) {
-        this.context = null;
-        this.configuration = settings;
-        logger = new HubSonarLogger(Loggers.get(getClass()));
-    }
-
-    public SonarManager(final SensorContext context) {
+    public SonarManager(SensorContext context) {
         this.context = context;
         this.configuration = context.config();
         logger = new HubSonarLogger(Loggers.get(context.getClass()));
@@ -63,14 +52,14 @@ public class SonarManager {
         return context;
     }
 
-    public HubServerConfig getHubServerConfigFromSettings() {
-        final HubServerConfigBuilder configBuilder = new HubServerConfigBuilder();
+    public Optional<BlackDuckServerConfig> getBlackDuckServerConfigFromSettings() {
+        BlackDuckServerConfigBuilder configBuilder = new BlackDuckServerConfigBuilder();
         if (configuration != null) {
-            configBuilder.setHubUrl(getValue(HubPropertyConstants.HUB_URL));
+            configBuilder.setUrl(getValue(HubPropertyConstants.HUB_URL));
             configBuilder.setUsername(getValue(HubPropertyConstants.HUB_USERNAME));
             configBuilder.setPassword(getValue(HubPropertyConstants.HUB_PASSWORD));
-            configBuilder.setTimeout(getValue(HubPropertyConstants.HUB_TIMEOUT));
-            configBuilder.setAlwaysTrustServerCertificate(Boolean.parseBoolean(getValue(HubPropertyConstants.HUB_TRUST_SSL_CERT)));
+            configBuilder.setTimeoutInSeconds(getValue(HubPropertyConstants.HUB_TIMEOUT));
+            configBuilder.setTrustCert(Boolean.parseBoolean(getValue(HubPropertyConstants.HUB_TRUST_SSL_CERT)));
 
             configBuilder.setProxyHost(getValue(HubPropertyConstants.HUB_PROXY_HOST));
             configBuilder.setProxyPort(getValue(HubPropertyConstants.HUB_PROXY_PORT));
@@ -78,23 +67,22 @@ public class SonarManager {
             configBuilder.setProxyPassword(getValue(HubPropertyConstants.HUB_PROXY_PASSWORD));
         }
         if (isConfigValid(configBuilder)) {
-            return configBuilder.build();
+            return Optional.of(configBuilder.build());
         }
-        return new HubServerConfig(null, 300, null, null, false);
+        return Optional.empty();
     }
 
-    public boolean isConfigValid(final HubServerConfigBuilder configBuilder) {
-        final AbstractValidator validator = configBuilder.createValidator();
-        final ValidationResults validationResults = validator.assertValid();
-        if (validationResults.hasErrors()) {
-            final Map<FieldEnum, Set<ValidationResult>> resultsMap = validationResults.getResultMap();
-            for (final FieldEnum field : resultsMap.keySet()) {
-                logger.error(String.format("%s: %s", field, resultsMap.get(field)));
-            }
-            return false;
+    public boolean isConfigValid(BlackDuckServerConfigBuilder configBuilder) {
+        BuilderStatus builderStatus = configBuilder.validateAndGetBuilderStatus();
+        if (builderStatus.isValid()) {
+            logger.debug("Hub config validation results: SUCCESS!");
+            return true;
         }
-        logger.debug("Hub config validation results: SUCCESS!");
-        return true;
+        List<String> errorMessages = builderStatus.getErrorMessages();
+        for (String error : errorMessages) {
+            logger.error(error);
+        }
+        return false;
     }
 
     public String[] getGlobalInclusionPatterns() {
@@ -105,17 +93,17 @@ public class SonarManager {
         return getValues(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE);
     }
 
-    public String getValue(final String key) {
-        final Optional<String> value = configuration.get(key);
+    public String getValue(String key) {
+        Optional<String> value = configuration.get(key);
         return value.isPresent() ? value.get().trim() : "";
     }
 
-    public String[] getValues(final String key) {
+    public String[] getValues(String key) {
         return configuration.getStringArray(key);
     }
 
-    public String getHubPluginVersionFromFile(final String fileName) {
-        final Properties properties = new Properties();
+    public String getHubPluginVersionFromFile(String fileName) {
+        Properties properties = new Properties();
         String version = null;
         try {
             properties.load(this.getClass().getResourceAsStream(fileName));
@@ -123,7 +111,7 @@ public class SonarManager {
             if (version != null) {
                 return version;
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Do nothing
         }
         return "<unknown>";

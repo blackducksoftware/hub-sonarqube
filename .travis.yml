@@ -9,21 +9,24 @@ addons:
       secure: "ashVI4k4FH90otCYmWxndgfWs4YpFsjioPc4fJgQenQg0zURi1nM5q9SJgWB/va2KwVLuNSU7AjwYjhuak8uavVckqpmqJpRLGGhYi+4PydHGIOFLwxmozl43NMsfzsKiiGkOrfHgDvk3/tdN7Kd+1L3u+kVm3pBFwOrq8IfHPkKbiZOzHbUoDfOsRPyRese5eyX3b5mDCRlT2Ob5Aa22T9FKB6yqX+nOiGQKMv9i/5GY9YAOGdnB9mZbBjK8CyrlYJNZ+6v8/J20Z5quwJFP04ol7YMTvg7HoZuTcktqnCTBY8VPrRanxRwXd2Hc7kk8KySu4+t9Z1i2fCQ/DtzJBvNSXB8aG2jWz/A4GplXnJdvBgwU9FnlXi2D2BN2sgZyOZEeFgjDlzEDOtCkeYlfk1LbF3DkrkXbGZ0+eyIsByUREmFDuwN3wPeVgvxbviCbhNhmfDhx2gOc3iM19jnl9gpCCdodtE8v+PO0/2KjWNt68jtQ7EdIluclUhGrfPLG6v6bTMXdhRQNTmHNt1F1E6mBcBGG2YQ8yNvlczzfswGzzcdzYHJpbecl9Q6RLR4zs2tsXag8I8Kpi6GzlvtKwEDXM3IkBC0vc3MafWEhZ2lHA6ydG7FYMANkJ2l+XvaYcY/LtjrDW0jZAeeAWmL4s9KCT+GBTQxtXglm0vCPSI="
 
 jdk:
-- oraclejdk8
+  - oraclejdk11
 
 notifications:
   email:
     recipients:
-    - akamen@blackducksoftware.com
-    - gkillough@blackducksoftware.com
+      - akamen@blackducksoftware.com
+      - gkillough@blackducksoftware.com
 
 script:
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar -Dsonar.projectKey=blackducksoftware_hub-sonarqube
+
+env:
+  - DETECT_MAVEN_INCLUDED_SCOPES="compile" JAVA_OPTS="-Xmx2048m"
 
 after_success:
   - bash <(curl -s https://copilot.blackducksoftware.com/ci/travis/scripts/upload)
 
 cache:
   directories:
-  - "$HOME/.m2/repository"
-  - "$HOME/.sonar/cache"
+    - "$HOME/.m2/repository"
+    - "$HOME/.sonar/cache"

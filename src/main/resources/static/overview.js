@@ -23,7 +23,7 @@
  */
 var HEADER_CONTENT = 'Black Duck Hub Security Analysis';
 var PAGE_SIZE = 100;
-var METRIC_KEYS = 'num_vuln_low, num_vuln_med, num_vuln_high, hub_component_names, num_components_rating';
+var METRIC_KEYS = 'num_vuln_low, num_vuln_med, num_vuln_high, num_vuln_critical, hub_component_names, num_components_rating';
 var MAX_COMPONENTS_PER_ROW = 5;
 
 window.registerExtension('hubsonarqube/overview', function (options) {
@@ -167,6 +167,7 @@ function getComponentHelperObject(fileName, measuresArray) {
     helper.low = 0;
     helper.med = 0;
     helper.high = 0;
+    helper.critical = 0;
 
     for (var i = 0; i < measuresArray.length; i++) {
         var curMetric = measuresArray[i].metric;
@@ -177,6 +178,8 @@ function getComponentHelperObject(fileName, measuresArray) {
             helper.med = curValue;
         } else if (curMetric == 'num_vuln_high') {
             helper.high = curValue;
+        } else if (curMetric == 'num_vuln_critical') {
+            helper.critical = curValue;
         } else if (curMetric == 'hub_component_names') {
             helper.comps = parseComponents(curValue);
         } else if (curMetric == 'num_components_rating') {
@@ -187,13 +190,16 @@ function getComponentHelperObject(fileName, measuresArray) {
 }
 
 function getTableRowsAsString(componentHelperArray) {
+    var critical = [];
     var high = [];
     var med = [];
     var low = [];
 
     for (var i = 0; i < componentHelperArray.length; i++) {
         var helperComp = componentHelperArray[i];
-        if (helperComp.high > 0) {
+        if (helperComp.critical > 0) {
+            critical[critical.length] = helperComp;
+        } else if (helperComp.high > 0) {
             high[high.length] = helperComp;
         } else if (helperComp.med > 0) {
             med[med.length] = helperComp;
@@ -201,7 +207,7 @@ function getTableRowsAsString(componentHelperArray) {
             low[low.length] = helperComp;
         }
     }
-
+    critical.sort(compareCritical);
     high.sort(compareHigh);
     med.sort(compareMed);
     low.sort(compareLow);
@@ -210,9 +216,10 @@ function getTableRowsAsString(componentHelperArray) {
     var tableRows = '';
     for (var j = 0; j < sortedComponents.length; j++) {
         var curComp = sortedComponents[j];
-        if ((curComp.low + curComp.med + curComp.high) > 0 && curComp.comps != '') {
+        if ((curComp.low + curComp.med + curComp.high + curComp.critical) > 0 && curComp.comps != '') {
             tableRows += '<tr><td><i class="icon-qualifier-fil"></i> '
-                + curComp.name + '</td><td style="text-align:center;"><span title="High" id="highRisk">'
+                + curComp.name + '</td><td style="text-align:center;">' + '<span title="Critical" id="criticalRisk">'
+                + curComp.critical + '</span> <span title="High" id="highRisk">'
                 + curComp.high + '</span> <span title="Medium" id="medRisk">'
                 + curComp.med + '</span> <span title="Low" id="lowRisk">'
                 + curComp.low + '</span></td><td>'
@@ -267,6 +274,9 @@ function getToolTip(rating) {
             break;
         case 'D':
             fix = 'high';
+            break;
+        case 'E':
+            fix = 'critical';
             break;
         default:
             return '';
@@ -368,6 +378,14 @@ function resetTable() {
     var table = wrapper.getElementsByTagName('table')[0];
     table.remove();
     displayMainTable(wrapper, window.componentsArray, window.isDisplayed);
+}
+
+function compareCritical(a, b) {
+    if (a.critical > b.critical)
+        return -1;
+    if (a.critical < b.critical)
+        return 1;
+    return compareHigh(a, b);
 }
 
 function compareHigh(a, b) {

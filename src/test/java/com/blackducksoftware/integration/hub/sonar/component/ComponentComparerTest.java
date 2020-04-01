@@ -33,8 +33,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sonar.api.internal.google.common.collect.Sets;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
+import com.synopsys.integration.exception.IntegrationException;
 
 public class ComponentComparerTest {
     private static final Set<String> BASE_SET = Sets.newHashSet("one", "two", "three");

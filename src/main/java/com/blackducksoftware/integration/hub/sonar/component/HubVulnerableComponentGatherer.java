@@ -23,37 +23,52 @@
  */
 package com.blackducksoftware.integration.hub.sonar.component;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.VersionBomComponentDataService;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.MatchedFilesModel;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
-import com.blackducksoftware.integration.log.IntLogger;
+import com.synopsys.integration.blackduck.api.generated.component.ComponentVersionRiskProfileRiskDataCountsView;
+import com.synopsys.integration.blackduck.api.generated.enumeration.ComponentVersionRiskProfileRiskDataCountsCountTypeType;
+import com.synopsys.integration.blackduck.api.generated.view.ComponentMatchedFilesView;
+import com.synopsys.integration.blackduck.api.generated.view.ProjectVersionComponentView;
+import com.synopsys.integration.blackduck.api.generated.view.ProjectVersionView;
+import com.synopsys.integration.blackduck.api.generated.view.RiskProfileView;
+import com.synopsys.integration.blackduck.service.BlackDuckService;
+import com.synopsys.integration.blackduck.service.ProjectService;
+import com.synopsys.integration.blackduck.service.model.ProjectVersionWrapper;
+import com.synopsys.integration.blackduck.service.model.RequestFactory;
+import com.synopsys.integration.exception.IntegrationException;
+import com.synopsys.integration.log.IntLogger;
+import com.synopsys.integration.rest.request.Request;
 
 public class HubVulnerableComponentGatherer implements ComponentGatherer {
+    private static final String FILTER = "filter";
+    private static final String SECURITY_RISK = "securityRisk";
     private final IntLogger logger;
     private final ComponentHelper componentHelper;
     private final SonarManager sonarManager;
-    private final VersionBomComponentDataService versionBomComponentDataService;
+    private final ProjectService projectService;
+    private final BlackDuckService blackDuckService;
 
-    private final Map<String, Set<VersionBomComponentModel>> vulnerableComponentMap;
+    private final Map<String, Set<ProjectVersionComponentView>> vulnerableComponentMap;
     private String hubProjectName;
     private String hubProjectVersionName;
 
-    public HubVulnerableComponentGatherer(IntLogger logger, ComponentHelper componentHelper, SonarManager sonarManager, VersionBomComponentDataService versionBomComponentDataService) {
+    public HubVulnerableComponentGatherer(IntLogger logger, ComponentHelper componentHelper, SonarManager sonarManager, ProjectService projectService, BlackDuckService blackDuckService) {
         this.logger = logger;
         this.componentHelper = componentHelper;
         this.sonarManager = sonarManager;
-        this.versionBomComponentDataService = versionBomComponentDataService;
+        this.projectService = projectService;
+        this.blackDuckService = blackDuckService;
 
         this.vulnerableComponentMap = new HashMap<>();
         setProjectAndVersion();
@@ -66,41 +81,52 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
 
     // Returns a mapping of unqualified file names to sets of vulnerable bom components from that file.
     // Note: The sets of bom components for each file may (and likely do) intersect with other sets of bom components from different files. If this is the case, the sets likely have a parent-child relationship.
-    public Map<String, Set<VersionBomComponentModel>> getVulnerableComponentMap() {
+    public Map<String, Set<ProjectVersionComponentView>> getVulnerableComponentMap() {
         if (vulnerableComponentMap.isEmpty()) {
-            List<VersionBomComponentModel> components = null;
+            List<ProjectVersionComponentView> components = new ArrayList<>();
+            Optional<ProjectVersionWrapper> projectVersionWrapper = Optional.empty();
             try {
-                components = versionBomComponentDataService.getComponentsForProjectVersion(hubProjectName, hubProjectVersionName);
+                projectVersionWrapper = projectService.getProjectVersion(hubProjectName, hubProjectVersionName);
             } catch (IntegrationException e) {
-                logger.error(String.format("Problem getting BOM components: %s", e));
+                logger.error(String.format("Couldn't find the BlackDuck project '%s' and version '%s'. Error: %s", hubProjectName, hubProjectVersionName, e.getMessage()), e);
+            }
+            if (projectVersionWrapper.isPresent()) {
+                ProjectVersionView projectVersionView = projectVersionWrapper.get().getProjectVersionView();
+                components = getProjectVersionComponents(projectVersionView);
             }
             mapMatchedFilesToComponents(vulnerableComponentMap, components);
         }
         return vulnerableComponentMap;
     }
 
-    private void mapMatchedFilesToComponents(Map<String, Set<VersionBomComponentModel>> vulnerableComponentMap, List<VersionBomComponentModel> components) {
+    private void mapMatchedFilesToComponents(Map<String, Set<ProjectVersionComponentView>> vulnerableComponentMap, List<ProjectVersionComponentView> components) {
         if (components != null && !components.isEmpty()) {
             String prevName = "";
-            for (VersionBomComponentModel component : components) {
-                if (component.hasSecurityRisk()) {
+            for (ProjectVersionComponentView component : components) {
+                if (hasSecurityRisk(component)) {
                     prevName = logComponentName(prevName, component.getComponentName());
                     mapMatchedFilesToComponent(vulnerableComponentMap, component);
                 }
             }
         }
-
     }
 
-    private void mapMatchedFilesToComponent(Map<String, Set<VersionBomComponentModel>> vulnerableComponentMap, VersionBomComponentModel component) {
-        List<MatchedFilesModel> allMatchedFiles = component.getMatchedFiles();
-        logger.debug(String.format("Found %d files.", allMatchedFiles.size()));
-        for (MatchedFilesModel matchedFile : allMatchedFiles) {
-            String fileName = componentHelper.getFileNameFromComposite(matchedFile.getCompositePathContext());
-            if (!vulnerableComponentMap.containsKey(fileName)) {
-                vulnerableComponentMap.put(fileName, new HashSet<VersionBomComponentModel>());
+    private void mapMatchedFilesToComponent(Map<String, Set<ProjectVersionComponentView>> vulnerableComponentMap, ProjectVersionComponentView component) {
+        List<ComponentMatchedFilesView> matchedFiles = new ArrayList<>();
+        try {
+            matchedFiles = blackDuckService.getAllResponses(component, ProjectVersionComponentView.MATCHED_FILES_LINK_RESPONSE);
+        } catch (IntegrationException e) {
+            logger.error(String.format("Problem getting the matched files for component '%s' version '%s'. Error: %s", component.getComponentName(), component.getComponentVersionName(), e.getMessage()), e);
+        }
+        logger.debug(String.format("Found %d files for component '%s' version '%s'.", matchedFiles.size(), component.getComponentName(), component.getComponentVersionName()));
+        for (ComponentMatchedFilesView matchedFile : matchedFiles) {
+            if (null != matchedFile.getFilePath() && null != matchedFile.getFilePath().getCompositePathContext()) {
+                String fileName = componentHelper.getFileNameFromComposite(matchedFile.getFilePath().getCompositePathContext());
+                if (!vulnerableComponentMap.containsKey(fileName)) {
+                    vulnerableComponentMap.put(fileName, new HashSet<ProjectVersionComponentView>());
+                }
+                vulnerableComponentMap.get(fileName).add(component);
             }
-            vulnerableComponentMap.get(fileName).add(component);
         }
     }
 
@@ -127,5 +153,48 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
             hubProjectVersionName = hubProjectVersionNameOverride;
             logger.debug(String.format("Overriden Hub Project-Version to look for: %s", hubProjectVersionName));
         }
+    }
+
+    private List<ProjectVersionComponentView> getProjectVersionComponents(ProjectVersionView projectVersionView) {
+        if (null == projectVersionView) {
+            return Collections.emptyList();
+        }
+        try {
+            Optional<String> optionalComponentsLink = projectVersionView.getFirstLink(ProjectVersionView.COMPONENTS_LINK);
+            if (optionalComponentsLink.isPresent()) {
+                String componentsLink = optionalComponentsLink.get();
+                Request.Builder requestBuilder = RequestFactory.createCommonGetRequestBuilder();
+                requestBuilder.uri(componentsLink);
+                requestBuilder.addQueryParameter(FILTER, SECURITY_RISK + ":" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.CRITICAL.toString().toLowerCase());
+                requestBuilder.addQueryParameter(FILTER, SECURITY_RISK + ":" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.HIGH.toString().toLowerCase());
+                requestBuilder.addQueryParameter(FILTER, SECURITY_RISK + ":" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.MEDIUM.toString().toLowerCase());
+                requestBuilder.addQueryParameter(FILTER, SECURITY_RISK + ":" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.LOW.toString().toLowerCase());
+                return blackDuckService.getAllResponses(projectVersionView, ProjectVersionView.COMPONENTS_LINK_RESPONSE, requestBuilder);
+            }
+        } catch (IntegrationException e) {
+            logger.error(String.format("Problem getting BOM components. Error: %s", e.getMessage()), e);
+        }
+        return Collections.emptyList();
+    }
+
+    private boolean hasSecurityRisk(ProjectVersionComponentView componentView) {
+        RiskProfileView securityRiskProfile = componentView.getSecurityRiskProfile();
+        if (null != securityRiskProfile && null != securityRiskProfile.getCounts() && !securityRiskProfile.getCounts().isEmpty()) {
+            for (ComponentVersionRiskProfileRiskDataCountsView countView : securityRiskProfile.getCounts()) {
+                switch (countView.getCountType()) {
+                    case CRITICAL:
+                    case HIGH:
+                    case MEDIUM:
+                    case LOW:
+                        if (countView.getCount().intValue() > 0) {
+                            return true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        return false;
     }
 }

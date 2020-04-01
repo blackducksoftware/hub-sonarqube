@@ -32,10 +32,10 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.measures.Metric;
 
-import com.blackducksoftware.integration.hub.dataservice.model.RiskProfileCounts;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
-import com.blackducksoftware.integration.hub.model.enumeration.RiskCountEnum;
-import com.blackducksoftware.integration.log.IntLogger;
+import com.synopsys.integration.blackduck.api.generated.component.ComponentVersionRiskProfileRiskDataCountsView;
+import com.synopsys.integration.blackduck.api.generated.view.ProjectVersionComponentView;
+import com.synopsys.integration.blackduck.api.generated.view.RiskProfileView;
+import com.synopsys.integration.log.IntLogger;
 
 public class MetricsHelper {
     private static final int MAX_COMPONENT_NAME_LENGTH = 100;
@@ -48,20 +48,21 @@ public class MetricsHelper {
         this.context = context;
     }
 
-    public void createMeasuresForInputFiles(Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap, Iterable<InputFile> inputFiles) {
+    public void createMeasuresForInputFiles(Map<String, Set<ProjectVersionComponentView>> vulnerableComponentsMap, Iterable<InputFile> inputFiles) {
         for (InputFile inputFile : inputFiles) {
             createMeasuresForInputFile(vulnerableComponentsMap, inputFile);
         }
     }
 
-    public void createMeasuresForInputFile(Map<String, Set<VersionBomComponentModel>> vulnerableComponentsMap, InputFile inputFile) {
+    public void createMeasuresForInputFile(Map<String, Set<ProjectVersionComponentView>> vulnerableComponentsMap, InputFile inputFile) {
         String fileName = inputFile.filename();
         if (vulnerableComponentsMap.containsKey(fileName)) {
             StringBuilder compListBuilder = new StringBuilder();
+            int critical = 0;
             int high = 0;
             int med = 0;
             int low = 0;
-            for (VersionBomComponentModel component : vulnerableComponentsMap.get(fileName)) {
+            for (ProjectVersionComponentView component : vulnerableComponentsMap.get(fileName)) {
                 String compName = component.getComponentName();
                 String compVersion = component.getComponentVersionName();
                 String compVersionUrl = component.getComponentVersion();
@@ -72,15 +73,32 @@ public class MetricsHelper {
                 compListBuilder.append(compVersion + ",");
                 compListBuilder.append(compVersionUrl + ",");
 
-                RiskProfileCounts riskProfile = component.getSecurityRiskProfile();
-                high += riskProfile.getCount(RiskCountEnum.HIGH);
-                med += riskProfile.getCount(RiskCountEnum.MEDIUM);
-                low += riskProfile.getCount(RiskCountEnum.LOW);
+                RiskProfileView riskProfile = component.getSecurityRiskProfile();
+                for (ComponentVersionRiskProfileRiskDataCountsView countView : riskProfile.getCounts()) {
+                    switch (countView.getCountType()) {
+                        case CRITICAL:
+                            critical += countView.getCount().intValue();
+                            break;
+                        case HIGH:
+                            high += countView.getCount().intValue();
+                            break;
+                        case MEDIUM:
+                            med += countView.getCount().intValue();
+                            break;
+                        case LOW:
+                            low += countView.getCount().intValue();
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
             createMeasure(HubSonarMetrics.NUM_VULN_LOW, inputFile, low);
             createMeasure(HubSonarMetrics.NUM_VULN_MED, inputFile, med);
             createMeasure(HubSonarMetrics.NUM_VULN_HIGH, inputFile, high);
-            if ((low + med + high) > 0) {
+            createMeasure(HubSonarMetrics.NUM_VULN_CRITICAL, inputFile, critical);
+
+            if ((low + med + high + critical) > 0) {
                 String compList = compListBuilder.toString();
                 compListBuilder.deleteCharAt(compList.lastIndexOf(','));
                 compList = compListBuilder.toString();

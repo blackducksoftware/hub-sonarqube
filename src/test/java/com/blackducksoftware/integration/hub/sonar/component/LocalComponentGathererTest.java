@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.internal.DefaultFileSystem;
+import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.internal.google.common.collect.Sets;
 
@@ -41,8 +42,9 @@ import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
 import com.blackducksoftware.integration.hub.sonar.model.MockFilePredicates;
 import com.blackducksoftware.integration.hub.sonar.model.MockFileSystem;
-import com.blackducksoftware.integration.log.LogLevel;
-import com.blackducksoftware.integration.log.PrintStreamIntLogger;
+import com.blackducksoftware.integration.hub.sonar.model.MockSensorContext;
+import com.synopsys.integration.log.LogLevel;
+import com.synopsys.integration.log.PrintStreamIntLogger;
 
 public class LocalComponentGathererTest {
     @Test
@@ -58,10 +60,12 @@ public class LocalComponentGathererTest {
     @SuppressWarnings("deprecation")
     protected static LocalComponentGatherer createGatherer(File baseDir) {
         PrintStreamIntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO);
+
         MapSettings settings = new MapSettings();
         settings.setProperty(HubPropertyConstants.HUB_BINARY_INCLUSION_PATTERN_OVERRIDE, ".jar,.tar");
         settings.setProperty(HubPropertyConstants.HUB_BINARY_EXCLUSION_PATTERN_OVERRIDE, ".png");
-        SonarManager manager = new SonarManager(settings.asConfig());
+        SensorContext sensorContext = new MockSensorContext(settings.asConfig(), new MockFileSystem(baseDir));
+        SonarManager manager = new SonarManager(sensorContext);
 
         DefaultFileSystem fileSystem = new MockFileSystem(baseDir);
         FilePredicates predicates = new MockFilePredicates();

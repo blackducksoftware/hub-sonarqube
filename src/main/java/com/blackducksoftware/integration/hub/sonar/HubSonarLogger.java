@@ -26,8 +26,8 @@ package com.blackducksoftware.integration.hub.sonar;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.LoggerLevel;
 
-import com.blackducksoftware.integration.log.IntLogger;
-import com.blackducksoftware.integration.log.LogLevel;
+import com.synopsys.integration.log.IntLogger;
+import com.synopsys.integration.log.LogLevel;
 
 public class HubSonarLogger extends IntLogger {
     private final Logger logger;

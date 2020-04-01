@@ -26,8 +26,11 @@ package com.blackducksoftware.integration.hub.sonar.component;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -37,41 +40,53 @@ import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.internal.google.common.collect.Sets;
 import org.sonar.api.utils.log.Loggers;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.VersionBomComponentDataService;
-import com.blackducksoftware.integration.hub.dataservice.versionbomcomponent.model.VersionBomComponentModel;
-import com.blackducksoftware.integration.hub.model.view.MatchedFilesView;
-import com.blackducksoftware.integration.hub.model.view.components.FilePathView;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.sonar.HubPropertyConstants;
 import com.blackducksoftware.integration.hub.sonar.HubSonarLogger;
+import com.blackducksoftware.integration.hub.sonar.SonarTestUtils;
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
-import com.blackducksoftware.integration.hub.sonar.model.MockRestConnection;
-import com.blackducksoftware.integration.hub.sonar.model.MockVersionBomComponentDataService;
-import com.blackducksoftware.integration.log.IntLogger;
+import com.blackducksoftware.integration.hub.sonar.model.MockFileSystem;
+import com.blackducksoftware.integration.hub.sonar.model.MockSensorContext;
+import com.synopsys.integration.blackduck.api.generated.component.ComponentMatchedFilesItemsFilePathView;
+import com.synopsys.integration.blackduck.api.generated.component.ComponentVersionRiskProfileRiskDataCountsView;
+import com.synopsys.integration.blackduck.api.generated.enumeration.ComponentVersionRiskProfileRiskDataCountsCountTypeType;
+import com.synopsys.integration.blackduck.api.generated.view.ComponentMatchedFilesView;
+import com.synopsys.integration.blackduck.api.generated.view.ProjectVersionComponentView;
+import com.synopsys.integration.blackduck.api.generated.view.ProjectVersionView;
+import com.synopsys.integration.blackduck.api.generated.view.RiskProfileView;
+import com.synopsys.integration.blackduck.api.manual.component.ResourceLink;
+import com.synopsys.integration.blackduck.api.manual.component.ResourceMetadata;
+import com.synopsys.integration.blackduck.service.BlackDuckService;
+import com.synopsys.integration.blackduck.service.ProjectService;
+import com.synopsys.integration.blackduck.service.model.ProjectVersionWrapper;
+import com.synopsys.integration.exception.IntegrationException;
+import com.synopsys.integration.log.IntLogger;
 
 @SuppressWarnings("deprecation")
 public class HubVulnerableComponentGathererTest {
     private IntLogger logger;
     private ComponentHelper componentHelper;
     private SonarManager sonarManager;
-    private MockVersionBomComponentDataService versionBomComponentDataService;
+    private ProjectService projectService;
+    private BlackDuckService blackDuckService;
 
     @Before
     public void init() {
-        sonarManager = new SonarManager(new MapSettings().asConfig());
+        File baseDir = new File(SonarTestUtils.TEST_DIRECTORY);
+        MockSensorContext sensorContext = new MockSensorContext(new MapSettings().asConfig(), new MockFileSystem(baseDir));
+
+        sonarManager = new SonarManager(sensorContext);
         componentHelper = new ComponentHelper(sonarManager);
         logger = new HubSonarLogger(Loggers.get(getClass()));
 
-        RestConnection restConnection = new MockRestConnection(logger);
-        versionBomComponentDataService = new MockVersionBomComponentDataService(restConnection);
+        projectService = Mockito.mock(ProjectService.class);
+        blackDuckService = Mockito.mock(BlackDuckService.class);
     }
 
     @Test
     public void constructorDoesNotInitializeProjectVersionFieldsTest() throws IntegrationException {
         SonarManager manager = Mockito.mock(SonarManager.class);
         Mockito.when(manager.getValue(HubPropertyConstants.HUB_PROJECT_OVERRIDE)).thenReturn("projectOverride");
-        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, versionBomComponentDataService);
+        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, projectService, blackDuckService);
 
         assertTrue(null != gatherer);
     }
@@ -82,45 +97,96 @@ public class HubVulnerableComponentGathererTest {
         Mockito.when(manager.getValue(HubPropertyConstants.HUB_PROJECT_OVERRIDE)).thenReturn("projectOverride");
         Mockito.when(manager.getValue(HubPropertyConstants.HUB_PROJECT_VERSION_OVERRIED)).thenReturn("projectVersionOverride");
 
-        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, versionBomComponentDataService);
+        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, manager, projectService, blackDuckService);
 
         assertTrue(null != gatherer);
     }
 
     @Test
     public void gatherComponentsEmptyTest() throws IntegrationException {
-        versionBomComponentDataService.setEmpty(true);
-        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, versionBomComponentDataService);
+        Mockito.when(projectService.getProjectVersion(Mockito.anyString(), Mockito.anyString())).thenReturn(Optional.empty());
+
+        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, projectService, blackDuckService);
 
         assertTrue(gatherer.gatherComponents().isEmpty());
     }
 
     @Test
     public void gatherComponentsWithMatchesTest() throws IntegrationException {
-        MatchedFilesView matchedFiles0 = new MatchedFilesView();
-        FilePathView filePath0 = new FilePathView();
-        final String fileName = "test.jar";
-        filePath0.compositePathContext = fileName + "!";
-        matchedFiles0.filePath = filePath0;
+        ComponentMatchedFilesView matchedFile0 = new ComponentMatchedFilesView();
+        ComponentMatchedFilesItemsFilePathView filePath0 = new ComponentMatchedFilesItemsFilePathView();
+        final String fileName0 = "test.jar";
+        filePath0.setCompositePathContext(fileName0);
+        matchedFile0.setFilePath(filePath0);
 
-        MatchedFilesView matchedFiles1 = new MatchedFilesView();
-        FilePathView filePath1 = new FilePathView();
-        filePath1.compositePathContext = "test.tar!";
-        matchedFiles1.filePath = filePath1;
+        ComponentMatchedFilesView matchedFile1 = new ComponentMatchedFilesView();
+        ComponentMatchedFilesItemsFilePathView filePath1 = new ComponentMatchedFilesItemsFilePathView();
+        final String fileName1 = "test.jar!";
+        filePath1.setCompositePathContext(fileName1);
+        matchedFile1.setFilePath(filePath1);
 
-        versionBomComponentDataService.setMatchedFiles(Arrays.asList(matchedFiles0), Arrays.asList(matchedFiles1));
-        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, versionBomComponentDataService);
+        ProjectVersionView projectVersionView = new ProjectVersionView();
+        ResourceMetadata resourceMetadata = new ResourceMetadata();
+        ResourceLink resourceLink = new ResourceLink();
+        resourceLink.setRel("components");
+        resourceLink.setName("components");
+        resourceLink.setHref("components");
+        resourceMetadata.setLinks(Arrays.asList(resourceLink));
+        projectVersionView.setMeta(resourceMetadata);
+        ProjectVersionWrapper projectVersionWrapper = new ProjectVersionWrapper();
+        projectVersionWrapper.setProjectVersionView(projectVersionView);
 
-        assertEquals(Sets.newHashSet(fileName), gatherer.gatherComponents());
+        Mockito.when(projectService.getProjectVersion(Mockito.anyString(), Mockito.anyString())).thenReturn(Optional.of(projectVersionWrapper));
+
+        ProjectVersionComponentView projectVersionComponentView = new ProjectVersionComponentView();
+        RiskProfileView securityRiskProfile = new RiskProfileView();
+        ComponentVersionRiskProfileRiskDataCountsView componentVersionRiskProfileRiskDataCountsView = new ComponentVersionRiskProfileRiskDataCountsView();
+        componentVersionRiskProfileRiskDataCountsView.setCountType(ComponentVersionRiskProfileRiskDataCountsCountTypeType.CRITICAL);
+        componentVersionRiskProfileRiskDataCountsView.setCount(new BigDecimal(34));
+        securityRiskProfile.setCounts(Arrays.asList(componentVersionRiskProfileRiskDataCountsView));
+        projectVersionComponentView.setSecurityRiskProfile(securityRiskProfile);
+        Mockito.when(blackDuckService.getAllResponses(Mockito.any(), Mockito.eq(ProjectVersionView.COMPONENTS_LINK_RESPONSE), Mockito.any())).thenReturn(Arrays.asList(projectVersionComponentView));
+
+        Mockito.when(blackDuckService.getAllResponses(Mockito.any(), Mockito.eq(ProjectVersionComponentView.MATCHED_FILES_LINK_RESPONSE))).thenReturn(Arrays.asList(matchedFile0, matchedFile1));
+
+        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, projectService, blackDuckService);
+        Set<String> strings = gatherer.gatherComponents();
+
+        assertEquals(Sets.newHashSet(fileName0), strings);
     }
 
     @Test
-    public void getVulnerableComponentMapThrowsExceptionTest() throws IntegrationException {
-        VersionBomComponentDataService dataService = Mockito.mock(VersionBomComponentDataService.class);
-        Mockito.when(dataService.getComponentsForProjectVersion(Mockito.any(), Mockito.any())).thenThrow(new IntegrationException());
+    public void getVulnerableComponentMapThrowsProjectExceptionTest() throws IntegrationException {
+        Mockito.when(projectService.getProjectVersion(Mockito.anyString(), Mockito.anyString())).thenThrow(new IntegrationException("Expected Exception"));
 
-        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, dataService);
-        Map<String, Set<VersionBomComponentModel>> map = gatherer.getVulnerableComponentMap();
+        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, projectService, blackDuckService);
+        Map<String, Set<ProjectVersionComponentView>> map = gatherer.getVulnerableComponentMap();
+
+        assertTrue(map.isEmpty());
+    }
+
+    @Test
+    public void getVulnerableComponentMapNoProjectTest() throws IntegrationException {
+        Mockito.when(projectService.getProjectVersion(Mockito.anyString(), Mockito.anyString())).thenReturn(Optional.empty());
+
+        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, projectService, blackDuckService);
+        Map<String, Set<ProjectVersionComponentView>> map = gatherer.getVulnerableComponentMap();
+
+        assertTrue(map.isEmpty());
+    }
+
+    @Test
+    public void getVulnerableComponentMapThrowsComponentsExceptionTest() throws IntegrationException {
+        ProjectVersionView projectVersionView = new ProjectVersionView();
+
+        ProjectVersionWrapper projectVersionWrapper = new ProjectVersionWrapper();
+        projectVersionWrapper.setProjectVersionView(projectVersionView);
+
+        Mockito.when(projectService.getProjectVersion(Mockito.anyString(), Mockito.anyString())).thenReturn(Optional.of(projectVersionWrapper));
+        Mockito.when(blackDuckService.getAllResponses(Mockito.any(), Mockito.eq(ProjectVersionView.COMPONENTS_LINK_RESPONSE), Mockito.any())).thenThrow(new IntegrationException("Expected Exception"));
+
+        HubVulnerableComponentGatherer gatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, projectService, blackDuckService);
+        Map<String, Set<ProjectVersionComponentView>> map = gatherer.getVulnerableComponentMap();
 
         assertTrue(map.isEmpty());
     }

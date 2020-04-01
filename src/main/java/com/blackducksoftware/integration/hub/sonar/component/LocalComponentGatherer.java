@@ -34,7 +34,7 @@ import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 
 import com.blackducksoftware.integration.hub.sonar.manager.SonarManager;
-import com.blackducksoftware.integration.log.IntLogger;
+import com.synopsys.integration.log.IntLogger;
 
 public class LocalComponentGatherer implements ComponentGatherer {
     private final IntLogger logger;
