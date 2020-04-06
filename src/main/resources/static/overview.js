@@ -163,10 +163,7 @@ function getComponentHelperObjects(componentsArray) {
 function getComponentHelperObject(fileName, measuresArray) {
     var helper = new Object();
     helper.name = fileName;
-    if (measuresArray && measuresArray.length > 0) {
-        /// TODO remove debug log
-        console.log('Component ' + fileName);
-    }
+   
     helper.low = 0;
     helper.med = 0;
     helper.high = 0;
