@@ -84,7 +84,6 @@ function getAndDisplayData(wrapper, page = 1) {
     }).catch(function (error) {
         handleErrorResponse(wrapper, errorResponse);
     });
-    ;
 }
 
 function handleResponse(wrapper) {
@@ -155,7 +154,7 @@ function getComponentHelperObjects(componentsArray) {
         if (curComponent.qualifier == 'FIL') {
             var filePath = curComponent.path;
             var measuresArray = curComponent.measures;
-            vulnerableComponents[vulnerableComponents.length] = getComponentHelperObject(filePath, measuresArray);
+            vulnerableComponents.push(getComponentHelperObject(filePath, measuresArray));
         }
     }
     return vulnerableComponents;
@@ -164,6 +163,10 @@ function getComponentHelperObjects(componentsArray) {
 function getComponentHelperObject(fileName, measuresArray) {
     var helper = new Object();
     helper.name = fileName;
+    if (measuresArray && measuresArray.length > 0) {
+        /// TODO remove debug log
+        console.log('Component ' + fileName);
+    }
     helper.low = 0;
     helper.med = 0;
     helper.high = 0;
@@ -198,13 +201,13 @@ function getTableRowsAsString(componentHelperArray) {
     for (var i = 0; i < componentHelperArray.length; i++) {
         var helperComp = componentHelperArray[i];
         if (helperComp.critical > 0) {
-            critical[critical.length] = helperComp;
+            critical.push(helperComp);
         } else if (helperComp.high > 0) {
-            high[high.length] = helperComp;
+            high.push(helperComp);
         } else if (helperComp.med > 0) {
-            med[med.length] = helperComp;
-        } else {
-            low[low.length] = helperComp;
+            med.push(helperComp);
+        } else if (helperComp.low > 0) {
+            low.push(helperComp);
         }
     }
     critical.sort(compareCritical);
