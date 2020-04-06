@@ -23,6 +23,7 @@
  */
 var HEADER_CONTENT = 'Black Duck Hub Security Analysis';
 var PAGE_SIZE = 100;
+var METRIC_COMPONENT_NAME = 'hub_component_names';
 var METRIC_KEYS = 'num_vuln_low, num_vuln_med, num_vuln_high, num_vuln_critical, hub_component_names, num_components_rating';
 var MAX_COMPONENTS_PER_ROW = 5;
 
@@ -71,7 +72,10 @@ function getAndDisplayData(wrapper, page = 1) {
         baseComponentKey: window.globalOptions.component.key,
         p: page,
         ps: PAGE_SIZE,
-        metricKeys: METRIC_KEYS
+        metricKeys: METRIC_KEYS,
+        s: 'metric',
+        metricSort: METRIC_COMPONENT_NAME,
+        metricSortFilter: 'withMeasuresOnly'
     }).then(function (response) {
         window.componentsArray = window.componentsArray.concat(response.components);
         if (page > (response.paging.total / PAGE_SIZE)) {
@@ -163,7 +167,7 @@ function getComponentHelperObjects(componentsArray) {
 function getComponentHelperObject(fileName, measuresArray) {
     var helper = new Object();
     helper.name = fileName;
-   
+
     helper.low = 0;
     helper.med = 0;
     helper.high = 0;
