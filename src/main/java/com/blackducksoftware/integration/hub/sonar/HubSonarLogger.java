@@ -93,13 +93,13 @@ public class HubSonarLogger extends IntLogger {
 
     @Override
     public void debug(String txt, Throwable t) {
-        if (isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug(txt, t);
         }
     }
 
     public boolean isDebugEnabled() {
-        return getLogLevel() == LogLevel.DEBUG;
+        return logger.isDebugEnabled();
     }
 
     @Override
