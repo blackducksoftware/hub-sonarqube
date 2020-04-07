@@ -66,7 +66,7 @@ public class HubSensor implements Sensor {
         ComponentHelper componentHelper = new ComponentHelper(sonarManager);
         Optional<BlackDuckServicesFactory> servicesFactoryOptional = createServiceFactory(logger, sonarManager);
         if (!servicesFactoryOptional.isPresent()) {
-            logger.warn("No connection to the Black Duck server could be established, skipping Black Duck Hub Sensor.");
+            logger.warn("No connection to the Black Duck server could be established, skipping the Black Duck Hub Sensor.");
             return;
         }
         BlackDuckServicesFactory blackDuckServicesFactory = servicesFactoryOptional.get();
@@ -82,14 +82,14 @@ public class HubSensor implements Sensor {
 
         logger.info("Gathering Black Duck component files...");
         HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, blackDuckServicesFactory.createProjectService(), blackDuckServicesFactory.createBlackDuckService());
-        Set<String> hubComponents = hubComponentGatherer.gatherComponents();
+        Set<String> blackDuckComponents = hubComponentGatherer.gatherComponents();
 
         logger.info(String.format("--> Number of local files matching inclusion/exclusion patterns: %d", localComponents.size()));
-        logger.info(String.format("--> Number of vulnerable Black Duck component files matched: %d", hubComponents.size()));
+        logger.info(String.format("--> Number of vulnerable Black Duck component files matched: %d", blackDuckComponents.size()));
 
         ComponentComparer componentComparer = null;
         Set<String> sharedComponents = null;
-        if (localComponents.isEmpty() || hubComponents.isEmpty()) {
+        if (localComponents.isEmpty() || blackDuckComponents.isEmpty()) {
             logger.info("No comparison will be performed because at least one of the lists of components had zero entries.");
         } else {
             if (logger.isDebugEnabled()) {
@@ -98,11 +98,11 @@ public class HubSensor implements Sensor {
                     logger.debug(localComponent);
                 }
                 logger.debug("Black Duck Components:");
-                for (String blackduckComponent : hubComponents) {
-                    logger.debug(blackduckComponent);
+                for (String blackDuckComponent : blackDuckComponents) {
+                    logger.debug(blackDuckComponent);
                 }
             }
-            componentComparer = new ComponentComparer(componentHelper, localComponents, hubComponents);
+            componentComparer = new ComponentComparer(componentHelper, localComponents, blackDuckComponents);
 
             logger.info("Comparing local components to Black Duck components...");
             sharedComponents = componentComparer.getSharedComponents();
@@ -149,7 +149,7 @@ public class HubSensor implements Sensor {
                 return Optional.of(blackDuckServicesFactory);
             }
         } catch (Exception e) {
-            logger.error(String.format("Error establishing a Hub connection: %s", e.getMessage()), e);
+            logger.error(String.format("Error establishing a Black Duck connection: %s", e.getMessage()), e);
         }
         return Optional.empty();
     }
