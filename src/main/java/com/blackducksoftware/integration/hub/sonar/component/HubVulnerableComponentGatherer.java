@@ -94,6 +94,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
                 ProjectVersionView projectVersionView = projectVersionWrapper.get().getProjectVersionView();
                 components = getProjectVersionComponents(projectVersionView);
             }
+            logger.debug(String.format("Found %d components for BlackDuck project '%s' version '%s'.", components.size(), hubProjectName, hubProjectVersionName));
             mapMatchedFilesToComponents(vulnerableComponentMap, components);
         }
         return vulnerableComponentMap;
@@ -149,9 +150,9 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
         String hubProjectVersionNameOverride = sonarManager.getValue(HubPropertyConstants.HUB_PROJECT_VERSION_OVERRIED);
         if (StringUtils.isNotEmpty(hubProjectNameOverride) && StringUtils.isNotEmpty(hubProjectVersionNameOverride)) {
             hubProjectName = hubProjectNameOverride;
-            logger.debug(String.format("Overriden Black Duck Project to look for: %s", hubProjectName));
+            logger.debug(String.format("Overridden Black Duck Project to look for: %s", hubProjectName));
             hubProjectVersionName = hubProjectVersionNameOverride;
-            logger.debug(String.format("Overriden Black Duck Project-Version to look for: %s", hubProjectVersionName));
+            logger.debug(String.format("Overridden Black Duck Project-Version to look for: %s", hubProjectVersionName));
         }
     }
 
@@ -172,7 +173,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
                 return blackDuckService.getAllResponses(projectVersionView, ProjectVersionView.COMPONENTS_LINK_RESPONSE, requestBuilder);
             }
         } catch (IntegrationException e) {
-            logger.error(String.format("Problem getting BOM components. Error: %s", e.getMessage()), e);
+            logger.error(String.format("Problem getting components for BlackDuck project '%s' and version '%s'. Error: %s", hubProjectName, hubProjectVersionName, e.getMessage()), e);
         }
         return Collections.emptyList();
     }
