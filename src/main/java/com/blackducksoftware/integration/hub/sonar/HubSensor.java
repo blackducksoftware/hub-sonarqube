@@ -49,6 +49,7 @@ import com.synopsys.integration.blackduck.configuration.BlackDuckServerConfig;
 import com.synopsys.integration.blackduck.phonehome.BlackDuckPhoneHomeHelper;
 import com.synopsys.integration.blackduck.service.BlackDuckServicesFactory;
 import com.synopsys.integration.log.IntLogger;
+import com.synopsys.integration.phonehome.PhoneHomeResponse;
 
 public class HubSensor implements Sensor {
     public static final String ARTIFACT_ID = "blackduck-sonarqube";
@@ -70,55 +71,60 @@ public class HubSensor implements Sensor {
             return;
         }
         BlackDuckServicesFactory blackDuckServicesFactory = servicesFactoryOptional.get();
-        phoneHome(logger, blackDuckServicesFactory, sonarManager);
+        Optional<PhoneHomeResponse> phoneHomeResponseOptional = phoneHome(logger, blackDuckServicesFactory, sonarManager);
+        try {
+            FileSystem fileSystem = context.fileSystem();
+            FilePredicates filePredicates = fileSystem.predicates();
+            FilePredicate filePredicate = generateFilePredicateFromInclusionAndExclusionPatterns(sonarManager, filePredicates);
 
-        FileSystem fileSystem = context.fileSystem();
-        FilePredicates filePredicates = fileSystem.predicates();
-        FilePredicate filePredicate = generateFilePredicateFromInclusionAndExclusionPatterns(sonarManager, filePredicates);
+            logger.info("Gathering local component files...");
+            LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, sonarManager, fileSystem, filePredicate);
+            Set<String> localComponents = localComponentGatherer.gatherComponents();
 
-        logger.info("Gathering local component files...");
-        LocalComponentGatherer localComponentGatherer = new LocalComponentGatherer(logger, sonarManager, fileSystem, filePredicate);
-        Set<String> localComponents = localComponentGatherer.gatherComponents();
+            logger.info("Gathering Black Duck component files...");
+            HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, blackDuckServicesFactory.createProjectService(), blackDuckServicesFactory.createBlackDuckService());
+            Set<String> blackDuckComponents = hubComponentGatherer.gatherComponents();
 
-        logger.info("Gathering Black Duck component files...");
-        HubVulnerableComponentGatherer hubComponentGatherer = new HubVulnerableComponentGatherer(logger, componentHelper, sonarManager, blackDuckServicesFactory.createProjectService(), blackDuckServicesFactory.createBlackDuckService());
-        Set<String> blackDuckComponents = hubComponentGatherer.gatherComponents();
+            logger.info(String.format("--> Number of local files matching inclusion/exclusion patterns: %d", localComponents.size()));
+            logger.info(String.format("--> Number of vulnerable Black Duck component files matched: %d", blackDuckComponents.size()));
 
-        logger.info(String.format("--> Number of local files matching inclusion/exclusion patterns: %d", localComponents.size()));
-        logger.info(String.format("--> Number of vulnerable Black Duck component files matched: %d", blackDuckComponents.size()));
-
-        ComponentComparer componentComparer = null;
-        Set<String> sharedComponents = null;
-        if (localComponents.isEmpty() || blackDuckComponents.isEmpty()) {
-            logger.info("No comparison will be performed because at least one of the lists of components had zero entries.");
-        } else {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Local Components:");
-                for (String localComponent : localComponents) {
-                    logger.debug(localComponent);
+            ComponentComparer componentComparer = null;
+            Set<String> sharedComponents = null;
+            if (localComponents.isEmpty() || blackDuckComponents.isEmpty()) {
+                logger.info("No comparison will be performed because at least one of the lists of components had zero entries.");
+            } else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Local Components:");
+                    for (String localComponent : localComponents) {
+                        logger.debug(localComponent);
+                    }
+                    logger.debug("Black Duck Components:");
+                    for (String blackDuckComponent : blackDuckComponents) {
+                        logger.debug(blackDuckComponent);
+                    }
                 }
-                logger.debug("Black Duck Components:");
-                for (String blackDuckComponent : blackDuckComponents) {
-                    logger.debug(blackDuckComponent);
+                componentComparer = new ComponentComparer(componentHelper, localComponents, blackDuckComponents);
+
+                logger.info("Comparing local components to Black Duck components...");
+                sharedComponents = componentComparer.getSharedComponents();
+                logger.info(String.format("--> Number of shared components: %d", componentComparer.getSharedComponentCount()));
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Shared Components:");
+                    for (String sharedComponent : sharedComponents) {
+                        logger.debug(sharedComponent);
+                    }
+                }
+                MetricsHelper metricsHelper = new MetricsHelper(logger, context);
+                Map<String, Set<ProjectVersionComponentView>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
+                if (vulnerableComponentsMap != null && !vulnerableComponentsMap.isEmpty()) {
+                    metricsHelper.createMeasuresForInputFiles(vulnerableComponentsMap, componentHelper.getInputFilesFromStrings(sharedComponents));
                 }
             }
-            componentComparer = new ComponentComparer(componentHelper, localComponents, blackDuckComponents);
-
-            logger.info("Comparing local components to Black Duck components...");
-            sharedComponents = componentComparer.getSharedComponents();
-            logger.info(String.format("--> Number of shared components: %d", componentComparer.getSharedComponentCount()));
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("Shared Components:");
-                for (String sharedComponent : sharedComponents) {
-                    logger.debug(sharedComponent);
-                }
-            }
-            MetricsHelper metricsHelper = new MetricsHelper(logger, context);
-            Map<String, Set<ProjectVersionComponentView>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
-            if (vulnerableComponentsMap != null && !vulnerableComponentsMap.isEmpty()) {
-                metricsHelper.createMeasuresForInputFiles(vulnerableComponentsMap, componentHelper.getInputFilesFromStrings(sharedComponents));
-            }
+        } finally {
+            phoneHomeResponseOptional.ifPresent(phoneHomeResponse -> {
+                phoneHomeResponse.awaitResult(10);
+            });
         }
     }
 
@@ -154,14 +160,15 @@ public class HubSensor implements Sensor {
         return Optional.empty();
     }
 
-    private void phoneHome(IntLogger logger, BlackDuckServicesFactory blackDuckServicesFactory, SonarManager sonarManager) {
+    private Optional<PhoneHomeResponse> phoneHome(IntLogger logger, BlackDuckServicesFactory blackDuckServicesFactory, SonarManager sonarManager) {
         try {
             ExecutorService phoneHomeExecutor = Executors.newSingleThreadExecutor();
             BlackDuckPhoneHomeHelper blackDuckPhoneHomeHelper = BlackDuckPhoneHomeHelper.createAsynchronousPhoneHomeHelper(blackDuckServicesFactory, phoneHomeExecutor);
-            blackDuckPhoneHomeHelper.handlePhoneHome(ARTIFACT_ID, sonarManager.getHubPluginVersionFromFile("/plugin.properties"));
+            return Optional.of(blackDuckPhoneHomeHelper.handlePhoneHome(ARTIFACT_ID, sonarManager.getHubPluginVersionFromFile("/plugin.properties")));
         } catch (Exception e) {
             logger.debug(String.format("Could not send the phone home data. Error: %s", e.getMessage()));
             logger.trace(e.getMessage(), e);
         }
+        return Optional.empty();
     }
 }
