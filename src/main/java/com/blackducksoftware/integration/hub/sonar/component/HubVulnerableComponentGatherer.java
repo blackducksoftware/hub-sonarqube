@@ -140,18 +140,18 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
 
     private void setProjectAndVersion() {
         hubProjectName = sonarManager.getValue(HubPropertyConstants.SONAR_PROJECT_NAME_KEY);
-        logger.debug(String.format("Default Hub Project to look for: %s", hubProjectName));
+        logger.debug(String.format("Default Black Duck Project to look for: %s", hubProjectName));
         hubProjectVersionName = sonarManager.getValue(HubPropertyConstants.SONAR_PROJECT_VERSION_KEY);
-        logger.debug(String.format("Default Hub Project-Version to look for: %s", hubProjectVersionName));
+        logger.debug(String.format("Default Black Duck Project-Version to look for: %s", hubProjectVersionName));
 
         // Only override if the user provides a project AND project version
         String hubProjectNameOverride = sonarManager.getValue(HubPropertyConstants.HUB_PROJECT_OVERRIDE);
         String hubProjectVersionNameOverride = sonarManager.getValue(HubPropertyConstants.HUB_PROJECT_VERSION_OVERRIED);
         if (StringUtils.isNotEmpty(hubProjectNameOverride) && StringUtils.isNotEmpty(hubProjectVersionNameOverride)) {
             hubProjectName = hubProjectNameOverride;
-            logger.debug(String.format("Overriden Hub Project to look for: %s", hubProjectName));
+            logger.debug(String.format("Overriden Black Duck Project to look for: %s", hubProjectName));
             hubProjectVersionName = hubProjectVersionNameOverride;
-            logger.debug(String.format("Overriden Hub Project-Version to look for: %s", hubProjectVersionName));
+            logger.debug(String.format("Overriden Black Duck Project-Version to look for: %s", hubProjectVersionName));
         }
     }
 

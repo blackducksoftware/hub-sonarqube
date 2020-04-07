@@ -75,7 +75,7 @@ public class SonarManager {
     public boolean isConfigValid(BlackDuckServerConfigBuilder configBuilder) {
         BuilderStatus builderStatus = configBuilder.validateAndGetBuilderStatus();
         if (builderStatus.isValid()) {
-            logger.debug("Hub config validation results: SUCCESS!");
+            logger.debug("Black Duck config validation results: SUCCESS!");
             return true;
         }
         List<String> errorMessages = builderStatus.getErrorMessages();
