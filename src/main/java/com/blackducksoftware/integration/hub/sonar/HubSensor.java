@@ -121,9 +121,7 @@ public class HubSensor implements Sensor {
             }
 
         } finally {
-            phoneHomeResponseOptional.ifPresent(phoneHomeResponse -> {
-                phoneHomeResponse.awaitResult(10);
-            });
+            phoneHomeResponseOptional.ifPresent(phoneHomeResponse -> phoneHomeResponse.awaitResult(10));
         }
     }
 
