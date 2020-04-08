@@ -158,6 +158,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
 
     private List<ProjectVersionComponentView> getProjectVersionComponents(ProjectVersionView projectVersionView) {
         if (null == projectVersionView) {
+            logger.error(String.format("The version '%s' is missing for BlackDuck project '%s'.", hubProjectVersionName, hubProjectName));
             return Collections.emptyList();
         }
         try {
@@ -171,6 +172,8 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
                 requestBuilder.addQueryParameter(FILTER, SECURITY_RISK + ":" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.MEDIUM.toString().toLowerCase());
                 requestBuilder.addQueryParameter(FILTER, SECURITY_RISK + ":" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.LOW.toString().toLowerCase());
                 return blackDuckService.getAllResponses(projectVersionView, ProjectVersionView.COMPONENTS_LINK_RESPONSE, requestBuilder);
+            } else {
+                logger.error(String.format("The components link is missing for BlackDuck project '%s' and version '%s'.", hubProjectName, hubProjectVersionName));
             }
         } catch (IntegrationException e) {
             logger.error(String.format("Problem getting components for BlackDuck project '%s' and version '%s'. Error: %s", hubProjectName, hubProjectVersionName, e.getMessage()), e);
