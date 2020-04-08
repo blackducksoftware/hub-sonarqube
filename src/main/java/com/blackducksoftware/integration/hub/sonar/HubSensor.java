@@ -88,39 +88,38 @@ public class HubSensor implements Sensor {
             logger.info(String.format("--> Number of local files matching inclusion/exclusion patterns: %d", localComponents.size()));
             logger.info(String.format("--> Number of vulnerable Black Duck component files matched: %d", blackDuckComponents.size()));
 
-            ComponentComparer componentComparer = null;
-            Set<String> sharedComponents = null;
             if (localComponents.isEmpty() || blackDuckComponents.isEmpty()) {
                 logger.info("No comparison will be performed because at least one of the lists of components had zero entries.");
-            } else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Local Components:");
-                    for (String localComponent : localComponents) {
-                        logger.debug(localComponent);
-                    }
-                    logger.debug("Black Duck Components:");
-                    for (String blackDuckComponent : blackDuckComponents) {
-                        logger.debug(blackDuckComponent);
-                    }
+                return;
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Local Components:");
+                for (String localComponent : localComponents) {
+                    logger.debug(localComponent);
                 }
-                componentComparer = new ComponentComparer(componentHelper, localComponents, blackDuckComponents);
-
-                logger.info("Comparing local components to Black Duck components...");
-                sharedComponents = componentComparer.getSharedComponents();
-                logger.info(String.format("--> Number of shared components: %d", componentComparer.getSharedComponentCount()));
-
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Shared Components:");
-                    for (String sharedComponent : sharedComponents) {
-                        logger.debug(sharedComponent);
-                    }
-                }
-                MetricsHelper metricsHelper = new MetricsHelper(logger, context);
-                Map<String, Set<ProjectVersionComponentView>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
-                if (vulnerableComponentsMap != null && !vulnerableComponentsMap.isEmpty()) {
-                    metricsHelper.createMeasuresForInputFiles(vulnerableComponentsMap, componentHelper.getInputFilesFromStrings(sharedComponents));
+                logger.debug("Black Duck Components:");
+                for (String blackDuckComponent : blackDuckComponents) {
+                    logger.debug(blackDuckComponent);
                 }
             }
+            ComponentComparer componentComparer = new ComponentComparer(componentHelper, localComponents, blackDuckComponents);
+
+            logger.info("Comparing local components to Black Duck components...");
+            Set<String> sharedComponents = componentComparer.getSharedComponents();
+            logger.info(String.format("--> Number of shared components: %d", componentComparer.getSharedComponentCount()));
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Shared Components:");
+                for (String sharedComponent : sharedComponents) {
+                    logger.debug(sharedComponent);
+                }
+            }
+            MetricsHelper metricsHelper = new MetricsHelper(logger, context);
+            Map<String, Set<ProjectVersionComponentView>> vulnerableComponentsMap = hubComponentGatherer.getVulnerableComponentMap();
+            if (vulnerableComponentsMap != null && !vulnerableComponentsMap.isEmpty()) {
+                metricsHelper.createMeasuresForInputFiles(vulnerableComponentsMap, componentHelper.getInputFilesFromStrings(sharedComponents));
+            }
+
         } finally {
             phoneHomeResponseOptional.ifPresent(phoneHomeResponse -> {
                 phoneHomeResponse.awaitResult(10);
