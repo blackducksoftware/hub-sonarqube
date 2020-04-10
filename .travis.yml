@@ -14,8 +14,8 @@ jdk:
 notifications:
   email:
     recipients:
-      - akamen@blackducksoftware.com
-      - gkillough@blackducksoftware.com
+      - jrichard@synopsys.com
+      - gavink@synopsys.com
 
 script:
   - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar -Dsonar.projectKey=blackducksoftware_hub-sonarqube
