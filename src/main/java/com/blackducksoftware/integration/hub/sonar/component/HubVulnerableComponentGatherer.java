@@ -88,13 +88,13 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
             try {
                 projectVersionWrapper = projectService.getProjectVersion(hubProjectName, hubProjectVersionName);
             } catch (IntegrationException e) {
-                logger.error(String.format("Couldn't find the BlackDuck project '%s' and version '%s'. Error: %s", hubProjectName, hubProjectVersionName, e.getMessage()), e);
+                logger.error(String.format("Couldn't find the Black Duck project '%s' and version '%s'. Error: %s", hubProjectName, hubProjectVersionName, e.getMessage()), e);
             }
             if (projectVersionWrapper.isPresent()) {
                 ProjectVersionView projectVersionView = projectVersionWrapper.get().getProjectVersionView();
                 components = getProjectVersionComponents(projectVersionView);
             }
-            logger.debug(String.format("Found %d components for BlackDuck project '%s' version '%s'.", components.size(), hubProjectName, hubProjectVersionName));
+            logger.debug(String.format("Found %d components for Black Duck project '%s' version '%s'.", components.size(), hubProjectName, hubProjectVersionName));
             mapMatchedFilesToComponents(vulnerableComponentMap, components);
         }
         return vulnerableComponentMap;
@@ -158,7 +158,7 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
 
     private List<ProjectVersionComponentView> getProjectVersionComponents(ProjectVersionView projectVersionView) {
         if (null == projectVersionView) {
-            logger.error(String.format("The version '%s' is missing for BlackDuck project '%s'.", hubProjectVersionName, hubProjectName));
+            logger.error(String.format("The version '%s' is missing for Black Duck project '%s'.", hubProjectVersionName, hubProjectName));
             return Collections.emptyList();
         }
         try {
@@ -173,10 +173,12 @@ public class HubVulnerableComponentGatherer implements ComponentGatherer {
                 requestBuilder.addQueryParameter(FILTER, SECURITY_RISK + ":" + ComponentVersionRiskProfileRiskDataCountsCountTypeType.LOW.toString().toLowerCase());
                 return blackDuckService.getAllResponses(projectVersionView, ProjectVersionView.COMPONENTS_LINK_RESPONSE, requestBuilder);
             } else {
-                logger.error(String.format("The components link is missing for BlackDuck project '%s' and version '%s'.", hubProjectName, hubProjectVersionName));
+                // if the components link is missing it is likely a permission issue in Black Duck
+                logger.error(String.format("The components link is missing for Black Duck project '%s' and version '%s'. Make sure the configured Black Duck user has permission to view the components in this project.", hubProjectName,
+                    hubProjectVersionName));
             }
         } catch (IntegrationException e) {
-            logger.error(String.format("Problem getting components for BlackDuck project '%s' and version '%s'. Error: %s", hubProjectName, hubProjectVersionName, e.getMessage()), e);
+            logger.error(String.format("Problem getting components for Black Duck project '%s' and version '%s'. Error: %s", hubProjectName, hubProjectVersionName, e.getMessage()), e);
         }
         return Collections.emptyList();
     }
