@@ -148,4 +148,47 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>snapshot-deployment</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <distributionManagement>
+        <snapshotRepository>
+          <id>bds-artifactory</id>
+          <url>https://artifactory.internal.synopsys.com/artifactory/bds-integrations-snapshot</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
+    <profile>
+      <id>deployment</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <distributionManagement>
+        <repository>
+          <id>bds-artifactory</id>
+          <url>https://artifactory.internal.synopsys.com/artifactory/bds-integrations-release</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+    <profile>
+      <id>qa-deployment</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <distributionManagement>
+        <repository>
+          <id>bds-artifactory</id>
+          <url>https://artifactory.internal.synopsys.com/artifactory/bds-integrations-test</url>
+        </repository>
+        <snapshotRepository>
+          <id>bds-artifactory</id>
+          <url>https://artifactory.internal.synopsys.com/artifactory/bds-integrations-snapshot</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
+  </profiles>
 </project>
