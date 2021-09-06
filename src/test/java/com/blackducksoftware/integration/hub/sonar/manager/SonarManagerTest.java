@@ -23,12 +23,16 @@
  */
 package com.blackducksoftware.integration.hub.sonar.manager;
 
+import static com.blackducksoftware.integration.hub.sonar.HubPropertyConstants.HUB_URL;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.util.Optional;
 
+import com.synopsys.integration.blackduck.configuration.BlackDuckServerConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -45,6 +49,7 @@ public class SonarManagerTest {
     private static final String DELIMITER = ", ";
 
     private static final String EXAMPLE_KEY = "key";
+    public static final String HUB_TOKEN = HubPropertyConstants.HUB_SONAR_PREFIX + ".token";
 
     private File baseDir;
     private SensorContext sensorContext;
@@ -118,8 +123,7 @@ public class SonarManagerTest {
     @Test
     public void getHubPluginVersionTest() {
         SonarManager manager = new SonarManager(sensorContext);
-
-        assertTrue("<unknown>" != manager.getHubPluginVersionFromFile("/plugin.properties"));
+        assertNotEquals("<unknown>", manager.getHubPluginVersionFromFile("/plugin.properties"));
     }
 
     @Test
@@ -127,5 +131,19 @@ public class SonarManagerTest {
         SonarManager manager = new SonarManager(sensorContext);
 
         assertEquals("<unknown>", manager.getHubPluginVersionFromFile("/NULL"));
+    }
+
+    @Test
+    public void getBlackDuckServerConfigFromSettingsTest() {
+        MapSettings settings = new MapSettings();
+        settings.setProperty(HUB_URL, "http://127.0.0.1/valid/url");
+        settings.setProperty(HUB_TOKEN, HUB_TOKEN + ".testValue");
+
+        sensorContext = new MockSensorContext(settings.asConfig(), new MockFileSystem(baseDir));
+        SonarManager manager = new SonarManager(sensorContext);
+
+        Optional<BlackDuckServerConfig> blackDuckServerConfig = manager.getBlackDuckServerConfigFromSettings();
+        assertTrue(blackDuckServerConfig.isPresent());
+        assertEquals(settings.asConfig().get(HUB_TOKEN), blackDuckServerConfig.get().getApiToken());
     }
 }
