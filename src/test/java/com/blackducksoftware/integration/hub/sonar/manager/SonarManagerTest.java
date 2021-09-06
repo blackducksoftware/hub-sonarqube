@@ -23,6 +23,7 @@
  */
 package com.blackducksoftware.integration.hub.sonar.manager;
 
+import static com.blackducksoftware.integration.hub.sonar.HubPropertyConstants.HUB_API_TOKEN;
 import static com.blackducksoftware.integration.hub.sonar.HubPropertyConstants.HUB_URL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -49,7 +50,6 @@ public class SonarManagerTest {
     private static final String DELIMITER = ", ";
 
     private static final String EXAMPLE_KEY = "key";
-    public static final String HUB_TOKEN = HubPropertyConstants.HUB_SONAR_PREFIX + ".token";
 
     private File baseDir;
     private SensorContext sensorContext;
@@ -137,13 +137,13 @@ public class SonarManagerTest {
     public void getBlackDuckServerConfigFromSettingsTest() {
         MapSettings settings = new MapSettings();
         settings.setProperty(HUB_URL, "http://127.0.0.1/valid/url");
-        settings.setProperty(HUB_TOKEN, HUB_TOKEN + ".testValue");
+        settings.setProperty(HUB_API_TOKEN, HUB_API_TOKEN + ".testValue");
 
         sensorContext = new MockSensorContext(settings.asConfig(), new MockFileSystem(baseDir));
         SonarManager manager = new SonarManager(sensorContext);
 
         Optional<BlackDuckServerConfig> blackDuckServerConfig = manager.getBlackDuckServerConfigFromSettings();
         assertTrue(blackDuckServerConfig.isPresent());
-        assertEquals(settings.asConfig().get(HUB_TOKEN), blackDuckServerConfig.get().getApiToken());
+        assertEquals(settings.asConfig().get(HUB_API_TOKEN), blackDuckServerConfig.get().getApiToken());
     }
 }
