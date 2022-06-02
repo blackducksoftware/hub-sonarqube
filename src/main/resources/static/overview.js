@@ -1,7 +1,7 @@
 /*
  * Black Duck Hub Plugin for SonarQube
  *
- * Copyright (C) 2020 Black Duck Software, Inc.
+ * Copyright (C) 2022 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -69,7 +69,8 @@ window.registerExtension('hubsonarqube/overview', function (options) {
 
 function getAndDisplayData(wrapper, page = 1) {
     window.SonarRequest.getJSON('/api/measures/component_tree', {
-        baseComponentKey: window.globalOptions.component.key,
+        // JC: Change baseComponentKey to component
+        component: window.globalOptions.component.key,
         p: page,
         ps: PAGE_SIZE,
         metricKeys: METRIC_KEYS,
