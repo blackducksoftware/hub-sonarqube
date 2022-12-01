@@ -40,6 +40,7 @@ public class HubPropertyConstants {
     public static final String HUB_URL = HUB_SONAR_PREFIX + "url";
     public static final String HUB_USERNAME = HUB_SONAR_PREFIX + "username";
     public static final String HUB_PASSWORD = HUB_SONAR_PREFIX + "password";
+    public static final String HUB_API_TOKEN = HUB_SONAR_PREFIX + "token";
     public static final String HUB_TIMEOUT = HUB_SONAR_PREFIX + "timeout";
     public static final String HUB_TRUST_SSL_CERT = HUB_SONAR_PREFIX + "trust.ssl.cert";
 
